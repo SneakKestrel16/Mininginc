@@ -1,0 +1,7 @@
+{
+	"hardness_base": 3.0,
+	"hardness_per_block": 0.25,
+	"ores": [
+		{ "id": "coal", "min_depth": 0, "max_depth": 49, "chance": 0.35 }
+	]
+}

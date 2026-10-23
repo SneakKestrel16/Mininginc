@@ -1,0 +1,7 @@
+Reviewed-Content-Hash: src/mining/dig_shaft.gd ea85c10047a63adcfdff5a358940bf1b8165a22d
+Reviewed-Content-Hash: src/mining/mine.gd b840eb6b33b05ab273fc1525b51e29ac5eb22159
+Reviewed-Content-Hash: src/mining/dig_shaft_view.gd 463bcd3a50af8cae56f411060cd1b42d1669b3be
+Reviewed-Content-Hash: src/mining/dig_shaft_view.tscn d6fe55f5d106d8714358a5d4e9fb3a0e2b442b34
+Reviewed-Content-Hash: src/main.tscn 2fce434b0a52492a51a8242f6bf78cbd41821d54
+Reviewed-Content-Hash: data/ores.json 0880eec289b17e165791688c5104b9f6da678805
+Reviewed-Content-Hash: tests/unit/heartwake/dig_shaft_check.gd 194ecad793ee2930ea5b7ff641e5e64e06c1869d

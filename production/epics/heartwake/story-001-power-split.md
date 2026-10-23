@@ -1,7 +1,7 @@
 # Story 001: Power split slider + Heart meter
 
 > **Epic**: Heartwake
-> **Status**: In Progress
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: M
@@ -84,3 +84,10 @@
 
 - Depends on: None
 - Unlocks: `production/epics/heartwake/story-003-furnace.md`, `production/epics/heartwake/story-004-drills.md`, `production/epics/heartwake/story-005-heart-stages.md`
+
+## Completion Notes
+**Completed**: 2026-10-23
+**Criteria**: 8/8 passing (AC-5 by a headless probe: slider to 100% moved Heart progress 2.00 → 6.00 with drill share 0, no reset)
+**Deviations**: None
+**Test Evidence**: waived at qa.level minimal; self-check `tests/unit/heartwake/power_split_check.gd` passes; screenshot `production/qa/evidence/story-001-power-split/heart-meter-3s.png`
+**Reviewed by**: self, no independent review

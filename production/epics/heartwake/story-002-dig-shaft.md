@@ -1,12 +1,12 @@
 # Story 002: Dig shaft with ore discovery
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: In Progress
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: L
 > **Manifest Version**: N/A (minimal — no control manifest)
-> **Last Updated**: [set by /dev-story when implementation begins]
+> **Last Updated**: 2026-10-23
 
 ## Context
 
@@ -56,12 +56,13 @@
 
 ## Files
 
-- `src/mining/dig_shaft.gd`
-- `src/mining/dig_shaft_view.tscn`
-- `data/ores.json`
-- `tests/unit/heartwake/dig_shaft_test.gd`
-
----
+- src/mining/dig_shaft.gd
+- src/mining/mine.gd
+- src/mining/dig_shaft_view.gd
+- src/mining/dig_shaft_view.tscn
+- src/main.tscn
+- data/ores.json
+- tests/unit/heartwake/dig_shaft_check.gd
 
 ## QA Test Cases
 
