@@ -1,0 +1,6 @@
+{
+	"tick_seconds": 0.1,
+	"fake_power_per_second": 10.0,
+	"heart_share_default": 0.5,
+	"heart_first_threshold": 600.0
+}

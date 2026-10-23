@@ -1,4 +1,7 @@
-[gd_scene format=3]
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://src/economy/economy.gd" id="1_economy"]
+[ext_resource type="PackedScene" path="res://src/ui/power_panel.tscn" id="2_panel"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -8,14 +11,17 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Placeholder" type="Label" parent="."]
+[node name="Economy" type="Node" parent="."]
+script = ExtResource("1_economy")
+
+[node name="Center" type="CenterContainer" parent="."]
 layout_mode = 1
-anchors_preset = 8
-anchor_left = 0.5
-anchor_top = 0.5
-anchor_right = 0.5
-anchor_bottom = 0.5
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "Heartwake - placeholder until /dev-story builds the first scene"
-horizontal_alignment = 1
+
+[node name="PowerPanel" parent="Center" node_paths=PackedStringArray("economy") instance=ExtResource("2_panel")]
+layout_mode = 2
+economy = NodePath("../../Economy")

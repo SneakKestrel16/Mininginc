@@ -1,12 +1,12 @@
 # Story 001: Power split slider + Heart meter
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: In Progress
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: M
 > **Manifest Version**: N/A (minimal — no control manifest)
-> **Last Updated**: [set by /dev-story when implementation begins]
+> **Last Updated**: 2026-10-23
 
 ## Context
 
@@ -56,12 +56,14 @@
 
 ## Files
 
-- `src/economy/power_split.gd`
-- `src/ui/power_panel.tscn`
-- `data/economy.json` (tuning values; format chosen by /dev-story)
-- `tests/unit/heartwake/power_split_test.gd`
-
----
+- src/economy/power_split.gd
+- src/economy/economy.gd
+- src/ui/power_panel.gd
+- src/ui/power_panel.tscn
+- src/main.tscn
+- data/economy.json
+- export_presets.cfg
+- tests/unit/heartwake/power_split_check.gd
 
 ## QA Test Cases
 

@@ -1,0 +1,8 @@
+Reviewed-Content-Hash: src/economy/power_split.gd 23cbc6d132528fe19e2b5ce4a2ed742f9a1de02c
+Reviewed-Content-Hash: src/economy/economy.gd 854ce3b186e95cd400f3fd7c35b4f4469e8af372
+Reviewed-Content-Hash: src/ui/power_panel.gd a9635e6aa5cd524ef7da92ee1bd9a799ca04e802
+Reviewed-Content-Hash: src/ui/power_panel.tscn 31d95009df94ef0437cce5552427270e5e8ed521
+Reviewed-Content-Hash: src/main.tscn bae15b62bd05a856d4dc660e7ba7e9257b9d3b93
+Reviewed-Content-Hash: data/economy.json c626d778c5a6c7939cb5e536443ebf8535de0453
+Reviewed-Content-Hash: export_presets.cfg f0c61e58aa992385eeda8f4ffc183b883d6f8a56
+Reviewed-Content-Hash: tests/unit/heartwake/power_split_check.gd e82df9daa997b29c6e995077726e303a06a3ad0a
