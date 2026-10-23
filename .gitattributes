@@ -27,3 +27,6 @@
 # .gitattributes governs the INDEX. It does not retro-fix a working tree that
 # predates the rule -- run `git add --renormalize .` for that.
 .claude/**/*.md text eol=lf
+
+# Batch files need CRLF: cmd.exe misparses labels and blocks in LF files.
+*.cmd text eol=crlf
