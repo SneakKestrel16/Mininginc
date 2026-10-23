@@ -21,7 +21,7 @@ func _ready() -> void:
 	_shaft.custom_minimum_size = Vector2(BLOCK_SIZE.x, BLOCK_SIZE.y * (BLOCKS_ABOVE + 1 + BLOCKS_BELOW))
 	_shaft.draw.connect(_draw_shaft)
 	_shaft.gui_input.connect(_on_shaft_input)
-	mine.dug.connect(_refresh)
+	mine.changed.connect(_refresh)
 	_refresh()
 
 

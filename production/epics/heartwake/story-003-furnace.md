@@ -1,12 +1,12 @@
 # Story 003: Hand-fed furnace
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: In Progress
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: M
 > **Manifest Version**: N/A (minimal — no control manifest)
-> **Last Updated**: [set by /dev-story when implementation begins]
+> **Last Updated**: 2026-10-23
 
 ## Context
 
@@ -53,12 +53,15 @@
 
 ## Files
 
-- `src/economy/furnace.gd`
-- `src/ui/furnace_panel.tscn`
-- `data/economy.json`
-- `tests/unit/heartwake/furnace_test.gd`
-
----
+- src/economy/furnace.gd
+- src/economy/economy.gd
+- src/mining/mine.gd
+- src/mining/dig_shaft_view.gd
+- src/ui/furnace_panel.gd
+- src/ui/furnace_panel.tscn
+- src/main.tscn
+- data/economy.json
+- tests/unit/heartwake/furnace_check.gd
 
 ## QA Test Cases
 

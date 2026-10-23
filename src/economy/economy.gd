@@ -1,5 +1,4 @@
 ## Runs the economy on a fixed tick, with tuning values from data/economy.json.
-## Until story 003 adds the furnace, power comes from a fake source at a fixed rate.
 class_name Economy
 extends Node
 
@@ -8,10 +7,16 @@ signal ticked
 
 const CONFIG_PATH := "res://data/economy.json"
 
+## Where the furnace's coal comes from.
+@export var mine: Mine
+
 ## The drills/Heart split this economy feeds.
 var split: PowerSplit
 
-## Power produced per second by all generators.
+## The hand-fed furnace, the only generator until story 006.
+var furnace: Furnace
+
+## Power produced per second by all generators over the last tick.
 var power_per_second: float = 0.0
 
 var _tick_seconds: float
@@ -24,16 +29,26 @@ func _ready() -> void:
 		set_process(false)
 		return
 	_tick_seconds = config["tick_seconds"]
-	power_per_second = config["fake_power_per_second"]
 	split = PowerSplit.new(config["heart_first_threshold"], config["heart_share_default"])
+	furnace = Furnace.new(
+		config["furnace_fuel_capacity"],
+		config["furnace_burn_seconds_per_coal"],
+		config["furnace_power_per_second"],
+	)
 
 
 func _process(delta: float) -> void:
 	_elapsed += delta
 	while _elapsed >= _tick_seconds:
 		_elapsed -= _tick_seconds
+		power_per_second = furnace.tick(_tick_seconds)
 		split.tick(power_per_second, _tick_seconds)
 		ticked.emit()
+
+
+## Moves as much of the mine's coal into the furnace as fits. Returns how many went in.
+func feed_furnace() -> int:
+	return mine.take("coal", furnace.feed(mine.ores.get("coal", 0)))
 
 
 ## Returns the config, or an empty Dictionary after reporting why it is unusable.
@@ -43,13 +58,15 @@ func _load_config() -> Dictionary:
 	if not config is Dictionary:
 		_fail("Cannot read %s (open error %d)" % [CONFIG_PATH, FileAccess.get_open_error()])
 		return {}
-	for key in ["tick_seconds", "fake_power_per_second", "heart_share_default", "heart_first_threshold"]:
+	for key in ["tick_seconds", "heart_share_default", "heart_first_threshold",
+			"furnace_fuel_capacity", "furnace_burn_seconds_per_coal", "furnace_power_per_second"]:
 		if not config.has(key):
 			_fail("%s is missing \"%s\"" % [CONFIG_PATH, key])
 			return {}
-	if config["tick_seconds"] <= 0.0:
-		_fail("%s: tick_seconds must be above 0" % CONFIG_PATH)
-		return {}
+	for key in ["tick_seconds", "furnace_burn_seconds_per_coal"]:
+		if config[key] <= 0.0:
+			_fail("%s: %s must be above 0" % [CONFIG_PATH, key])
+			return {}
 	return config
 
 

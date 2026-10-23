@@ -2,8 +2,8 @@
 class_name Mine
 extends Node
 
-## Emitted after every hit on the shaft, broken or not.
-signal dug
+## Emitted after every hit on the shaft, broken or not, and whenever ore is taken.
+signal changed
 
 const CONFIG_PATH := "res://data/ores.json"
 
@@ -29,7 +29,16 @@ func hit(power: float = 1.0) -> void:
 	var contents := shaft.hit(power)
 	if contents in ores:
 		ores[contents] += 1
-	dug.emit()
+	changed.emit()
+
+
+## Removes up to [param amount] of ore [param id]. Returns how much was taken.
+func take(id: String, amount: int) -> int:
+	var taken := mini(amount, ores.get(id, 0))
+	if taken > 0:
+		ores[id] -= taken
+		changed.emit()
+	return taken
 
 
 ## Returns the config, or an empty Dictionary after reporting why it is unusable.

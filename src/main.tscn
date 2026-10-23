@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://src/economy/economy.gd" id="1_economy"]
 [ext_resource type="PackedScene" path="res://src/ui/power_panel.tscn" id="2_panel"]
 [ext_resource type="Script" path="res://src/mining/mine.gd" id="3_mine"]
 [ext_resource type="PackedScene" path="res://src/mining/dig_shaft_view.tscn" id="4_shaft"]
+[ext_resource type="PackedScene" path="res://src/ui/furnace_panel.tscn" id="5_furnace"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -13,11 +14,12 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Economy" type="Node" parent="."]
-script = ExtResource("1_economy")
-
 [node name="Mine" type="Node" parent="."]
 script = ExtResource("3_mine")
+
+[node name="Economy" type="Node" parent="." node_paths=PackedStringArray("mine")]
+script = ExtResource("1_economy")
+mine = NodePath("../Mine")
 
 [node name="Center" type="CenterContainer" parent="."]
 layout_mode = 1
@@ -35,7 +37,15 @@ theme_override_constants/separation = 48
 layout_mode = 2
 mine = NodePath("../../../Mine")
 
-[node name="PowerPanel" parent="Center/Columns" node_paths=PackedStringArray("economy") instance=ExtResource("2_panel")]
+[node name="Panels" type="VBoxContainer" parent="Center/Columns"]
 layout_mode = 2
 size_flags_vertical = 4
-economy = NodePath("../../../Economy")
+theme_override_constants/separation = 16
+
+[node name="FurnacePanel" parent="Center/Columns/Panels" node_paths=PackedStringArray("economy") instance=ExtResource("5_furnace")]
+layout_mode = 2
+economy = NodePath("../../../../Economy")
+
+[node name="PowerPanel" parent="Center/Columns/Panels" node_paths=PackedStringArray("economy") instance=ExtResource("2_panel")]
+layout_mode = 2
+economy = NodePath("../../../../Economy")

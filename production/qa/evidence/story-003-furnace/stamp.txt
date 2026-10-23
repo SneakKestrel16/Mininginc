@@ -1,0 +1,9 @@
+Reviewed-Content-Hash: src/economy/furnace.gd 6a379b7993f3beb3723016e33bf4e2fe38d8555f
+Reviewed-Content-Hash: src/economy/economy.gd 5622eb7560b305856bbcac773027b11e4bb8dd5f
+Reviewed-Content-Hash: src/mining/mine.gd dfe4446a6b6e21cff592d00c0667102df9461a4b
+Reviewed-Content-Hash: src/mining/dig_shaft_view.gd 4cca3b102affd15223a1857587080a2a9b428847
+Reviewed-Content-Hash: src/ui/furnace_panel.gd 259d284bdc0e46b8eb71933a7bc8f8107f0a7665
+Reviewed-Content-Hash: src/ui/furnace_panel.tscn 5c28ddfb4e3f5241dd5ddf9b0c3235da54606b3e
+Reviewed-Content-Hash: src/main.tscn 8601443a6e0825014d8961b1c591ac7c598c6206
+Reviewed-Content-Hash: data/economy.json 94a6249e342db9ad8883eb5a4d8f371ffa33efad
+Reviewed-Content-Hash: tests/unit/heartwake/furnace_check.gd 55a08c6385f7dd8567a339285e52c334c0a985cc

@@ -1,7 +1,7 @@
 # Story 002: Dig shaft with ore discovery
 
 > **Epic**: Heartwake
-> **Status**: In Progress
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: L
@@ -83,3 +83,10 @@
 
 - Depends on: None
 - Unlocks: `production/epics/heartwake/story-003-furnace.md`, `production/epics/heartwake/story-004-drills.md`
+
+## Completion Notes
+**Completed**: 2026-10-23
+**Criteria**: 8/8 passing (click path verified with 41 real mouse events: depth 9, damage 2, matches the hardness curve)
+**Deviations**: None
+**Test Evidence**: waived at qa.level minimal; self-check `tests/unit/heartwake/dig_shaft_check.gd` passes; screenshot `production/qa/evidence/story-002-dig-shaft/shaft-depth-9.png`
+**Reviewed by**: self, no independent review
