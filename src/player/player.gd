@@ -7,15 +7,20 @@ const CONFIG_PATH := "res://data/world.json"
 
 ## The moon the player walks and digs.
 @export var world: VoxelWorld
+## Where ore goes and auto-drills are placed from.
+@export var mine: Mine
 
 ## The block under the crosshair within reach, or null.
 var target: Variant = null
-## The machine under the crosshair within reach, or null.
-var machine: WorldMachine = null
+## The machine, drill or console under the crosshair within reach, or null: anything
+## with prompt(), use_primary() and use_secondary().
+var machine: Node3D = null
 ## True while the player is in control. A click on the game turns it on and takes the
 ## mouse; Esc or an overlay turns it off. Never on at start, so the game (or a check run)
 ## never grabs the mouse by itself.
 var controls_enabled := false
+## Face of [member target] the crosshair is on; a drill goes on an upward face.
+var _target_normal := Vector3.ZERO
 ## True while an overlay is open, which hides the "click to play" hint.
 var hint_blocked := false
 
@@ -73,6 +78,9 @@ func _unhandled_input(event: InputEvent) -> void:
 			KEY_Q:
 				if machine:
 					machine.use_secondary()
+			KEY_F:
+				if target != null and _target_normal == Vector3.UP:
+					mine.place_drill(target)
 
 
 ## Hands control (and the mouse) to the player, or takes it away.
@@ -102,7 +110,7 @@ func _physics_process(delta: float) -> void:
 		world.hit(target, _drill_rate * delta)
 	_show_target()
 	_hint.visible = not controls_enabled and not hint_blocked
-	_prompt.visible = machine != null
+	_prompt.visible = machine != null and controls_enabled
 	if machine:
 		_prompt.text = machine.prompt()
 
@@ -118,9 +126,10 @@ func _aim() -> void:
 	if hit.is_empty():
 		return
 	var owner_node: Node = hit["collider"].get_parent()
-	if owner_node is WorldMachine:
+	if owner_node.has_method("prompt"):
 		machine = owner_node
 		return
+	_target_normal = hit["normal"].round()
 	# Step half a block into the face hit, so the point lands inside the solid block.
 	target = Vector3i((hit["position"] - hit["normal"] * 0.5).floor())
 

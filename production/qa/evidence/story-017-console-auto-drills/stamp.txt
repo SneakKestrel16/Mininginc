@@ -1,0 +1,9 @@
+Reviewed-Content-Hash: src/machines/auto_drill.gd 4c0ed0617a1f8e40535e8984d720656b17f01aa0
+Reviewed-Content-Hash: src/machines/console.gd 2e4aaf71c0b373361d7d18d1cca84d93021e7b41
+Reviewed-Content-Hash: src/ui/overlay.gd a60b1cda21bb46a41cbe34f471442ef866efe8ee
+Reviewed-Content-Hash: src/mining/mine.gd 2be47272abac2d6e4363c0e40cb4db93cc9fa2ab
+Reviewed-Content-Hash: src/player/player.gd 56efeed2f367c683c80aa567a132ad69c77d5f3d
+Reviewed-Content-Hash: src/player/player.tscn 512d093c425e6e38b597b2c277fc9c8321d72f80
+Reviewed-Content-Hash: src/main.tscn 31c857d47549606deaa5f74fac4bfe75af8e66a6
+Reviewed-Content-Hash: data/world.json aafb58c75f1924ddcf11be563dec3d7f201ad08f
+Reviewed-Content-Hash: tests/unit/heartwake/auto_drill_check.gd 02173752206eedfa9ca7b7c576518242353c461c

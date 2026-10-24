@@ -1,7 +1,7 @@
 # Story 017: Power console + auto-drills
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Estimate**: L
@@ -54,11 +54,14 @@
 ## Files
 
 - src/machines/auto_drill.gd
-- src/machines/auto_drill.tscn
 - src/machines/console.gd
-- src/economy/economy.gd
+- src/ui/overlay.gd
 - src/mining/mine.gd
+- src/player/player.gd
+- src/player/player.tscn
 - src/main.tscn
+- data/world.json
+- tests/unit/heartwake/auto_drill_check.gd
 
 ## QA Test Cases
 
@@ -79,3 +82,11 @@
 
 - Depends on: `production/epics/heartwake/story-016-heart-and-hud.md`
 - Unlocks: `production/epics/heartwake/story-018-world-saves.md`
+
+## Completion Notes
+**Completed**: 2026-10-23
+**Criteria**: 6/6 passing (self-check `auto_drill_check.gd`; windowed probe on the second monitor: F placed a drill for 3 copper on the aimed ground block, it dug down on furnace power with the split at Drills, its prompt offered pick-up, and the console's prompt opened the slider)
+**Deviations**: Placing uses F on an upward face; picking up is E on the drill and refunds its copper. Drills are solid to the aim ray only (collision layer 2), so the player can drop into a drilled column. The console opens the same slider panel the Tab overlay showed; Tab no longer opens it. `Economy` is unchanged: `Mine.dig` now shares drill hits between placed drills, so `DigShaft` only carries the seed and saved fields until story 018.
+**Known gap**: `tools/pacing_sim.gd` still digs through `Mine.dig` with no drills placed, so it no longer models digging; story 012 has to rebuild it for the 3D game. Drill speed is the MVP's 0.1 hits per power-second, about one block per 3 s on furnace power.
+**Test Evidence**: waived at qa.level minimal; self-check `tests/unit/heartwake/auto_drill_check.gd` passes; screenshots in `production/qa/evidence/story-017-console-auto-drills/`
+**Reviewed by**: self, no independent review

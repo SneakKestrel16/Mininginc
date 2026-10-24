@@ -1,4 +1,5 @@
-## Owns the dig shaft and the ores found in it, with tuning values from data/ores.json.
+## Owns the ores found so far and the auto-drills placed in the voxel world, with tuning
+## values from data/ores.json and data/world.json.
 class_name Mine
 extends Node
 
@@ -11,8 +12,15 @@ const CONFIG_PATH := "res://data/ores.json"
 ## checks can run a Mine alone.
 @export var world: VoxelWorld
 
-## The shaft the economy's drills dig until story 017 moves them into the world.
+## Holds the world seed and the MVP's shaft fields that saves still carry; the economy's
+## drills no longer dig it (story 017).
 var shaft: DigShaft
+
+## Placed auto-drills, oldest first.
+var drills: Array[AutoDrill] = []
+
+## Copper one auto-drill costs.
+var drill_cost: int = 0
 
 ## Ore id to amount found so far. Rock is not counted.
 var ores: Dictionary = {}
@@ -30,19 +38,49 @@ func _ready() -> void:
 	shaft = DigShaft.new(randi(), config["hardness_base"], config["hardness_per_block"], config["ores"],
 			config["frozen_from_depth"], config["frozen_hardness_multiplier"])
 	_base_frozen_from = config["frozen_from_depth"]
+	var world_config = JSON.parse_string(FileAccess.get_file_as_string("res://data/world.json"))
+	if not world_config is Dictionary or not world_config.has("drill_build_copper"):
+		_fail("res://data/world.json is missing \"drill_build_copper\"")
+		return
+	drill_cost = world_config["drill_build_copper"]
 	if world:
 		world.world_seed = shaft.shaft_seed
 		world.block_broken.connect(_collect)
 
 
-## Lands [param hits] on the shaft and collects any ore it breaks out. Clicks land 1 hit;
-## drills land a fraction each tick. Both act on the same block, so nothing counts twice.
+## Shares [param hits] of drill power between the drills still digging; with none placed
+## the power does nothing. Ore they break is collected through the world's signal.
 func dig(hits: float = 1.0) -> void:
-	if hits <= 0.0:
+	var working := drills.filter(func(d: AutoDrill) -> bool: return not d.stopped)
+	if hits <= 0.0 or working.is_empty():
 		return
-	for contents in shaft.dig(hits):
-		if contents in ores:
-			ores[contents] += 1
+	for drill in working:
+		drill.dig(hits / working.size())
+	changed.emit()
+
+
+## Spends copper and places an auto-drill on top of block [param at]. Returns the drill,
+## or null when there is not enough copper, no world, or a drill already stands there.
+func place_drill(at: Vector3i) -> AutoDrill:
+	if world == null or ores.get("copper", 0) < drill_cost:
+		return null
+	for drill in drills:
+		if drill.column == Vector2i(at.x, at.z):
+			return null
+	take("copper", drill_cost)
+	var drill := AutoDrill.new()
+	drill.setup(world, self, at)
+	world.add_child(drill)
+	drills.append(drill)
+	changed.emit()
+	return drill
+
+
+## Picks [param drill] up and gives back its copper. Its column stays dug.
+func remove_drill(drill: AutoDrill) -> void:
+	drills.erase(drill)
+	drill.queue_free()
+	ores["copper"] = ores.get("copper", 0) + drill_cost
 	changed.emit()
 
 

@@ -61,9 +61,10 @@ anchor_bottom = 0.5
 offset_left = -340.0
 offset_top = 30.0
 offset_right = 340.0
-offset_bottom = 80.0
+offset_bottom = 110.0
 text = "Click to play
-WASD move · Space jump · hold left click to drill · Esc frees the mouse · Tab panels"
+WASD move · Space jump · hold left click to drill · E/Q use machines
+F place an auto-drill on the ground · Esc frees the mouse"
 horizontal_alignment = 1
 
 [node name="Prompt" type="Label" parent="Crosshair"]

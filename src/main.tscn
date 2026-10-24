@@ -1,4 +1,4 @@
-[gd_scene load_steps=12 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://src/economy/economy.gd" id="1_economy"]
 [ext_resource type="PackedScene" path="res://src/ui/power_panel.tscn" id="2_panel"]
@@ -11,6 +11,7 @@
 [ext_resource type="Script" path="res://src/machines/machine.gd" id="13_machine"]
 [ext_resource type="Script" path="res://src/heart/heart_machine.gd" id="14_heart"]
 [ext_resource type="PackedScene" path="res://src/ui/hud.tscn" id="15_hud"]
+[ext_resource type="Script" path="res://src/machines/console.gd" id="16_console"]
 
 [sub_resource type="Environment" id="Env"]
 background_mode = 1
@@ -80,11 +81,19 @@ economy = NodePath("../Economy")
 [node name="Hud" parent="." node_paths=PackedStringArray("economy") instance=ExtResource("15_hud")]
 economy = NodePath("../Economy")
 
-[node name="Player" parent="." node_paths=PackedStringArray("world") instance=ExtResource("11_player")]
+[node name="Console" type="Node3D" parent="Machines" node_paths=PackedStringArray("economy", "overlay")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64.5, 1, 61.5)
+script = ExtResource("16_console")
+economy = NodePath("../../Economy")
+overlay = NodePath("../../Overlay")
+
+[node name="Player" parent="." node_paths=PackedStringArray("world", "mine") instance=ExtResource("11_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64.5, 1.1, 64.5)
 world = NodePath("../World")
+mine = NodePath("../Mine")
 
 [node name="Overlay" type="CanvasLayer" parent="." node_paths=PackedStringArray("player")]
+layer = 2
 script = ExtResource("12_overlay")
 player = NodePath("../Player")
 
