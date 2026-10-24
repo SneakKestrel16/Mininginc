@@ -38,6 +38,8 @@ var max_depth: int
 var crust_depth: int
 var wall_height: int
 var view_radius: int
+## The open pit the Heart sits in, generated as air: corners, inclusive.
+var chamber := AABB()
 
 var _ores: Array
 var _ore_ids: PackedInt32Array
@@ -54,7 +56,7 @@ var _material := StandardMaterial3D.new()
 
 func _ready() -> void:
 	var world := _load_json(WORLD_PATH, ["chunk_size", "world_size", "max_depth", "crust_depth", "wall_height",
-			"view_radius_chunks"])
+			"view_radius_chunks", "heart_chamber_min", "heart_chamber_max"])
 	var ores := _load_json(ORES_PATH, ["hardness_base", "hardness_per_block", "frozen_from_depth",
 			"frozen_hardness_multiplier", "ores"])
 	if world.is_empty() or ores.is_empty():
@@ -65,6 +67,9 @@ func _ready() -> void:
 	crust_depth = world["crust_depth"]
 	wall_height = world["wall_height"]
 	view_radius = world["view_radius_chunks"]
+	var low := Vector3(world["heart_chamber_min"][0], world["heart_chamber_min"][1], world["heart_chamber_min"][2])
+	var high := Vector3(world["heart_chamber_max"][0], world["heart_chamber_max"][1], world["heart_chamber_max"][2])
+	chamber = AABB(low, high - low)
 	_ores = ores["ores"]
 	for ore in _ores:
 		var id := Blocks.id_of(ore["id"])
@@ -83,6 +88,10 @@ func _ready() -> void:
 	for cx in chunks:
 		for cz in chunks:
 			_open_chunks[Vector3i(cx, 0, cz)] = true
+	for x in [chamber.position.x, chamber.end.x]:
+		for y in [chamber.position.y - 1, chamber.end.y]:
+			for z in [chamber.position.z, chamber.end.z]:
+				_open_chunks[chunk_of(Vector3i(x, y, z))] = true
 
 
 ## The block at [param pos]: its edit if it has one, else what the seed generates.
@@ -202,7 +211,13 @@ func _solid_generated(pos: Vector3i) -> bool:
 		return false
 	if _is_wall(pos):
 		return pos.y <= wall_height
+	if _in_chamber(pos):
+		return false
 	return pos.y <= 0
+
+
+func _in_chamber(pos: Vector3i) -> bool:
+	return pos.x >= chamber.position.x and pos.x <= chamber.end.x and pos.y >= chamber.position.y 			and pos.y <= chamber.end.y and pos.z >= chamber.position.z and pos.z <= chamber.end.z
 
 
 func _is_wall(pos: Vector3i) -> bool:

@@ -1,7 +1,7 @@
 # Story 016: The Heart in the world + HUD
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Estimate**: M
@@ -52,10 +52,13 @@
 ## Files
 
 - src/heart/heart_machine.gd
-- src/heart/heart_machine.tscn
 - src/ui/hud.gd
 - src/ui/hud.tscn
+- src/world/voxel_world.gd
+- data/world.json
 - src/main.tscn
+- src/ui/heart_panel.gd (deleted)
+- src/mining/dig_shaft_view.gd (deleted)
 
 ## QA Test Cases
 
@@ -76,3 +79,10 @@
 
 - Depends on: `production/epics/heartwake/story-015-world-machines.md`
 - Unlocks: `production/epics/heartwake/story-017-console-auto-drills.md`
+
+## Completion Notes
+**Completed**: 2026-10-23
+**Criteria**: 5/5 passing (windowed probe on the second monitor: the Heart seen from the pit's edge asleep, then at Flicker with its line on screen, then awake at Breath, brighter, lighting the pit walls; the line faded to 0 after 8 s; HUD showed inventory, power and the stage meter)
+**Deviations**: The Heart's pit is part of world generation (`heart_chamber_min`/`max` in `data/world.json`), so it costs no saved edits. The Heart is built in code (sphere, three cage rings, light), not a scene. The overlay's dig-shaft view is deleted along with the Heart panel; the economy's drills still dig the old shaft unseen until story 017.
+**Test Evidence**: waived at qa.level minimal; no new self-check (visual); screenshots in `production/qa/evidence/story-016-heart-and-hud/`
+**Reviewed by**: self, no independent review
