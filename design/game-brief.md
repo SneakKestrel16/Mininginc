@@ -68,6 +68,13 @@ Chosen 2026-10-24 after v0.3.0: once the turbine, reactor and drills are built, 
 
 Build order: 28 + 29 → 30.
 
+## Milestone 6 — digging feel
+Chosen 2026-10-24 after v0.4.0, by Claude on the user's "just keep going": the dig is the action the player repeats most, and it gives no feedback beyond the hole and the inventory count.
+
+31. Each scoop the player digs throws a puff of dust in the colour of what it cut, plays a short crunch, and shows the ore it gained ("+2 coal") by the crosshair.
+
+Build order: 31.
+
 ## Out of scope — not building this
 - Deeper tiers (Deep, Abyss, Core) and their twists: waste that later becomes fuel, the crystal placement grid, transmission loss.
 - Heart stage 6 (Wake), launch, the star map and Resonance prestige.
