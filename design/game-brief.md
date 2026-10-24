@@ -21,9 +21,23 @@
 6. Shallow layer: ice + copper and a steam turbine that needs both fuel and water.
 7. Save/load with offline progress, where furnaces burn out unless automated.
 
+## Milestone 2 — Mid layer and Heart stages 4–5
+Shipped MVP is v0.1.1. This milestone gives power spent on the drills a payoff past Breath: today sending 100% to the Heart is always fastest (`tools/pacing_sim.gd`).
+
+8. Mid layer: uranium is found in the rock below Breath's thaw (depth 100 and down), alongside coal and ice.
+9. Fission reactor: built with copper, burns uranium for far more power than the turbine, and builds heat while it runs.
+10. Cooling and scram: melting ice into the reactor removes heat; if heat reaches the limit it scrams and stays off until it has cooled.
+11. Waste: every uranium burned leaves waste, which piles up in a store shown on screen. It has no use yet.
+12. Heart stage 4, Sight: the Heart scans the moon and marks blocks with rich ore on the shaft before you dig them.
+13. Heart stage 5, Voice: the Heart talks to you; a short run of lines hints that it is a seed ship or a beacon.
+14. Retune with the pacing simulator so that a split favouring the drills reaches Voice sooner than 100% to the Heart.
+
+Build order: 8 → 9 → 10 → 11 → 12 → 13 → 14. Thresholds and reactor numbers live in `data/*.json` and are set by step 14.
+
 ## Out of scope — not building this
-- Fission and deeper tiers (Mid, Deep, Abyss, Core) and their twists: heat/scram, waste that later becomes fuel, the crystal placement grid, transmission loss.
-- Heart stages 4–6 (Sight, Voice, Wake), launch, the star map and Resonance prestige.
+- Deeper tiers (Deep, Abyss, Core) and their twists: waste that later becomes fuel, the crystal placement grid, transmission loss.
+- Heart stage 6 (Wake), launch, the star map and Resonance prestige.
+- An upgrade shop or other ore sinks.
 - Overload events, new-moon rule changes, story logs beyond one line per stage.
 
 ## Build order
