@@ -1,7 +1,7 @@
 # Story 021: Smooth terrain
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: L
@@ -28,11 +28,11 @@
 
 *From `design/game-brief.md` (Milestone 4 item 24), scoped to this story:*
 
-- [ ] The moon's ground is a smooth surface built per chunk from a density field generated from the seed, not blocks.
-- [ ] Ore lies in deposits shaped by 3D noise, by depth band from `data/ores.json`; the surface is coloured by what lies under it.
-- [ ] The ground has collision the player walks on, with hard edges and an unbreakable floor.
-- [ ] Chunks are built around the player within a radius and only where the ground surface passes, never all at once.
-- [ ] A new world builds fast enough to start in a few seconds.
+- [x] The moon's ground is a smooth surface built per chunk from a density field generated from the seed, not blocks.
+- [x] Ore lies in deposits shaped by 3D noise, by depth band from `data/ores.json`; the surface is coloured by what lies under it.
+- [x] The ground has collision the player walks on, with hard edges and an unbreakable floor.
+- [x] Chunks are built around the player within a radius and only where the ground surface passes, never all at once.
+- [x] A new world builds fast enough to start in a few seconds.
 
 ---
 

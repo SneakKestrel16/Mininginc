@@ -22,10 +22,10 @@ func _initialize() -> void:
 	a.dig(40.0)
 	failures += _check(first.depth_y < 0 and second.depth_y < 0 and absi(first.depth_y - second.depth_y) <= 2,
 			"drill power is shared between the drills (%d, %d)" % [first.depth_y, second.depth_y])
-	failures += _check(a.world.block_at(Vector3i(20, 0, 20)) == Blocks.AIR and a.world.block_at(Vector3i(20, first.depth_y, 20)) != Blocks.AIR,
-			"a drill breaks its column top down")
+	failures += _check(not a.world.is_solid(Vector3i(20, 0, 20)) and a.world.is_solid(Vector3i(20, first.depth_y - 1, 20)),
+			"a drill scoops its column top down")
 
-	# Hits carry from block to block: one big dig reaches as deep as many small ones.
+	# Hits carry from scoop to scoop: one big dig reaches as deep as many small ones.
 	var b := await _mine(5)
 	var c := await _mine(5)
 	b.ores["copper"] = 10
@@ -43,7 +43,7 @@ func _initialize() -> void:
 	var copper_before: int = b.ores["copper"]
 	b.remove_drill(big)
 	failures += _check(b.ores["copper"] == copper_before + b.drill_cost and b.drills.is_empty()
-			and b.world.block_at(Vector3i(40, -10, 40)) == Blocks.AIR, "picking a drill up returns its copper; the column stays dug")
+			and not b.world.is_solid(Vector3i(40, -10, 40)), "picking a drill up returns its copper; the column stays dug")
 
 	print("auto_drill_check: %s" % ("PASS" if failures == 0 else "%d FAILED" % failures))
 	quit(1 if failures else 0)

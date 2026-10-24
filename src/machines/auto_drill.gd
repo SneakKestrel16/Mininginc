@@ -1,6 +1,6 @@
 ## An auto-drill the player places on the ground (brief: Milestone 3D item 20). It bores
-## straight down its column with its share of drill power, breaking blocks in the voxel
-## world exactly as the hand drill does, so hardness and Breath apply the same.
+## straight down its column with its share of drill power, one scoop per metre, digging
+## exactly as the hand tool does, so hardness and Breath apply the same.
 class_name AutoDrill
 extends Node3D
 
@@ -8,11 +8,11 @@ extends Node3D
 var world: VoxelWorld
 ## The mine that placed it; picking it up goes back through the mine.
 var mine: Mine
-## Block x and z of the column it digs.
+## Cell x and z of the column it digs.
 var column: Vector2i
-## Block y it stands on.
+## Cell y it stands on.
 var top_y: int
-## Block y it is digging now.
+## Cell y it is digging now.
 var depth_y: int
 ## True once it has reached bedrock; it then takes no more power.
 var stopped := false
@@ -20,14 +20,14 @@ var stopped := false
 var _rod: MeshInstance3D
 
 
-## Places the drill on top of block [param at], digging that block first.
+## Places the drill at cell [param at], digging that cell first.
 func setup(on_world: VoxelWorld, owner_mine: Mine, at: Vector3i) -> void:
 	world = on_world
 	mine = owner_mine
 	column = Vector2i(at.x, at.z)
 	top_y = at.y
 	depth_y = at.y
-	position = Vector3(at.x + 0.5, at.y + 1, at.z + 0.5)
+	position = Vector3(at.x + 0.5, at.y + 0.5, at.z + 0.5)
 
 
 func _ready() -> void:
@@ -54,8 +54,8 @@ func _ready() -> void:
 	_show_rod()
 
 
-## Lands [param hits] down the column, carrying what is left after each broken block into
-## the next one, so a long offline step digs as far as many short ones.
+## Lands [param hits] down the column, carrying what is left after each scoop into the
+## next one, so a long offline step digs as far as many short ones.
 func dig(hits: float) -> void:
 	var left := hits
 	while left > 0.0 and not stopped:
@@ -63,19 +63,17 @@ func dig(hits: float) -> void:
 			stopped = true
 			break
 		var pos := Vector3i(column.x, depth_y, column.y)
-		var needed := world.hardness(pos)
+		var needed := world.hardness_at(pos)
 		if is_inf(needed):
 			stopped = true
 			break
 		var remaining: float = needed - world.damage.get(pos, 0.0)
-		if needed == 0.0 or left >= remaining:
-			if needed > 0.0:
-				world.hit(pos, remaining)
-				left -= remaining
+		var used := minf(left, remaining)
+		world.dig(Vector3(pos) + Vector3(0.5, 0.5, 0.5), used)
+		left -= used
+		# The world decides when a scoop is done: it forgives a float's hair short.
+		if not world.damage.has(pos):
 			depth_y -= 1
-		else:
-			world.hit(pos, left)
-			left = 0.0
 	_show_rod()
 
 

@@ -1,10 +1,10 @@
 {
-	"chunk_size": 16,
+	"chunk_size": 8,
 	"world_size": 128,
 	"max_depth": 400,
 	"crust_depth": 2,
 	"wall_height": 4,
-	"view_radius_chunks": 4,
+	"view_radius_chunks": 6,
 	"move_speed": 5.0,
 	"jump_velocity": 4.0,
 	"gravity": 5.0,
@@ -14,5 +14,11 @@
 	"hand_power_bonus": 1.0,
 	"heart_chamber_min": [59, -9, 44],
 	"heart_chamber_max": [69, 0, 54],
-	"drill_build_copper": 3
+	"drill_build_copper": 3,
+	"surface_bumps": 1.5,
+	"ore_noise_frequency": 0.08,
+	"bite_radius": 1.2,
+	"bite_cost": 2.0,
+	"base_min": [56, -4, 55],
+	"base_max": [74, 6, 68]
 }

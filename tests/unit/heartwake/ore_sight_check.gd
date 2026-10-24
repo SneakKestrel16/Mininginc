@@ -25,19 +25,19 @@ func _initialize() -> void:
 	for x in range(-reach, reach + 1):
 		for y in range(-reach, reach + 1):
 			for z in range(-reach, reach + 1):
-				if Vector3i(x, y, z).length_squared() <= reach * reach and world.block_at(center + Vector3i(x, y, z)) > Blocks.ROCK:
+				if Vector3i(x, y, z).length_squared() <= reach * reach and world.is_solid(center + Vector3i(x, y, z)) 						and world.material_at(center + Vector3i(x, y, z)) > Blocks.ROCK:
 					expected += 1
 	failures += _check(found.size() == expected and expected > 0, "every ore within reach glows, nothing else (%d)" % expected)
 	var all_match := true
 	for item in found:
-		all_match = all_match and world.block_at(item[0]) == item[1]
-	failures += _check(all_match, "a glowing block holds the ore it shows")
+		all_match = all_match and world.material_at(item[0]) == item[1]
+	failures += _check(all_match, "a glowing spot holds the ore it shows")
 	var first: Vector3i = found[0][0]
 	var ore_name: String = Blocks.NAMES[found[0][1]]
-	failures += _check(world.hit(first, 1e6) == ore_name, "digging it yields that ore")
+	failures += _check(world.carve(Vector3(first), 1.2).get(ore_name, 0) > 0, "digging it yields that ore")
 	var after := OreSight.scan(world, center, reach)
 	failures += _check(after.size() < expected and not after.any(func(item: Array) -> bool: return item[0] == first),
-			"a broken block stops glowing, and so does ore it opens to view")
+			"a dug spot stops glowing, and so does ore it opens to view")
 
 	print("ore_sight_check: %s" % ("PASS" if failures == 0 else "%d FAILED" % failures))
 	quit(1 if failures else 0)

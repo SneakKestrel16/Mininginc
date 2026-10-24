@@ -1,5 +1,6 @@
-## The miner, in first person (brief: Milestone 3D item 16). Walks the voxel moon and
-## breaks the block under the crosshair with the hand drill while the left button is held.
+## The miner, in first person (brief: Milestone 3D item 16, Milestone 4 item 25). Walks the
+## moon and scoops round bites out of the ground under the crosshair while the left button
+## is held.
 class_name Player
 extends CharacterBody3D
 
@@ -12,7 +13,7 @@ const CONFIG_PATH := "res://data/world.json"
 ## Its drill power adds to the hand tool's speed.
 @export var economy: Economy
 
-## The block under the crosshair within reach, or null.
+## The point just inside the ground under the crosshair within reach, or null.
 var target: Variant = null
 ## The machine, drill or console under the crosshair within reach, or null: anything
 ## with prompt(), use_primary() and use_secondary().
@@ -21,7 +22,7 @@ var machine: Node3D = null
 ## mouse; Esc or an overlay turns it off. Never on at start, so the game (or a check run)
 ## never grabs the mouse by itself.
 var controls_enabled := false
-## Face of [member target] the crosshair is on; a drill goes on an upward face.
+## Surface normal at [member target]; a drill goes on ground facing mostly up.
 var _target_normal := Vector3.ZERO
 ## True while an overlay is open, which hides the "click to play" hint.
 var hint_blocked := false
@@ -90,8 +91,8 @@ func _unhandled_input(event: InputEvent) -> void:
 				if machine:
 					machine.use_secondary()
 			KEY_F:
-				if target != null and _target_normal == Vector3.UP:
-					mine.place_drill(target)
+				if target != null and _target_normal.y > 0.7:
+					mine.place_drill(Vector3i(target.floor()))
 
 
 ## Hits per second the hand tool lands: its own rate plus its share of drill power.
@@ -127,7 +128,7 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	_aim()
 	if drilling and target != null:
-		world.hit(target, hand_rate() * delta)
+		world.dig(target, hand_rate() * delta)
 	_show_target()
 	_hint.visible = not controls_enabled and not hint_blocked
 	_prompt.visible = machine != null and controls_enabled
@@ -135,7 +136,7 @@ func _physics_process(delta: float) -> void:
 		_prompt.text = machine.prompt()
 
 
-## Finds the block under the crosshair within reach.
+## Finds the ground under the crosshair within reach.
 func _aim() -> void:
 	var from := _camera.global_position
 	var query := PhysicsRayQueryParameters3D.create(from, from - _camera.global_basis.z * _reach)
@@ -149,17 +150,18 @@ func _aim() -> void:
 	if owner_node.has_method("prompt"):
 		machine = owner_node
 		return
-	_target_normal = hit["normal"].round()
-	# Step half a block into the face hit, so the point lands inside the solid block.
-	target = Vector3i((hit["position"] - hit["normal"] * 0.5).floor())
+	_target_normal = hit["normal"]
+	# A little into the ground, so the point's cell is the rock being dug, not the air.
+	target = hit["position"] - hit["normal"] * 0.25
 
 
-## Outlines the target block, darker the more damage it has taken.
+## Marks the spot being dug, redder and more solid the closer the next scoop is.
 func _show_target() -> void:
 	_marker.visible = target != null
 	if target == null:
 		return
-	_marker.global_position = Vector3(target) + Vector3(0.5, 0.5, 0.5)
-	var needed: float = world.hardness(target)
-	var done: float = world.damage.get(target, 0.0) / needed if needed > 0.0 and not is_inf(needed) else 0.0
-	_marker_material.albedo_color = Color(0.05, 0.02, 0.0, 0.12 + 0.6 * done)
+	_marker.global_position = target
+	var cell := Vector3i(target.floor())
+	var needed: float = world.hardness_at(cell)
+	var done: float = world.damage.get(cell, 0.0) / needed if needed > 0.0 and not is_inf(needed) else 0.0
+	_marker_material.albedo_color = Color(1.0, 0.55 - 0.4 * done, 0.15, 0.35 + 0.6 * done)

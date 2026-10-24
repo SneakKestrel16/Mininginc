@@ -45,7 +45,7 @@ func _ready() -> void:
 	drill_cost = world_config["drill_build_copper"]
 	if world:
 		world.world_seed = shaft.shaft_seed
-		world.block_broken.connect(_collect)
+		world.carved.connect(_collect)
 
 
 ## Shares [param hits] of drill power between the drills still digging and the hand tool,
@@ -71,7 +71,7 @@ func hand_share(drill_hits_per_second: float) -> float:
 	return drill_hits_per_second / (working_drills().size() + 1)
 
 
-## Spends copper and places an auto-drill on top of block [param at]. Returns the drill,
+## Spends copper and places an auto-drill at cell [param at]. Returns the drill,
 ## or null when there is not enough copper, no world, or a drill already stands there.
 func place_drill(at: Vector3i) -> AutoDrill:
 	if world == null or ores.get("copper", 0) < drill_cost:
@@ -83,7 +83,7 @@ func place_drill(at: Vector3i) -> AutoDrill:
 	return restore_drill(at, at.y, false)
 
 
-## Puts back a drill a save recorded on top of block [param at], already dug down to
+## Puts back a drill a save recorded at cell [param at], already dug down to
 ## [param depth_y]. Costs nothing: it was paid for when placed.
 func restore_drill(at: Vector3i, depth_y: int, stopped: bool) -> AutoDrill:
 	var drill := AutoDrill.new()
@@ -115,10 +115,11 @@ func thaw_to(depth: int) -> void:
 		world.thaw_to(depth)
 
 
-func _collect(_pos: Vector3i, block_name: String) -> void:
-	if block_name in ores:
-		ores[block_name] += 1
-		changed.emit()
+func _collect(_center: Vector3, collected: Dictionary) -> void:
+	for what in collected:
+		if what in ores:
+			ores[what] += collected[what]
+	changed.emit()
 
 
 ## Removes up to [param amount] of ore [param id]. Returns how much was taken.

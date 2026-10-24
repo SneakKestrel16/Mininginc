@@ -6,8 +6,9 @@
 radius = 0.35
 height = 1.7
 
-[sub_resource type="BoxMesh" id="MarkerMesh"]
-size = Vector3(1.02, 1.02, 1.02)
+[sub_resource type="SphereMesh" id="MarkerMesh"]
+radius = 0.25
+height = 0.5
 
 [sub_resource type="StandardMaterial3D" id="MarkerMaterial"]
 transparency = 1
@@ -63,8 +64,8 @@ offset_top = 30.0
 offset_right = 340.0
 offset_bottom = 110.0
 text = "Click to play
-WASD move · Space jump · hold left click to drill · E/Q use machines
-F place an auto-drill on the ground · Esc frees the mouse · F1 dev menu"
+WASD move Â· Space jump Â· hold left click to drill Â· E/Q use machines
+F place an auto-drill on the ground Â· Esc frees the mouse Â· F1 dev menu"
 horizontal_alignment = 1
 
 [node name="Prompt" type="Label" parent="Crosshair"]

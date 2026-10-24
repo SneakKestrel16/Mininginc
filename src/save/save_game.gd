@@ -5,7 +5,7 @@ class_name SaveGame
 extends Node
 
 ## Bumped when the save layout changes, so a later build can migrate older saves.
-const FORMAT_VERSION := 3
+const FORMAT_VERSION := 4
 const CONFIG_PATH := "res://data/save.json"
 
 @export var economy: Economy
@@ -146,8 +146,9 @@ static func apply(data: Dictionary, economy: Economy, mine: Mine, player: Player
 	if mine.world:
 		mine.world.world_seed = mine.shaft.shaft_seed
 	# Formats 1 and 2 predate the 3D world: their economy and ores carry over onto a fresh
-	# world, with the player at the base.
-	if int(data["version"]) >= 3:
+	# world, with the player at the base. Format 3's block world does not fit the smooth
+	# ground of format 4: it starts fresh too, at the base, and its drills come back as copper.
+	if int(data["version"]) >= 4:
 		if mine.world:
 			mine.world.load_edits(data["world"]["edits"])
 			for drill in data["drills"]:
@@ -159,6 +160,8 @@ static func apply(data: Dictionary, economy: Economy, mine: Mine, player: Player
 			player.get_node("Head").rotation.x = data["player"]["pitch"]
 	for id in data["mine"]["ores"]:
 		mine.ores[id] = int(data["mine"]["ores"][id])
+	if int(data["version"]) == 3:
+		mine.ores["copper"] = mine.ores.get("copper", 0) + data["drills"].size() * mine.drill_cost
 	economy.split.heart_share = data["heart_share"]
 	economy.heart.stage = int(data["heart"]["stage"])
 	economy.heart.progress = data["heart"]["progress"]

@@ -1,4 +1,4 @@
-## Self-check for the voxel moon until /test-setup installs gdUnit4.
+## Self-check for the smooth moon until /test-setup installs gdUnit4.
 ## Run: <godot> --headless --path . -s res://tests/unit/heartwake/voxel_world_check.gd
 ## Exits 0 when every check passes, 1 on the first failure.
 extends SceneTree
@@ -15,67 +15,95 @@ func _initialize() -> void:
 	var differs := false
 	for i in 2000:
 		var pos := Vector3i(1 + i % 120, -(i % 300), 1 + (i * 7) % 120)
-		same = same and world.generated(pos) == twin.generated(pos)
-		differs = differs or world.generated(pos) != other.generated(pos)
-	failures += _check(same and differs, "the same seed gives the same blocks; another seed does not")
+		same = same and world.density_at(pos) == twin.density_at(pos) and world.material_at(pos) == twin.material_at(pos)
+		differs = differs or world.material_at(pos) != other.material_at(pos)
+	failures += _check(same and differs, "the same seed gives the same ground; another seed does not")
 
-	failures += _check(world.block_at(Vector3i(5, 0, 5)) == Blocks.CRUST and world.block_at(Vector3i(5, 1, 5)) == Blocks.AIR,
-			"the surface is ice crust with air above")
-	var found := {}
-	for x in range(1, 127):
-		for y in range(-300, -1):
-			var id := world.generated(Vector3i(x, y, 9))
-			found[Blocks.NAMES[id] + ("@shallow" if -y < 50 else "@mid" if -y < 100 else "@deep")] = true
-	failures += _check(found.has("coal@shallow") and not found.has("ice@shallow") and not found.has("copper@shallow"),
+	failures += _check(world.is_solid(Vector3i(64, 0, 60)) and not world.is_solid(Vector3i(64, 1, 60))
+			and world.material_at(Vector3i(64, 0, 60)) == Blocks.CRUST, "the base is flat ice crust at y = 1")
+	var heights := {}
+	for x in range(1, 50):
+		var y := 6
+		while not world.is_solid(Vector3i(x, y, 20)):
+			y -= 1
+		heights[y] = true
+	failures += _check(heights.size() >= 2, "the ground outside the base is bumpy (%d heights)" % heights.size())
+
+	# Deposits fill about the share of rock data/ores.json asks for, in lumps, not specks.
+	var counts := {}
+	var lumpy := 0
+	var total := 0
+	for x in range(2, 126, 2):
+		for y in range(-299, -2, 3):
+			var pos := Vector3i(x, y, 40)
+			var id := world.material_at(pos)
+			var key: String = Blocks.NAMES[id] + ("@shallow" if -y < 50 else "@mid" if -y < 100 else "@deep")
+			counts[key] = counts.get(key, 0) + 1
+			if id > Blocks.ROCK:
+				total += 1
+				lumpy += int(world.material_at(pos + Vector3i.RIGHT) == id)
+	failures += _check(counts.has("coal@shallow") and not counts.has("ice@shallow") and not counts.has("copper@shallow"),
 			"coal near the top, no ice or copper there")
-	failures += _check(found.has("ice@mid") and found.has("copper@mid") and not found.has("uranium@mid"), "ice and copper below 50 m")
-	failures += _check(found.has("uranium@deep") and not found.has("uranium@shallow"), "uranium from 100 m")
+	failures += _check(counts.has("ice@mid") and counts.has("copper@mid") and not counts.has("uranium@mid"), "ice and copper below 50 m")
+	failures += _check(counts.has("uranium@deep") and not counts.has("uranium@shallow"), "uranium from 100 m")
+	var coal_share: float = counts.get("coal@shallow", 0) / float(counts.get("coal@shallow", 0) + counts.get("rock@shallow", 0))
+	failures += _check(coal_share > 0.1 and coal_share < 0.25, "coal is about 17.5%% of shallow rock (%.3f)" % coal_share)
+	failures += _check(lumpy > total / 2, "ore comes in deposits: most ore has the same ore beside it (%d of %d)" % [lumpy, total])
 
 	var shallow := Vector3i(5, -10, 5)
 	var frozen := Vector3i(5, -60, 5)
-	failures += _check(world.hardness(shallow) == ceilf(3.0 + 0.15 * 10), "hardness follows depth like the shaft")
-	failures += _check(world.hardness(frozen) == ceilf((3.0 + 0.15 * 60) * 2.0) and world.is_frozen(frozen), "frozen rock is harder")
+	failures += _check(is_equal_approx(world.hardness_at(shallow), (3.0 + 0.15 * 10) * 2.0), "a scoop costs hardness by depth times bite cost")
+	failures += _check(is_equal_approx(world.hardness_at(frozen), (3.0 + 0.15 * 60) * 2.0 * 2.0) and world.is_frozen(frozen),
+			"frozen rock is harder")
 	world.thaw_to(100)
-	failures += _check(world.hardness(frozen) == ceilf(3.0 + 0.15 * 60) and not world.is_frozen(frozen), "Breath thaws it")
+	failures += _check(is_equal_approx(world.hardness_at(frozen), (3.0 + 0.15 * 60) * 2.0) and not world.is_frozen(frozen), "Breath thaws it")
 	world.thaw_to(0)
 	failures += _check(world.frozen_from == 50, "never refreezes above the frozen floor")
 
-	failures += _check(is_inf(world.hardness(Vector3i(0, 0, 5))) and world.hit(Vector3i(0, 0, 5), 1000.0) == ""
-			and is_inf(world.hardness(Vector3i(5, -400, 5))), "edge walls and the floor are unbreakable bedrock")
+	failures += _check(is_inf(world.hardness_at(Vector3i(0, 0, 5))) and world.dig(Vector3(0.5, 0.5, 5.5), 1000.0).is_empty()
+			and is_inf(world.hardness_at(Vector3i(5, -400, 5))), "edge walls and the floor are bedrock no scoop opens")
 	failures += _check(world.is_solid(Vector3i(0, 4, 5)) and not world.is_solid(Vector3i(0, 5, 5)), "the edge wall rises above the surface")
+	world.carve(Vector3(1, 0, 5), 3.0)
+	failures += _check(world.is_solid(Vector3i(0, 0, 5)) and not world.is_solid(Vector3i(2, 0, 5)), "a scoop spares bedrock")
+	world.carve(Vector3(64, 0, 60), 3.0)
+	failures += _check(world.is_solid(Vector3i(64, 0, 60)), "a scoop spares the base")
 
-	var ore_pos := Vector3i(-1, 0, 0)
-	for y in range(-49, -1):
-		if world.generated(Vector3i(20, y, 20)) == Blocks.id_of("coal"):
-			ore_pos = Vector3i(20, y, 20)
-			break
-	var need := world.hardness(ore_pos)
-	failures += _check(world.hit(ore_pos, need - 1.0) == "" and world.block_at(ore_pos) == Blocks.id_of("coal"),
-			"a block holds until its hardness is reached")
-	failures += _check(world.hit(ore_pos, 1.0) == "coal" and world.block_at(ore_pos) == Blocks.AIR and not world.damage.has(ore_pos),
-			"then breaks, reporting what it held")
+	# Digging: hits wait until a scoop's hardness, then a ball of ground goes and its ore counts.
+	var spot := Vector3(20.5, -20.5, 20.5)
+	var cell := Vector3i(spot.floor())
+	var need := world.hardness_at(cell)
+	var heard := []
+	world.carved.connect(func(_center: Vector3, collected: Dictionary) -> void: heard.append(collected))
+	failures += _check(world.dig(spot, need - 1.0).is_empty() and world.is_solid(cell), "ground holds until a scoop's hardness")
+	var got := world.dig(spot, 1.0)
+	var removed := 0
+	for what in got:
+		removed += got[what]
+	failures += _check(removed >= 7 and removed <= 9 and not world.is_solid(cell) and not world.damage.has(cell),
+			"then a scoop of about 8 samples goes (%d)" % removed)
+	failures += _check(heard.size() == 1 and heard[0] == got, "the world tells the mine what the scoop held")
+	failures += _check(not world.dig(Vector3(30.5, 0.5, 30.5), world.hardness_at(Vector3i(30, 0, 30)) - 0.00001).is_empty(),
+			"a hair short of the hardness still scoops")
 
-	# Damage stopping a float's hair short of the hardness still breaks the block.
-	var crust := Vector3i(30, 0, 30)
-	failures += _check(world.hit(crust, world.hardness(crust) - 0.00001) == "crust", "a hair short of the hardness breaks the block")
-
-	# Drawing: a flat inner surface chunk shows one top face per column and nothing else.
+	# Drawing: surface nets give a closed surface with collision, built only near the player.
 	world.update_around(Vector3(40, 1, 40))  # the player calls this every frame
-	var inner: Node3D = world.chunk_node(Vector3i(2, 0, 2))
-	var mesh: ArrayMesh = (inner.get_child(0) as MeshInstance3D).mesh
-	failures += _check(mesh.surface_get_array_len(0) == 16 * 16 * 4, "only faces next to air are drawn")
-	failures += _check(inner.get_child(1) is StaticBody3D, "chunks have collision")
-	failures += _check(world.built_count() < 64 * 3, "chunks are built around a point, not all at once (%d)" % world.built_count())
-
-	world.break_block(Vector3i(40, 0, 40))
-	world.update_around(Vector3(40, 1, 40))  # the player calls this every frame
-	var after: ArrayMesh = (world.chunk_node(Vector3i(2, 0, 2)).get_child(0) as MeshInstance3D).mesh
-	# The broken block's top goes; the four sides around the hole and the block below show.
-	failures += _check(after.surface_get_array_len(0) == (16 * 16 - 1 + 4) * 4 and world.chunk_node(Vector3i(2, -1, 2)) != null,
-			"breaking a block redraws the chunks that can see it")
+	var inner: Node3D = world.chunk_node(world.chunk_of(Vector3i(40, 0, 40)))
+	failures += _check(inner.get_child_count() == 2 and inner.get_child(1) is StaticBody3D, "surface chunks have a mesh and collision")
+	failures += _check(world.chunk_node(world.chunk_of(Vector3i(40, -40, 40))) == null, "solid rock far below is not drawn")
+	failures += _check(world.built_count() < 16 * 16 * 3, "chunks are built around a point, not all at once (%d)" % world.built_count())
+	var before := _triangles(inner)
+	world.carve(Vector3(44, 0, 44), 2.5)
+	failures += _check(_triangles(world.chunk_node(world.chunk_of(Vector3i(40, 0, 40)))) > before
+			and world.chunk_node(world.chunk_of(Vector3i(40, -8, 40))) != null, "a scoop redraws the chunks that can see it")
 
 	print("voxel_world_check: %s" % ("PASS" if failures == 0 else "%d FAILED" % failures))
 	quit(1 if failures else 0)
+
+
+func _triangles(chunk: Node3D) -> int:
+	if chunk == null or chunk.get_child_count() == 0:
+		return 0
+	return (chunk.get_child(0) as MeshInstance3D).mesh.surface_get_array_index_len(0) / 3
 
 
 func _world(seed_value: int) -> VoxelWorld:

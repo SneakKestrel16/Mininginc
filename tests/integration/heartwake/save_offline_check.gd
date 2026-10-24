@@ -37,14 +37,14 @@ func _initialize() -> void:
 	a.economy.reactor.waste = 3.5
 	var data := SaveGame.capture(a.economy, a.mine, 1000.0, a.player)
 	failures += _check(a.mine.drills[0].depth_y < 0 and data["world"]["edits"].size() == 4 * a.mine.world.edits.size(),
-			"the world is saved as its changed blocks only")
+			"the world is saved as its changed samples only")
 	failures += _check(data["version"] == SaveGame.FORMAT_VERSION, "the save carries its format version")
 
 	# Round trip through JSON text, as on disk.
 	var b := await _game()
 	SaveGame.apply(JSON.parse_string(JSON.stringify(data)), b.economy, b.mine, b.player)
 	failures += _check(SaveGame.capture(b.economy, b.mine, 1000.0, b.player) == data, "loading restores every saved field")
-	failures += _check(b.mine.world.block_at(Vector3i(20, 0, 20)) == Blocks.AIR and b.mine.drills.size() == 1
+	failures += _check(not b.mine.world.is_solid(Vector3i(20, 0, 20)) and b.mine.drills.size() == 1
 			and b.mine.drills[0].depth_y == a.mine.drills[0].depth_y, "dug tunnels stay dug, and the drill is back where it was")
 
 	# Offline in big steps matches live play in small ticks.
@@ -69,7 +69,7 @@ func _initialize() -> void:
 	hand.economy.heart.stage = 0
 	hand.economy.advance(600.0, 5.0)
 	failures += _check(not hand.economy.furnace.is_burning() and hand.mine.ores["coal"] >= 6, "offline without drones: the furnace burns out, no coal fed in")
-	failures += _check(offline.mine.ores["coal"] < 6, "offline with drones: coal is fed in")
+	failures += _check(offline.economy.furnace.is_burning(), "offline with drones: coal is fed in, so the furnace still burns")
 
 	failures += _check(SaveGame.validate("x") != "" and SaveGame.validate({}) != "" and SaveGame.validate({ "version": 99 }) != "", "bad saves are refused")
 	failures += _check(SaveGame.validate(data) == "", "a good save is accepted")
@@ -88,6 +88,15 @@ func _initialize() -> void:
 			"a pre-3D save starts a fresh world, with the player at the base")
 	old["version"] = 2
 	failures += _check(SaveGame.validate(old) != "", "a format 2 save without a reactor is refused")
+
+	# A v0.2.x save (format 3) holds a block world: fresh smooth ground, drills refunded.
+	var v3_save: Dictionary = JSON.parse_string(JSON.stringify(data))
+	v3_save["version"] = 3
+	var v3 := await _game()
+	SaveGame.apply(v3_save, v3.economy, v3.mine, v3.player)
+	failures += _check(v3.mine.world.edits.is_empty() and v3.mine.drills.is_empty()
+			and v3.mine.ores["copper"] == int(data["mine"]["ores"]["copper"]) + data["drills"].size() * v3.mine.drill_cost
+			and v3.economy.reactor_built, "a format 3 save keeps its economy on fresh ground, its drills as copper")
 
 	# An unreadable file is moved aside, not overwritten, and the game starts new.
 	var path := "user://check_save.json"

@@ -16,8 +16,8 @@ var _since_scan := 0.0
 var _dirty := true
 
 
-## Every hidden ore block within [param reach] blocks of [param center] in [param on_world],
-## as pairs of position and block id. Rock, crust, air and bedrock are left out, and so is
+## Every hidden ore sample within [param reach] metres of [param center] in [param on_world],
+## as pairs of position and material id. Rock, crust, air and bedrock are left out, and so is
 ## ore already showing on an open face.
 static func scan(on_world: VoxelWorld, center: Vector3i, reach: int) -> Array:
 	var found := []
@@ -27,15 +27,17 @@ static func scan(on_world: VoxelWorld, center: Vector3i, reach: int) -> Array:
 				var pos := Vector3i(x, y, z)
 				if (pos - center).length_squared() > reach * reach:
 					continue
-				var id := on_world.block_at(pos)
+				if not on_world.is_solid(pos):
+					continue
+				var id := on_world.material_at(pos)
 				if id > Blocks.ROCK and not _exposed(on_world, pos):
 					found.append([pos, id])
 	return found
 
 
 static func _exposed(on_world: VoxelWorld, pos: Vector3i) -> bool:
-	for face in VoxelWorld.FACES:
-		if not on_world.is_solid(pos + face[0]):
+	for side in VoxelWorld.SIDES:
+		if not on_world.is_solid(pos + side):
 			return true
 	return false
 
@@ -53,7 +55,7 @@ func _ready() -> void:
 	multimesh.transform_format = MultiMesh.TRANSFORM_3D
 	multimesh.use_colors = true
 	multimesh.mesh = cube
-	world.block_broken.connect(func(_pos: Vector3i, _name: String) -> void: _dirty = true)
+	world.carved.connect(func(_center: Vector3, _collected: Dictionary) -> void: _dirty = true)
 
 
 func _process(delta: float) -> void:
@@ -71,7 +73,7 @@ func _process(delta: float) -> void:
 	var found := scan(world, at, reach)
 	multimesh.instance_count = found.size()
 	for i in found.size():
-		multimesh.set_instance_transform(i, Transform3D(Basis(), Vector3(found[i][0]) + Vector3(0.5, 0.5, 0.5)))
+		multimesh.set_instance_transform(i, Transform3D(Basis(), Vector3(found[i][0])))
 		var color: Color = Blocks.COLORS[found[i][1]]
 		color.a = 0.7
 		multimesh.set_instance_color(i, color)

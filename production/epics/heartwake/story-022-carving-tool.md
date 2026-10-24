@@ -1,7 +1,7 @@
 # Story 022: Carving tool on smooth ground
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Estimate**: L
@@ -28,12 +28,12 @@
 
 *From `design/game-brief.md` (Milestone 4 item 25), scoped to this story:*
 
-- [ ] Holding the tool scoops a round chunk out of the ground at the point aimed at; harder and deeper rock takes longer per scoop.
-- [ ] Ore inside each scoop goes into the inventory, by how much of the scoop it filled.
-- [ ] A marker shows where the next scoop lands and how close it is.
-- [ ] Auto-drills bore down by scooping a column under them.
-- [ ] Sight shows ore deposits through the ground near the player.
-- [ ] Machines no longer float: digging is blocked under machines and the console.
+- [x] Holding the tool scoops a round chunk out of the ground at the point aimed at; harder and deeper rock takes longer per scoop.
+- [x] Ore inside each scoop goes into the inventory, by how much of the scoop it filled.
+- [x] A marker shows where the next scoop lands and how close it is.
+- [x] Auto-drills bore down by scooping a column under them.
+- [x] Sight shows ore deposits through the ground near the player.
+- [x] Machines no longer float: digging is blocked under machines and the console.
 
 ---
 
