@@ -20,6 +20,13 @@
 			"effect": "thaw_to_depth",
 			"value": 100,
 			"line": "Vents open in the deep. Warm air thaws the frozen rock below you."
+		},
+		{
+			"name": "Sight",
+			"threshold": 2500.0,
+			"effect": "ore_sight",
+			"value": 6,
+			"line": "The Heart opens an eye. Veins of ore glow through the rock around you."
 		}
 	]
 }

@@ -1,7 +1,7 @@
 # Story 010: Heart stage 4: Sight
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Estimate**: M
@@ -26,22 +26,20 @@
 
 ## Acceptance Criteria
 
-*From `design/game-brief.md` (Milestone 2 item 12), scoped to this story:*
+*From `design/game-brief.md` (Milestone 2 item 12, rewritten for Milestone 3D: Sight becomes ore veins glowing through the rock), scoped to this story:*
 
-- [ ] Sight is the fourth stage, after Breath, with its threshold, effect and story line read from `data/heart_stages.json`.
-- [ ] After Sight, blocks with ore are marked on the shaft view before they are dug, for a tuning number of blocks below the current depth.
-- [ ] Before Sight, unknown blocks look the same whether they hold ore or rock.
-- [ ] The marks match what digging finds: a marked block yields that ore, an unmarked one does not.
-- [ ] Reaching Sight shows its story line, and the Heart panel shows Sight as the current stage.
-- [ ] Sight's reach is derived from the stage index alone, so a loaded save shows the marks with no extra saved field.
-
----
+- [ ] Sight is the fourth stage, after Breath, with its threshold, effect, reach and story line read from `data/heart_stages.json`.
+- [ ] After Sight, every ore block within the reach of the player glows through the rock in its ore's colour, so the player can see where to dig.
+- [ ] Before Sight nothing glows: hidden ore cannot be told from rock.
+- [ ] The glow matches what digging finds: a glowing block yields that ore, and broken blocks stop glowing.
+- [ ] The glow follows the player as they move and dig, without stalling the game.
+- [ ] Sight's reach is derived from the stage index alone, so a loaded save shows the glow with no extra saved field.
 
 ## Implementation Notes
 
 - Check `docs/engine-reference/godot/` before any engine API call: 4.7 is past the model's training data.
-- `DigShaft.block_at(d)` is deterministic from the seed, so the view can ask it ahead of the depth.
-- The Heart panel's "Every stage reached" text moves to after Voice (story 011).
+- `VoxelWorld.block_at` is deterministic from the seed and edits, so a scan around the player shows exactly what digging will find.
+- Draw the glow as one `MultiMeshInstance3D` with depth testing off, rebuilt when the player moves a block or the world changes.
 
 ---
 
@@ -54,12 +52,10 @@
 
 ## Files
 
-- src/heart/heart.gd
-- src/mining/dig_shaft_view.gd
-- src/economy/economy.gd
-- src/ui/heart_panel.gd
+- src/heart/ore_sight.gd
 - data/heart_stages.json
-- tests/integration/heartwake/heart_stages_check.gd
+- src/main.tscn
+- tests/unit/heartwake/ore_sight_check.gd
 
 ## QA Test Cases
 
@@ -80,3 +76,11 @@
 
 - Depends on: `production/epics/heartwake/story-005-heart-stages.md`
 - Unlocks: `production/epics/heartwake/story-011-heart-voice.md`
+
+## Completion Notes
+**Completed**: 2026-10-23
+**Criteria**: 6/6 passing (self-check `ore_sight_check.gd`; windowed probe on the second monitor: in a room 60 m down nothing glowed before Sight, and at Sight 412 hidden ore blocks glowed through the walls in their colours; one scan takes about 4 ms)
+**Deviations**: Criteria rewritten for the 3D game before work began (brief Milestone 3D: Sight becomes ore glowing through the rock). Ore already showing on an open face does not glow, which cuts clutter. Sight's threshold is 2500, reach 6 blocks: placeholders for story 012.
+**Known gap**: ore is so dense below 50 m (about 65% of blocks) that Sight looks busy there; story 012's density retune fixes the cause.
+**Test Evidence**: waived at qa.level minimal; self-check `tests/unit/heartwake/ore_sight_check.gd` passes; screenshots in `production/qa/evidence/story-010-heart-sight/`
+**Reviewed by**: self, no independent review

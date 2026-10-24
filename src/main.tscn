@@ -1,4 +1,4 @@
-[gd_scene load_steps=13 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://src/economy/economy.gd" id="1_economy"]
 [ext_resource type="PackedScene" path="res://src/ui/power_panel.tscn" id="2_panel"]
@@ -12,6 +12,7 @@
 [ext_resource type="Script" path="res://src/heart/heart_machine.gd" id="14_heart"]
 [ext_resource type="PackedScene" path="res://src/ui/hud.tscn" id="15_hud"]
 [ext_resource type="Script" path="res://src/machines/console.gd" id="16_console"]
+[ext_resource type="Script" path="res://src/heart/ore_sight.gd" id="17_sight"]
 
 [sub_resource type="Environment" id="Env"]
 background_mode = 1
@@ -78,6 +79,12 @@ color = Color(0.32, 0.4, 0.3, 1)
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64.5, -2.5, 49.5)
 script = ExtResource("14_heart")
 economy = NodePath("../Economy")
+
+[node name="OreSight" type="MultiMeshInstance3D" parent="." node_paths=PackedStringArray("economy", "world", "player")]
+script = ExtResource("17_sight")
+economy = NodePath("../Economy")
+world = NodePath("../World")
+player = NodePath("../Player")
 
 [node name="Hud" parent="." node_paths=PackedStringArray("economy") instance=ExtResource("15_hud")]
 economy = NodePath("../Economy")

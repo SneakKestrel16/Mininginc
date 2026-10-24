@@ -1,0 +1,4 @@
+Reviewed-Content-Hash: src/heart/ore_sight.gd aadc9c485fe69fa6e28ef08236b4e9ac9775ad3f
+Reviewed-Content-Hash: data/heart_stages.json c5d0fbae5f98b6af2592ab67e9dddf12aeeeca38
+Reviewed-Content-Hash: src/main.tscn 3b914e046c6cf1470d69ada512e6a388b64932e2
+Reviewed-Content-Hash: tests/unit/heartwake/ore_sight_check.gd 79d86abbd43adbfc10818b6196fbaf1fb181cb85
