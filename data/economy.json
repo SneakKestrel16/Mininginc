@@ -1,7 +1,6 @@
 {
 	"tick_seconds": 0.1,
 	"heart_share_default": 0.5,
-	"heart_first_threshold": 600.0,
 	"furnace_fuel_capacity": 10,
 	"furnace_burn_seconds_per_coal": 5.0,
 	"furnace_power_per_second": 10.0,

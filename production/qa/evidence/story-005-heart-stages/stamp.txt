@@ -1,0 +1,16 @@
+Reviewed-Content-Hash: src/heart/heart.gd ae026c53bd2bc813b111892ce5237e4063e15e44
+Reviewed-Content-Hash: src/economy/economy.gd 27e3571c8af89aa711fc86abaecfde4e72be1b7d
+Reviewed-Content-Hash: src/economy/power_split.gd e8e2ca969146636e16368433efb1963989a0f4e3
+Reviewed-Content-Hash: src/mining/dig_shaft.gd 60d326221aa62a19552a8b4bae97924e8f1ea06e
+Reviewed-Content-Hash: src/mining/mine.gd 06df29066e7c7212a6f8492528fb8311688ac478
+Reviewed-Content-Hash: src/mining/dig_shaft_view.gd b84013cca717337269ad3812b8317a062e5b34c8
+Reviewed-Content-Hash: src/ui/heart_panel.gd aac590bc3fbdcebc3c04a10f9e9a4f20adc11132
+Reviewed-Content-Hash: src/ui/heart_panel.tscn 7901c0b5e432c801008d7d386761f3bf62fad6a4
+Reviewed-Content-Hash: src/ui/power_panel.gd 58c0a8b426c073318be70bebf461f39d6c768ca2
+Reviewed-Content-Hash: src/ui/power_panel.tscn 135654f506967611ec6916ef332e63912567f203
+Reviewed-Content-Hash: src/main.tscn 97a94d296229cfed253b4387a104e1286b5db467
+Reviewed-Content-Hash: data/heart_stages.json 28e45019c5987d0312a0735ebc5c33bbcef7ec29
+Reviewed-Content-Hash: data/economy.json 4f4b7abe64a755582b8a79271e7f33141af1ba12
+Reviewed-Content-Hash: data/ores.json c24b759d4d5bb2c5fed4eec8820471db93505149
+Reviewed-Content-Hash: tests/integration/heartwake/heart_stages_check.gd cbbbeac9f4c5feb14d4573f224922e02d87dadef
+Reviewed-Content-Hash: tests/unit/heartwake/power_split_check.gd 0aa6299b55bcd2384ebef9300838fb7ba53390c3

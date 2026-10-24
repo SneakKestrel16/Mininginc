@@ -6,6 +6,8 @@ const BLOCKS_ABOVE := 3
 const BLOCKS_BELOW := 6
 const DUG_COLOR := Color(0.08, 0.09, 0.11)
 const UNKNOWN_COLOR := Color(0.55, 0.66, 0.78)
+const FROZEN_COLOR := Color(0.82, 0.9, 0.97)
+const FROZEN_TEXT_COLOR := Color(0.2, 0.3, 0.42)
 const ORE_COLORS := { DigShaft.ROCK: Color(0.42, 0.44, 0.48), "coal": Color(0.12, 0.12, 0.13) }
 const CRACK_COLOR := Color(1, 1, 1, 0.35)
 
@@ -50,9 +52,12 @@ func _draw_shaft() -> void:
 		if at_depth < shaft.depth:
 			_shaft.draw_rect(rect, DUG_COLOR)
 		elif at_depth > shaft.depth or not shaft.revealed:
-			_shaft.draw_rect(rect, UNKNOWN_COLOR)
+			_shaft.draw_rect(rect, FROZEN_COLOR if at_depth >= shaft.frozen_from else UNKNOWN_COLOR)
 			if at_depth == shaft.depth:
-				_shaft.draw_string(font, rect.position + Vector2(0, 30), "?", HORIZONTAL_ALIGNMENT_CENTER, rect.size.x)
+				var mark := "Frozen" if shaft.is_frozen() else "?"
+				var ink := FROZEN_TEXT_COLOR if shaft.is_frozen() else Color.WHITE
+				_shaft.draw_string(font, rect.position + Vector2(0, 30), mark, HORIZONTAL_ALIGNMENT_CENTER,
+						rect.size.x, _shaft.get_theme_default_font_size(), ink)
 		else:
 			var contents := shaft.block_at(at_depth)
 			_shaft.draw_rect(rect, ORE_COLORS.get(contents, ORE_COLORS[DigShaft.ROCK]))

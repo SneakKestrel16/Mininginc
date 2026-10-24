@@ -1,12 +1,12 @@
 # Story 005: Heart stages 1–3 (Flicker, Pulse, Breath)
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: In Progress
 > **Layer**: Feature
 > **Type**: Integration
 > **Estimate**: L
 > **Manifest Version**: N/A (minimal — no control manifest)
-> **Last Updated**: [set by /dev-story when implementation begins]
+> **Last Updated**: 2026-10-23
 
 ## Context
 
@@ -55,12 +55,22 @@
 
 ## Files
 
-- `src/heart/heart.gd`
-- `src/ui/heart_panel.tscn`
-- `data/heart_stages.json`
-- `tests/integration/heartwake/heart_stages_test.gd`
-
----
+- src/heart/heart.gd
+- src/economy/economy.gd
+- src/economy/power_split.gd
+- src/mining/dig_shaft.gd
+- src/mining/mine.gd
+- src/mining/dig_shaft_view.gd
+- src/ui/heart_panel.gd
+- src/ui/heart_panel.tscn
+- src/ui/power_panel.gd
+- src/ui/power_panel.tscn
+- src/main.tscn
+- data/heart_stages.json
+- data/economy.json
+- data/ores.json
+- tests/integration/heartwake/heart_stages_check.gd
+- tests/unit/heartwake/power_split_check.gd
 
 ## QA Test Cases
 

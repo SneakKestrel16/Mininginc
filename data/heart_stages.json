@@ -1,0 +1,25 @@
+{
+	"stages": [
+		{
+			"name": "Flicker",
+			"threshold": 600.0,
+			"effect": "drones",
+			"value": 0,
+			"line": "Lights flicker on far below. Small drones climb the shaft to tend your furnace."
+		},
+		{
+			"name": "Pulse",
+			"threshold": 1500.0,
+			"effect": "output_bonus",
+			"value": 0.25,
+			"line": "A heartbeat rolls up through the ice. Every generator runs hotter."
+		},
+		{
+			"name": "Breath",
+			"threshold": 3000.0,
+			"effect": "thaw_to_depth",
+			"value": 100,
+			"line": "Vents open in the deep. Warm air thaws the frozen rock below you."
+		}
+	]
+}

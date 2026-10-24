@@ -4,8 +4,11 @@ extends Node
 
 ## Emitted after every tick, once the split is updated.
 signal ticked
+## Emitted when the Heart reaches a stage; [param index] points into [member Heart.stages].
+signal stage_reached(index: int)
 
 const CONFIG_PATH := "res://data/economy.json"
+const STAGES_PATH := "res://data/heart_stages.json"
 
 ## The mine the drills dig and the furnace's coal comes from.
 @export var mine: Mine
@@ -15,6 +18,9 @@ var split: PowerSplit
 
 ## The hand-fed furnace, the only generator until story 006.
 var furnace: Furnace
+
+## The Heart, which stores the Heart share and grants each stage's bonus.
+var heart: Heart
 
 ## Power produced per second by all generators over the last tick.
 var power_per_second: float = 0.0
@@ -30,12 +36,16 @@ var _elapsed: float = 0.0
 
 
 func _ready() -> void:
-	var config := _load_config()
-	if config.is_empty():
+	var config := _load_json(CONFIG_PATH, ["tick_seconds", "heart_share_default",
+			"furnace_fuel_capacity", "furnace_burn_seconds_per_coal", "furnace_power_per_second",
+			"drill_hits_per_power_second"])
+	var stage_config := _load_json(STAGES_PATH, ["stages"])
+	if config.is_empty() or stage_config.is_empty() or not _valid_stages(stage_config["stages"]):
 		set_process(false)
 		return
 	_tick_seconds = config["tick_seconds"]
-	split = PowerSplit.new(config["heart_first_threshold"], config["heart_share_default"])
+	split = PowerSplit.new(config["heart_share_default"])
+	heart = Heart.new(stage_config["stages"])
 	furnace = Furnace.new(
 		config["furnace_fuel_capacity"],
 		config["furnace_burn_seconds_per_coal"],
@@ -48,11 +58,22 @@ func _process(delta: float) -> void:
 	_elapsed += delta
 	while _elapsed >= _tick_seconds:
 		_elapsed -= _tick_seconds
-		power_per_second = furnace.tick(_tick_seconds)
-		split.tick(power_per_second, _tick_seconds)
-		drill_hits_per_second = split.drill_power * drill_hits_per_power
-		mine.dig(drill_hits_per_second * _tick_seconds)
-		ticked.emit()
+		_tick()
+
+
+# Bonuses are read from the Heart's stage every tick, never stored in the systems they
+# change, so the stage index alone restores them (story 007).
+func _tick() -> void:
+	if heart.has_effect("drones"):
+		feed_furnace()
+	power_per_second = furnace.tick(_tick_seconds) * (1.0 + heart.effect_total("output_bonus"))
+	split.tick(power_per_second)
+	drill_hits_per_second = split.drill_power * drill_hits_per_power
+	mine.dig(drill_hits_per_second * _tick_seconds)
+	for index in heart.add(split.heart_power * _tick_seconds):
+		stage_reached.emit(index)
+	mine.thaw_to(int(heart.effect_total("thaw_to_depth")))
+	ticked.emit()
 
 
 ## Moves as much of the mine's coal into the furnace as fits. Returns how many went in.
@@ -60,24 +81,34 @@ func feed_furnace() -> int:
 	return mine.take("coal", furnace.feed(mine.ores.get("coal", 0)))
 
 
-## Returns the config, or an empty Dictionary after reporting why it is unusable.
-## Not assert(): release exports strip asserts, and friends run release builds.
-func _load_config() -> Dictionary:
-	var config = JSON.parse_string(FileAccess.get_file_as_string(CONFIG_PATH))
+## Returns the JSON object at [param path], or an empty Dictionary after reporting why it
+## is unusable. Not assert(): release exports strip asserts, and friends run release builds.
+func _load_json(path: String, keys: Array) -> Dictionary:
+	var config = JSON.parse_string(FileAccess.get_file_as_string(path))
 	if not config is Dictionary:
-		_fail("Cannot read %s (open error %d)" % [CONFIG_PATH, FileAccess.get_open_error()])
+		_fail("Cannot read %s (open error %d)" % [path, FileAccess.get_open_error()])
 		return {}
-	for key in ["tick_seconds", "heart_share_default", "heart_first_threshold",
-			"furnace_fuel_capacity", "furnace_burn_seconds_per_coal", "furnace_power_per_second",
-			"drill_hits_per_power_second"]:
+	for key in keys:
 		if not config.has(key):
-			_fail("%s is missing \"%s\"" % [CONFIG_PATH, key])
+			_fail("%s is missing \"%s\"" % [path, key])
 			return {}
 	for key in ["tick_seconds", "furnace_burn_seconds_per_coal"]:
-		if config[key] <= 0.0:
-			_fail("%s: %s must be above 0" % [CONFIG_PATH, key])
+		if config.has(key) and config[key] <= 0.0:
+			_fail("%s: %s must be above 0" % [path, key])
 			return {}
 	return config
+
+
+func _valid_stages(stages: Array) -> bool:
+	for stage in stages:
+		for key in ["name", "threshold", "effect", "value", "line"]:
+			if not stage.has(key):
+				_fail("%s: a stage is missing \"%s\"" % [STAGES_PATH, key])
+				return false
+		if stage["threshold"] <= 0.0:
+			_fail("%s: stage %s threshold must be above 0" % [STAGES_PATH, stage["name"]])
+			return false
+	return true
 
 
 func _fail(message: String) -> void:

@@ -1,7 +1,7 @@
 # Story 004: Power-driven drills with depth cost
 
 > **Epic**: Heartwake
-> **Status**: In Progress
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: M
@@ -82,3 +82,10 @@
 
 - Depends on: `production/epics/heartwake/story-001-power-split.md`, `production/epics/heartwake/story-002-dig-shaft.md`
 - Unlocks: `production/epics/heartwake/story-005-heart-stages.md`
+
+## Completion Notes
+**Completed**: 2026-10-23
+**Criteria**: 7/7 passing (split extremes set by real slider clicks; AC-6 upgrade costs: the MVP has no drill upgrades, power-to-speed is in data/economy.json)
+**Deviations**: None
+**Test Evidence**: waived at qa.level minimal; self-check `tests/unit/heartwake/drills_check.gd` passes; screenshots `production/qa/evidence/story-004-drills/drills-50.png`, `drills-all-power.png`
+**Reviewed by**: self, no independent review

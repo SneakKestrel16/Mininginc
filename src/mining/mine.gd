@@ -13,6 +13,8 @@ var shaft: DigShaft
 ## Ore id to amount found so far. Rock is not counted.
 var ores: Dictionary = {}
 
+var _base_frozen_from: int
+
 
 func _ready() -> void:
 	var config := _load_config()
@@ -21,7 +23,9 @@ func _ready() -> void:
 	for ore in config["ores"]:
 		ores[ore["id"]] = 0
 	# A new game rolls its shaft; story 007 restores a saved seed instead.
-	shaft = DigShaft.new(randi(), config["hardness_base"], config["hardness_per_block"], config["ores"])
+	shaft = DigShaft.new(randi(), config["hardness_base"], config["hardness_per_block"], config["ores"],
+			config["frozen_from_depth"])
+	_base_frozen_from = config["frozen_from_depth"]
 
 
 ## Lands [param hits] on the shaft and collects any ore it breaks out. Clicks land 1 hit;
@@ -33,6 +37,14 @@ func dig(hits: float = 1.0) -> void:
 		if contents in ores:
 			ores[contents] += 1
 	changed.emit()
+
+
+## Thaws the shaft down to [param depth]; never refreezes above the surface layer's floor.
+func thaw_to(depth: int) -> void:
+	var floor_depth := maxi(_base_frozen_from, depth)
+	if floor_depth != shaft.frozen_from:
+		shaft.frozen_from = floor_depth
+		changed.emit()
 
 
 ## Removes up to [param amount] of ore [param id]. Returns how much was taken.
@@ -51,7 +63,7 @@ func _load_config() -> Dictionary:
 	if not config is Dictionary:
 		_fail("Cannot read %s (open error %d)" % [CONFIG_PATH, FileAccess.get_open_error()])
 		return {}
-	for key in ["hardness_base", "hardness_per_block", "ores"]:
+	for key in ["hardness_base", "hardness_per_block", "frozen_from_depth", "ores"]:
 		if not config.has(key):
 			_fail("%s is missing \"%s\"" % [CONFIG_PATH, key])
 			return {}
