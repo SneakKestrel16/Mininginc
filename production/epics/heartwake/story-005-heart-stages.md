@@ -98,3 +98,5 @@
 **Deviations**: None. `flicker.png` and `awake.png` predate the Frozen label's colour change, which neither image shows.
 **Test Evidence**: waived at qa.level minimal; self-check `tests/integration/heartwake/heart_stages_check.gd` passes; screenshots in `production/qa/evidence/story-005-heart-stages/`
 **Reviewed by**: self, no independent review
+
+**Changed after close (2026-10-23, pacing fix):** the frozen floor was impassable, so coal ran out above it and every strategy soft-locked before Breath (`tools/pacing_sim.gd`). Frozen rock now digs at `frozen_hardness_multiplier` (2x) times the hits, and Breath removes the multiplier instead of opening the way. Thresholds retuned to 150/500/1000.

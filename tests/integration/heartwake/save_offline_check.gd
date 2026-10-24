@@ -45,7 +45,7 @@ func _initialize() -> void:
 	SaveGame.apply(JSON.parse_string(JSON.stringify(data)), hand.economy, hand.mine)
 	hand.economy.heart.stage = 0
 	hand.economy.advance(600.0, 5.0)
-	failures += _check(not hand.economy.furnace.is_burning() and hand.mine.ores["coal"] == 6, "offline without drones: the furnace burns out, coal untouched")
+	failures += _check(not hand.economy.furnace.is_burning() and hand.mine.ores["coal"] >= 6, "offline without drones: the furnace burns out, no coal fed in")
 	failures += _check(offline.mine.ores["coal"] < 6, "offline with drones: coal is fed in")
 
 	failures += _check(SaveGame.validate("x") != "" and SaveGame.validate({}) != "" and SaveGame.validate({ "version": 99 }) != "", "bad saves are refused")

@@ -28,12 +28,13 @@ func _init() -> void:
 	restored.stage = 2
 	failures += _check(restored.has_effect("drones") and restored.effect_total("output_bonus") == 0.25, "bonuses follow from the stage index alone")
 
-	var shaft := DigShaft.new(1, 1.0, 0.0, [], 2)
-	shaft.dig(10.0)
-	failures += _check(shaft.depth == 2 and shaft.is_frozen() and shaft.damage == 0.0, "digging stops at the frozen floor")
-	failures += _check(shaft.dig(5.0).is_empty() and shaft.depth == 2, "frozen rock cannot be dug")
+	var shaft := DigShaft.new(1, 1.0, 0.0, [], 2, 5.0)
+	shaft.dig(2.0)
+	failures += _check(shaft.depth == 2 and shaft.is_frozen(), "the shaft reaches the frozen floor")
+	failures += _check(shaft.hardness(2) == 5 and shaft.dig(4.0).is_empty() and shaft.dig(1.0).size() == 1,
+			"frozen rock digs, at 5x the hits (never a dead end)")
 	shaft.frozen_from = 100
-	failures += _check(shaft.dig(1.0).size() == 1 and shaft.depth == 3, "thawed rock digs again")
+	failures += _check(shaft.hardness(3) == 1 and shaft.dig(1.0).size() == 1, "thawed rock digs at normal hardness")
 
 	print("heart_stages_check: %s" % ("PASS" if failures == 0 else "%d FAILED" % failures))
 	quit(1 if failures else 0)

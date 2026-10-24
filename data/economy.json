@@ -2,7 +2,7 @@
 	"tick_seconds": 0.1,
 	"heart_share_default": 0.5,
 	"furnace_fuel_capacity": 10,
-	"furnace_burn_seconds_per_coal": 5.0,
+	"furnace_burn_seconds_per_coal": 10.0,
 	"furnace_power_per_second": 10.0,
 	"drill_hits_per_power_second": 0.1,
 	"turbine_build_copper": 5,

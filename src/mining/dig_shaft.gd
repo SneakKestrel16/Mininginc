@@ -15,9 +15,12 @@ var depth: int = 0
 var damage: float = 0.0
 ## True once the current block has been hit, so its contents show.
 var revealed: bool = false
-## First depth still frozen solid: nothing at or below it can be dug. The Heart's Breath
-## stage moves it down.
+## First depth still frozen solid. Frozen rock can be dug, but takes
+## [member frozen_multiplier] times the hits; the Heart's Breath stage moves this down.
+## Never impassable: a hard floor let coal run out and soft-locked the game.
 var frozen_from: int
+## How many times harder frozen rock is.
+var frozen_multiplier: float
 
 var _hardness_base: float
 var _hardness_per_block: float
@@ -27,17 +30,20 @@ var _ores: Array
 ## [param ores] is the "ores" list from data/ores.json: entries with id, min_depth,
 ## max_depth and chance, checked in order.
 func _init(seed_value: int, hardness_base: float, hardness_per_block: float, ores: Array,
-		frozen_depth: int = 1 << 62) -> void:
+		frozen_depth: int = 1 << 62, frozen_hardness: float = 1.0) -> void:
 	shaft_seed = seed_value
 	frozen_from = frozen_depth
+	frozen_multiplier = frozen_hardness
 	_hardness_base = hardness_base
 	_hardness_per_block = hardness_per_block
 	_ores = ores
 
 
-## Hits needed to break the block at [param at_depth]; grows with depth.
+## Hits needed to break the block at [param at_depth]; grows with depth, and frozen rock
+## takes [member frozen_multiplier] times as many.
 func hardness(at_depth: int) -> int:
-	return ceili(_hardness_base + _hardness_per_block * at_depth)
+	var hits := _hardness_base + _hardness_per_block * at_depth
+	return ceili(hits * frozen_multiplier if at_depth >= frozen_from else hits)
 
 
 ## What the block at [param at_depth] holds: an ore id, or [constant ROCK].
@@ -61,22 +67,18 @@ func hit(power: float = 1.0) -> String:
 ## one below. Returns the contents of every block broken, top first. Drills dig this way.
 func dig(hits: float) -> Array[String]:
 	var broken: Array[String] = []
-	if hits <= 0.0 or is_frozen():
+	if hits <= 0.0:
 		return broken
 	revealed = true
 	damage += hits
-	while not is_frozen() and damage >= hardness(depth):
+	while damage >= hardness(depth):
 		damage -= hardness(depth)
 		broken.append(block_at(depth))
 		depth += 1
 		revealed = damage > 0.0
-	if is_frozen():
-		# Hits spent on frozen rock are lost, not banked for when it thaws.
-		damage = 0.0
-		revealed = false
 	return broken
 
 
-## True when the current block is frozen and cannot be dug yet.
+## True when the current block is frozen, so it takes extra hits.
 func is_frozen() -> bool:
 	return depth >= frozen_from
