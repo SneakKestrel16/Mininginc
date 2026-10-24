@@ -24,11 +24,14 @@ func _ready() -> void:
 	shaft = DigShaft.new(randi(), config["hardness_base"], config["hardness_per_block"], config["ores"])
 
 
-## Lands one hit of [param power] on the shaft and collects any ore it breaks out.
-func hit(power: float = 1.0) -> void:
-	var contents := shaft.hit(power)
-	if contents in ores:
-		ores[contents] += 1
+## Lands [param hits] on the shaft and collects any ore it breaks out. Clicks land 1 hit;
+## drills land a fraction each tick. Both act on the same block, so nothing counts twice.
+func dig(hits: float = 1.0) -> void:
+	if hits <= 0.0:
+		return
+	for contents in shaft.dig(hits):
+		if contents in ores:
+			ores[contents] += 1
 	changed.emit()
 
 

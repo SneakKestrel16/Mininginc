@@ -4,5 +4,6 @@
 	"heart_first_threshold": 600.0,
 	"furnace_fuel_capacity": 10,
 	"furnace_burn_seconds_per_coal": 5.0,
-	"furnace_power_per_second": 10.0
+	"furnace_power_per_second": 10.0,
+	"drill_hits_per_power_second": 0.1
 }

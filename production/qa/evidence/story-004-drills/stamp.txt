@@ -1,0 +1,8 @@
+Reviewed-Content-Hash: src/mining/dig_shaft.gd 94c404290ddd43c4e9fe12844b8c65117e20c97e
+Reviewed-Content-Hash: src/mining/mine.gd 6d42139e3d25351c38c0df6f7b8ff9856e75087c
+Reviewed-Content-Hash: src/mining/dig_shaft_view.gd d0859a9a82ca207ed917b11d06fe08a8a76f14cf
+Reviewed-Content-Hash: src/economy/economy.gd bdc383d3560507dd59b8a1c5372f931a6fe617cc
+Reviewed-Content-Hash: src/ui/power_panel.gd f0e42f3c847ada1041745b11bb54dbe3b01542c8
+Reviewed-Content-Hash: src/ui/power_panel.tscn e58e7c2808ec78b8b7d65cbac64b9a3d26776e5b
+Reviewed-Content-Hash: data/economy.json d6fb6263b8ba237b2a0722e8e4052d4606b42889
+Reviewed-Content-Hash: tests/unit/heartwake/drills_check.gd 27322c21faafe533de3562f0114d9789345d80fc

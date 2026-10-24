@@ -7,6 +7,7 @@ extends PanelContainer
 @onready var _power_label: Label = %PowerLabel
 @onready var _split_slider: HSlider = %SplitSlider
 @onready var _share_label: Label = %ShareLabel
+@onready var _drill_label: Label = %DrillLabel
 @onready var _heart_bar: ProgressBar = %HeartBar
 @onready var _heart_label: Label = %HeartLabel
 
@@ -31,5 +32,6 @@ func _refresh() -> void:
 		economy.power_per_second * (1.0 - split.heart_share),
 		economy.power_per_second * split.heart_share,
 	]
+	_drill_label.text = "Drill speed: %.2f hits/s" % economy.drill_hits_per_second
 	_heart_bar.value = split.heart_progress
 	_heart_label.text = "Heart: %.0f / %.0f" % [split.heart_progress, split.heart_threshold]

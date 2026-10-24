@@ -1,12 +1,12 @@
 # Story 004: Power-driven drills with depth cost
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: In Progress
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: M
 > **Manifest Version**: N/A (minimal — no control manifest)
-> **Last Updated**: [set by /dev-story when implementation begins]
+> **Last Updated**: 2026-10-23
 
 ## Context
 
@@ -54,11 +54,14 @@
 
 ## Files
 
-- `src/mining/drills.gd`
-- `data/economy.json`
-- `tests/unit/heartwake/drills_test.gd`
-
----
+- src/mining/dig_shaft.gd
+- src/mining/mine.gd
+- src/mining/dig_shaft_view.gd
+- src/economy/economy.gd
+- src/ui/power_panel.gd
+- src/ui/power_panel.tscn
+- data/economy.json
+- tests/unit/heartwake/drills_check.gd
 
 ## QA Test Cases
 

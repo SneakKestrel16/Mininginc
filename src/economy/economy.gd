@@ -7,7 +7,7 @@ signal ticked
 
 const CONFIG_PATH := "res://data/economy.json"
 
-## Where the furnace's coal comes from.
+## The mine the drills dig and the furnace's coal comes from.
 @export var mine: Mine
 
 ## The drills/Heart split this economy feeds.
@@ -18,6 +18,12 @@ var furnace: Furnace
 
 ## Power produced per second by all generators over the last tick.
 var power_per_second: float = 0.0
+
+## Hits per second each unit of drill power lands on the shaft.
+var drill_hits_per_power: float
+
+## Hits per second the drills landed over the last tick.
+var drill_hits_per_second: float = 0.0
 
 var _tick_seconds: float
 var _elapsed: float = 0.0
@@ -35,6 +41,7 @@ func _ready() -> void:
 		config["furnace_burn_seconds_per_coal"],
 		config["furnace_power_per_second"],
 	)
+	drill_hits_per_power = config["drill_hits_per_power_second"]
 
 
 func _process(delta: float) -> void:
@@ -43,6 +50,8 @@ func _process(delta: float) -> void:
 		_elapsed -= _tick_seconds
 		power_per_second = furnace.tick(_tick_seconds)
 		split.tick(power_per_second, _tick_seconds)
+		drill_hits_per_second = split.drill_power * drill_hits_per_power
+		mine.dig(drill_hits_per_second * _tick_seconds)
 		ticked.emit()
 
 
@@ -59,7 +68,8 @@ func _load_config() -> Dictionary:
 		_fail("Cannot read %s (open error %d)" % [CONFIG_PATH, FileAccess.get_open_error()])
 		return {}
 	for key in ["tick_seconds", "heart_share_default", "heart_first_threshold",
-			"furnace_fuel_capacity", "furnace_burn_seconds_per_coal", "furnace_power_per_second"]:
+			"furnace_fuel_capacity", "furnace_burn_seconds_per_coal", "furnace_power_per_second",
+			"drill_hits_per_power_second"]:
 		if not config.has(key):
 			_fail("%s is missing \"%s\"" % [CONFIG_PATH, key])
 			return {}

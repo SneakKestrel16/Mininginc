@@ -48,12 +48,21 @@ func block_at(at_depth: int) -> String:
 ## Lands [param power] hits on the current block. Returns what it held when this
 ## breaks it, else an empty String. Breaking moves the shaft one block down.
 func hit(power: float = 1.0) -> String:
+	var broken := dig(power)
+	return broken[0] if broken else ""
+
+
+## Lands [param hits] on the shaft, carrying hits left over from a broken block into the
+## one below. Returns the contents of every block broken, top first. Drills dig this way.
+func dig(hits: float) -> Array[String]:
+	var broken: Array[String] = []
+	if hits <= 0.0:
+		return broken
 	revealed = true
-	damage += power
-	if damage < hardness(depth):
-		return ""
-	var contents := block_at(depth)
-	depth += 1
-	damage = 0.0
-	revealed = false
-	return contents
+	damage += hits
+	while damage >= hardness(depth):
+		damage -= hardness(depth)
+		broken.append(block_at(depth))
+		depth += 1
+		revealed = damage > 0.0
+	return broken

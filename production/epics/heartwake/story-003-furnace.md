@@ -1,7 +1,7 @@
 # Story 003: Hand-fed furnace
 
 > **Epic**: Heartwake
-> **Status**: In Progress
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: M
@@ -82,3 +82,10 @@
 
 - Depends on: `production/epics/heartwake/story-001-power-split.md`, `production/epics/heartwake/story-002-dig-shaft.md`
 - Unlocks: `production/epics/heartwake/story-005-heart-stages.md`, `production/epics/heartwake/story-006-steam-turbine.md`
+
+## Completion Notes
+**Completed**: 2026-10-23
+**Criteria**: 6/6 passing (feed and stall verified with real clicks; probe used 1 s/coal, data ships 5 s)
+**Deviations**: None
+**Test Evidence**: waived at qa.level minimal; self-check `tests/unit/heartwake/furnace_check.gd` passes; screenshots `production/qa/evidence/story-003-furnace/burning.png`, `out-of-fuel.png`
+**Reviewed by**: self, no independent review
