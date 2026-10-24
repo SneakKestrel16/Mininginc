@@ -4,6 +4,9 @@
 class_name Player
 extends CharacterBody3D
 
+## Emitted after each scoop the player digs, with what it removed: material name to samples.
+signal scooped(collected: Dictionary)
+
 const CONFIG_PATH := "res://data/world.json"
 
 ## The moon the player walks and digs.
@@ -40,6 +43,7 @@ var _reach: float
 var _drill_rate: float
 var _sensitivity: float
 var _power_bonus: float
+var _effects := DigEffects.new()
 
 @onready var _head: Node3D = $Head
 @onready var _camera: Camera3D = $Head/Camera
@@ -67,6 +71,7 @@ func _ready() -> void:
 	_sensitivity = config["mouse_sensitivity"]
 	_power_bonus = config["hand_power_bonus"]
 	_marker.top_level = true
+	add_child(_effects)
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -130,7 +135,10 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	_aim()
 	if drilling and target != null:
-		world.dig(target, hand_rate() * delta)
+		var got := world.dig(target, hand_rate() * delta)
+		if not got.is_empty():
+			_effects.play(target, got)
+			scooped.emit(got)
 	_show_target()
 	_hint.visible = not controls_enabled and not hint_blocked
 	_prompt.visible = machine != null and controls_enabled

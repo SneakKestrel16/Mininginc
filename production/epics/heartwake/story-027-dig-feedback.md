@@ -1,7 +1,7 @@
 # Story 027: Dig feedback
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Visual/Feel
 > **Estimate**: S
@@ -28,10 +28,10 @@
 
 *From `design/game-brief.md` (Milestone 6 item 31), scoped to this story:*
 
-- [ ] Each scoop the player digs throws a short puff of dust at the scoop, coloured by what it cut most of.
-- [ ] Each scoop plays a short crunch from the scoop's position, varied in pitch so repeats do not drone.
-- [ ] Ore gained from a scoop shows by the crosshair for a moment ("+2 coal"); rock and crust do not.
-- [ ] Auto-drill scoops underground make no dust, sound or popup.
+- [x] Each scoop the player digs throws a short puff of dust at the scoop, coloured by what it cut most of.
+- [x] Each scoop plays a short crunch from the scoop's position, varied in pitch so repeats do not drone.
+- [x] Ore gained from a scoop shows by the crosshair for a moment ("+2 coal"); rock and crust do not.
+- [x] Auto-drill scoops underground make no dust, sound or popup.
 
 ---
 

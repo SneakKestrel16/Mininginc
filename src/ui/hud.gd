@@ -15,6 +15,9 @@ const SPOKEN_SECONDS := 5.0
 @export var heart: Node3D
 
 var _line_left := 0.0
+# Ore gained from the last scoops, shown under the crosshair, and seconds it has left.
+var _gain := Label.new()
+var _gain_left := 0.0
 # Spoken lines still to show after the current one, oldest first.
 var _queue: Array = []
 
@@ -28,6 +31,15 @@ var _queue: Array = []
 func _ready() -> void:
 	economy.stage_reached.connect(_on_stage_reached)
 	_line.modulate.a = 0.0
+	_gain.set_anchors_and_offsets_preset(Control.PRESET_CENTER)
+	_gain.position.y += 28
+	_gain.grow_horizontal = Control.GROW_DIRECTION_BOTH
+	_gain.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_gain.add_theme_color_override("font_color", Color(1.0, 0.8, 0.35))
+	_gain.add_theme_constant_override("outline_size", 6)
+	_gain.add_theme_color_override("font_outline_color", Color.BLACK)
+	add_child(_gain)
+	player.scooped.connect(_on_scooped)
 
 
 func _process(delta: float) -> void:
@@ -57,6 +69,8 @@ Heart: about %d m down, %d m across" % [snappedi(maxf(-to_heart.y, 0.0), 5),
 		_meter.value = heart.progress
 	if not _spoken().is_empty():
 		_stage.text += "   [L] hear it again"
+	_gain_left -= delta
+	_gain.modulate.a = clampf(_gain_left * 2.0, 0.0, 1.0)
 	if _line_left > 0.0:
 		_line_left -= delta
 		_line.modulate.a = clampf(_line_left, 0.0, 1.0)
@@ -68,6 +82,17 @@ func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_L:
 		_queue = _spoken()
 		_line_left = 0.0
+
+
+# Ore only: rock and crust are what every scoop gives.
+func _on_scooped(collected: Dictionary) -> void:
+	var parts := PackedStringArray()
+	for what in collected:
+		if what in economy.mine.ores:
+			parts.append("+%d %s" % [collected[what], what])
+	if not parts.is_empty():
+		_gain.text = "  ".join(parts)
+		_gain_left = 1.5
 
 
 func _on_stage_reached(index: int) -> void:
