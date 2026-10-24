@@ -1,7 +1,7 @@
 # Story 009: Reactor cooling, scram + waste
 
 > **Epic**: Heartwake
-> **Status**: In Progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Logic
 > **Estimate**: M
@@ -82,3 +82,10 @@
 
 - Depends on: `production/epics/heartwake/story-008-fission-reactor.md`
 - Unlocks: `production/epics/heartwake/story-012-milestone-2-pacing.md`
+
+## Completion Notes
+**Completed**: 2026-10-23
+**Criteria**: 7/7 passing (self-check covers cooling, scram at the limit with uranium left, restart below the restart level, waste, and 5 s offline steps against 0.1 s ticks; probe showed the scram message, the waste count and the Cool button, and cooling restarted the reactor)
+**Deviations**: The scram moment is found inside a tick, so a long offline step scrams when live play would. Story 015 later replaced this panel with the 3D reactor, which keeps the same states.
+**Test Evidence**: waived at qa.level minimal; self-check `tests/unit/heartwake/fission_reactor_check.gd` passes; screenshots in `production/qa/evidence/story-009-reactor-cooling-waste/`
+**Reviewed by**: self, no independent review

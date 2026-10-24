@@ -1,0 +1,6 @@
+Reviewed-Content-Hash: src/save/save_game.gd 2e445874acc074a7cc580fef4bb5647d471e086c
+Reviewed-Content-Hash: src/world/voxel_world.gd 53617ed5a4a711be5720b56afbf0f69ade6ca7a7
+Reviewed-Content-Hash: src/mining/mine.gd c4f0f496f9c0e037837f072ccc664b61e4238feb
+Reviewed-Content-Hash: src/machines/auto_drill.gd e297e3463a7d2583ebec52fb550dcd970b72fe5b
+Reviewed-Content-Hash: src/main.tscn 421d49e842db521c8d41e8dbe92194f390427624
+Reviewed-Content-Hash: tests/integration/heartwake/save_offline_check.gd 2b40088cf2aef566577665410cc0a7506bd6d871

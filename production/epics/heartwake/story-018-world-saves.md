@@ -1,7 +1,7 @@
 # Story 018: Saves for the 3D world
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Estimate**: M
@@ -53,6 +53,9 @@
 
 - src/save/save_game.gd
 - src/world/voxel_world.gd
+- src/mining/mine.gd
+- src/machines/auto_drill.gd
+- src/main.tscn
 - tests/integration/heartwake/save_offline_check.gd
 
 ## QA Test Cases
@@ -74,3 +77,11 @@
 
 - Depends on: `production/epics/heartwake/story-017-console-auto-drills.md`
 - Unlocks: `production/epics/heartwake/story-010-heart-sight.md`
+
+## Completion Notes
+**Completed**: 2026-10-23
+**Criteria**: 5/5 passing (self-check round trip of world edits, drills and player; windowed probe: dug a pit and placed a drill, saved, aged the save by 10 minutes and restarted: 36 edits came back, the drill dug 20 more blocks while away, and the summary said so; save was 1.6 KB)
+**Deviations**: Save format 3 drops the MVP shaft's depth, damage and revealed fields; damage on half-dug blocks is not saved. Formats 1 and 2 load their economy and ores onto a fresh world from their seed, with the player where the scene puts them.
+**Fixed in passing**: `SaveGame` loaded before `VoxelWorld` was set up, so a restored drill saw only air and dug forever. `World` now comes first in `main.tscn`, and a drill past the world's floor stops.
+**Test Evidence**: waived at qa.level minimal; self-check `tests/integration/heartwake/save_offline_check.gd` passes; screenshot in `production/qa/evidence/story-018-world-saves/`
+**Reviewed by**: self, no independent review

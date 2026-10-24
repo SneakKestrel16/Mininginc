@@ -162,6 +162,29 @@ func hit(pos: Vector3i, hits: float) -> String:
 	return block_name
 
 
+## [member edits] as a flat list of x, y, z, id: small in a JSON save.
+func edits_flat() -> Array:
+	var flat := []
+	for pos in edits:
+		flat.append_array([pos.x, pos.y, pos.z, edits[pos]])
+	return flat
+
+
+## Replaces [member edits] with a list from [method edits_flat], and marks every chunk
+## that can see a changed block for drawing.
+func load_edits(flat: Array) -> void:
+	edits.clear()
+	damage.clear()
+	for i in range(0, flat.size() - 3, 4):
+		var pos := Vector3i(int(flat[i]), int(flat[i + 1]), int(flat[i + 2]))
+		edits[pos] = int(flat[i + 3])
+		_open_chunks[chunk_of(pos)] = true
+		for face in FACES:
+			_open_chunks[chunk_of(pos + face[0])] = true
+	for key in _built.keys():
+		_build(key)
+
+
 ## Turns the block at [param pos] to air and redraws the chunks that can see it.
 func break_block(pos: Vector3i) -> void:
 	edits[pos] = Blocks.AIR

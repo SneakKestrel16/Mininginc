@@ -5,13 +5,15 @@ class_name SaveGame
 extends Node
 
 ## Bumped when the save layout changes, so a later build can migrate older saves.
-const FORMAT_VERSION := 2
+const FORMAT_VERSION := 3
 const CONFIG_PATH := "res://data/save.json"
 
 @export var economy: Economy
 @export var mine: Mine
 ## Shows what was earned while away.
 @export var away_dialog: AcceptDialog
+## Saved and restored where they stand; optional, so checks can run without one.
+@export var player: Player
 
 ## Where the save lives. Checks and probes point it elsewhere so they never touch a real save.
 var save_path := "user://savegame.json"
@@ -50,7 +52,7 @@ func save_game() -> void:
 	if file == null:
 		push_error("Cannot write %s (error %d)" % [temp, FileAccess.get_open_error()])
 		return
-	file.store_string(JSON.stringify(capture(economy, mine, Time.get_unix_time_from_system()), "\t"))
+	file.store_string(JSON.stringify(capture(economy, mine, Time.get_unix_time_from_system(), player), "\t"))
 	file.close()
 	DirAccess.rename_absolute(temp, save_path)
 
@@ -68,7 +70,7 @@ func load_game() -> void:
 		push_error("Save unreadable (%s); kept as %s, starting a new game" % [problem, kept])
 		_show("Your save could not be read (%s).\nA new game has started; the old file is kept as\n%s" % [problem, ProjectSettings.globalize_path(kept)])
 		return
-	apply(data, economy, mine)
+	apply(data, economy, mine, player)
 	var away := clampf(Time.get_unix_time_from_system() - data["saved_at"], 0.0, _offline_cap)
 	if away >= _offline_step:
 		var before := snapshot(economy, mine)
@@ -81,19 +83,18 @@ func _show(text: String) -> void:
 	away_dialog.popup_centered.call_deferred()
 
 
-## Everything the game needs to resume, as JSON-safe values.
-static func capture(economy: Economy, mine: Mine, now: float) -> Dictionary:
-	var shaft := mine.shaft
-	return {
+## Everything the game needs to resume, as JSON-safe values. The world is saved as the
+## blocks changed from what its seed generates, never whole chunks.
+static func capture(economy: Economy, mine: Mine, now: float, player: Player = null) -> Dictionary:
+	var drills := []
+	for drill in mine.drills:
+		drills.append([drill.column.x, drill.top_y, drill.column.y, drill.depth_y, drill.stopped])
+	var data := {
 		"version": FORMAT_VERSION,
 		"saved_at": now,
-		"mine": {
-			"seed": shaft.shaft_seed,
-			"depth": shaft.depth,
-			"damage": shaft.damage,
-			"revealed": shaft.revealed,
-			"ores": mine.ores.duplicate(),
-		},
+		"mine": { "seed": mine.shaft.shaft_seed, "ores": mine.ores.duplicate() },
+		"world": { "edits": mine.world.edits_flat() if mine.world else [] },
+		"drills": drills,
 		"heart_share": economy.split.heart_share,
 		"heart": { "stage": economy.heart.stage, "progress": economy.heart.progress },
 		"furnace": { "fuel": economy.furnace.fuel, "burn_left": economy.furnace.burn_left },
@@ -112,6 +113,13 @@ static func capture(economy: Economy, mine: Mine, now: float) -> Dictionary:
 			"waste": economy.reactor.waste,
 		},
 	}
+	if player:
+		data["player"] = {
+			"position": [player.global_position.x, player.global_position.y, player.global_position.z],
+			"yaw": player.rotation.y,
+			"pitch": player.get_node("Head").rotation.x,
+		}
+	return data
 
 
 ## Returns why [param data] is not a usable save, or an empty String when it is.
@@ -127,18 +135,28 @@ static func validate(data: Variant) -> String:
 			return "missing \"%s\"" % key
 	if int(data["version"]) >= 2 and not data.has("reactor"):
 		return "missing \"reactor\""
+	if int(data["version"]) >= 3 and not data.has_all(["world", "drills"]):
+		return "missing the world or its drills"
 	return ""
 
 
 ## Restores [param data] (already validated) into the running game.
-static func apply(data: Dictionary, economy: Economy, mine: Mine) -> void:
-	var shaft := mine.shaft
-	shaft.shaft_seed = int(data["mine"]["seed"])
+static func apply(data: Dictionary, economy: Economy, mine: Mine, player: Player = null) -> void:
+	mine.shaft.shaft_seed = int(data["mine"]["seed"])
 	if mine.world:
-		mine.world.world_seed = shaft.shaft_seed
-	shaft.depth = int(data["mine"]["depth"])
-	shaft.damage = data["mine"]["damage"]
-	shaft.revealed = data["mine"]["revealed"]
+		mine.world.world_seed = mine.shaft.shaft_seed
+	# Formats 1 and 2 predate the 3D world: their economy and ores carry over onto a fresh
+	# world, with the player at the base.
+	if int(data["version"]) >= 3:
+		if mine.world:
+			mine.world.load_edits(data["world"]["edits"])
+			for drill in data["drills"]:
+				mine.restore_drill(Vector3i(int(drill[0]), int(drill[1]), int(drill[2])), int(drill[3]), drill[4])
+		if player and data.has("player"):
+			var at: Array = data["player"]["position"]
+			player.global_position = Vector3(at[0], at[1], at[2])
+			player.rotation.y = data["player"]["yaw"]
+			player.get_node("Head").rotation.x = data["player"]["pitch"]
 	for id in data["mine"]["ores"]:
 		mine.ores[id] = int(data["mine"]["ores"][id])
 	economy.split.heart_share = data["heart_share"]
@@ -165,7 +183,7 @@ static func apply(data: Dictionary, economy: Economy, mine: Mine) -> void:
 ## The numbers the away summary compares.
 static func snapshot(economy: Economy, mine: Mine) -> Dictionary:
 	return {
-		"depth": mine.shaft.depth,
+		"dug": mine.world.edits.size() if mine.world else 0,
 		"ores": mine.ores.duplicate(),
 		"stage": economy.heart.stage,
 		"heart": economy.heart.progress,
@@ -175,7 +193,8 @@ static func snapshot(economy: Economy, mine: Mine) -> Dictionary:
 ## One message saying what changed between [param before] and [param after].
 static func summary(before: Dictionary, after: Dictionary, seconds: float) -> String:
 	var lines := PackedStringArray(["While you were away (%dh %02dm):" % [int(seconds) / 3600, int(seconds) % 3600 / 60]])
-	lines.append("Dug %d m deeper, now at %d m" % [after["depth"] - before["depth"], after["depth"]])
+	if after["dug"] > before["dug"]:
+		lines.append("Drills broke %d blocks" % (after["dug"] - before["dug"]))
 	for id in after["ores"]:
 		var gained: int = after["ores"][id] - before["ores"].get(id, 0)
 		if gained > 0:
@@ -186,6 +205,6 @@ static func summary(before: Dictionary, after: Dictionary, seconds: float) -> St
 		lines.append("The Heart reached stage %d" % after["stage"])
 	elif after["heart"] > before["heart"]:
 		lines.append("The Heart stored %.0f power" % (after["heart"] - before["heart"]))
-	if lines.size() == 2 and after["depth"] == before["depth"]:
+	if lines.size() == 1:
 		lines.append("Nothing ran: the furnace was out of fuel.")
 	return "\n".join(lines)

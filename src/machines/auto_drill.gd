@@ -59,6 +59,9 @@ func _ready() -> void:
 func dig(hits: float) -> void:
 	var left := hits
 	while left > 0.0 and not stopped:
+		if depth_y < -world.max_depth:  # past the floor: only if the world is not set up
+			stopped = true
+			break
 		var pos := Vector3i(column.x, depth_y, column.y)
 		var needed := world.hardness(pos)
 		if is_inf(needed):

@@ -68,8 +68,16 @@ func place_drill(at: Vector3i) -> AutoDrill:
 		if drill.column == Vector2i(at.x, at.z):
 			return null
 	take("copper", drill_cost)
+	return restore_drill(at, at.y, false)
+
+
+## Puts back a drill a save recorded on top of block [param at], already dug down to
+## [param depth_y]. Costs nothing: it was paid for when placed.
+func restore_drill(at: Vector3i, depth_y: int, stopped: bool) -> AutoDrill:
 	var drill := AutoDrill.new()
 	drill.setup(world, self, at)
+	drill.depth_y = depth_y
+	drill.stopped = stopped
 	world.add_child(drill)
 	drills.append(drill)
 	changed.emit()
