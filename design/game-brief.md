@@ -47,6 +47,18 @@ Chosen 2026-10-23 after stories 008–009: the 2D panels did not feel like the i
 
 Build order: 15 → 16 → 17 → 18 → 19 → 20 → 21.
 
+## Milestone 4 — smooth moon
+Chosen 2026-10-24 after the first hand playtest of v0.2.1: the player does not want to mine blocks. They want Astroneer-style digging, scooping round chunks out of smooth ground to uncover ore. The Heart should be buried in the planet, not sitting in an open pit. A dev menu is wanted for testing. Drill power did nothing without placed auto-drills, which read as a bug.
+
+22. Dev menu: a key opens a panel to add ore, set the Heart's stage or meter, skip time, fly through the ground, and jump to the base or the Heart.
+23. Drill power also drives the hand tool: the more power on the Drills side, the faster the player digs, so drill power is never wasted.
+24. Smooth terrain: the moon is a smooth surface, not blocks, built in chunks from the seed. Ore lies in deposits (blobs and veins) inside the rock, coloured where they show.
+25. Carving tool: holding the tool scoops a round chunk out of the ground where the player aims; harder rock takes longer. Ore scooped out goes into the inventory. Auto-drills and Sight work on the smooth ground.
+26. The Heart lies buried deep below the base, in a cavern the player digs down to; its glow and hum grow as they get close.
+27. Saves keep the carved ground; the pacing simulator is redone for carving.
+
+Build order: 22 → 23 → 24 → 25 → 26 → 27.
+
 ## Out of scope — not building this
 - Deeper tiers (Deep, Abyss, Core) and their twists: waste that later becomes fuel, the crystal placement grid, transmission loss.
 - Heart stage 6 (Wake), launch, the star map and Resonance prestige.

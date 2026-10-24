@@ -4,7 +4,7 @@
 
 **Goal:** A lone miner on a frozen moon splits every watt between the drills that keep them alive and a buried machine called the Heart, which wakes one stage at a time and shows more of what it is.
 
-**Scope:** the brief's 7 MVP features, then its Milestone 2 items 8–14 and Milestone 3D items 15–21; its Out of scope list stays out.
+**Scope:** the brief's 7 MVP features, then its Milestone 2 items 8–14 Milestone 3D items 15–21 and Milestone 4 items 22–27; its Out of scope list stays out.
 
 **Order:** the brief's Build order — the power split first, with a fake power source, to prove the decision is real before the economy exists.
 
@@ -30,3 +30,9 @@
 | 016 | The Heart in the world + HUD | Integration | Ready | N/A (minimal) |
 | 017 | Power console + auto-drills | Integration | Ready | N/A (minimal) |
 | 018 | Saves for the 3D world | Integration | Ready | N/A (minimal) |
+| 019 | Dev menu | UI | Ready | N/A (minimal) |
+| 020 | Drill power drives the hand tool | Logic | Ready | N/A (minimal) |
+| 021 | Smooth terrain | Logic | Ready | N/A (minimal) |
+| 022 | Carving tool on smooth ground | Integration | Ready | N/A (minimal) |
+| 023 | The Heart buried in the planet | Visual/Feel | Ready | N/A (minimal) |
+| 024 | Saves and pacing for smooth ground | Integration | Ready | N/A (minimal) |
