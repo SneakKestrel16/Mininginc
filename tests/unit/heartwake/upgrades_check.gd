@@ -18,12 +18,12 @@ func _initialize() -> void:
 	economy.set_process(false)
 	var upgrades := economy.upgrades
 
-	failures += _check(upgrades.defs.size() == 4 and upgrades.levels.values().all(func(n: int) -> bool: return n == 0),
-			"four upgrades, none bought at start")
+	failures += _check(upgrades.defs.size() == 5 and upgrades.levels.values().all(func(n: int) -> bool: return n == 0),
+			"five upgrades, none bought at start")
 	var first: Dictionary = upgrades.cost("tool_motor")
 	failures += _check(not economy.buy_upgrade("tool_motor") and upgrades.levels["tool_motor"] == 0, "refused without the ore")
-	mine.ores["coal"] = 1000
-	failures += _check(economy.buy_upgrade("tool_motor") and mine.ores["coal"] == 1000 - first["coal"]
+	mine.ores["coal"] = 5000
+	failures += _check(economy.buy_upgrade("tool_motor") and mine.ores["coal"] == 5000 - first["coal"]
 			and upgrades.levels["tool_motor"] == 1, "buying takes the ore and raises the level")
 	failures += _check(upgrades.cost("tool_motor")["coal"] > first["coal"], "each level costs more than the last")
 	while economy.buy_upgrade("tool_motor"):
@@ -52,6 +52,11 @@ func _initialize() -> void:
 	economy.buy_upgrade("drill_gearing")
 	economy._tick(1.0)
 	failures += _check(is_equal_approx(economy.drill_hits_per_second, plain * 1.25), "drill gearing speeds drill power")
+	var power := economy.power_per_second
+	economy.furnace.fuel = 5
+	economy.buy_upgrade("generator_tuning")
+	economy._tick(1.0)
+	failures += _check(is_equal_approx(economy.power_per_second, power * 1.1), "generator tuning adds 10%% power")
 
 	# Levels load clamped, unknown ids dropped, missing ones at zero.
 	upgrades.load_levels({ "tool_motor": 99, "gone": 3 })

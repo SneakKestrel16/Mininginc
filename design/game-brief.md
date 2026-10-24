@@ -63,7 +63,7 @@ Build order: 22 → 23 → 24 → 25 → 26 → 27.
 Chosen 2026-10-24 after v0.3.0: once the turbine, reactor and drills are built, ore has nothing left to buy. An upgrade shop gives every ore a use for the rest of the run.
 
 28. Upgrade shop at the power console: spend ore on upgrade levels, each level dearer than the last, with a cap per upgrade.
-29. Upgrades: a faster tool motor (hand digging speed), a wider scoop (bigger chunks per scoop), a longer arm (reach) and drill gearing (auto-drill and tool power speed). They are saved and take effect at once.
+29. Upgrades: a faster tool motor (hand digging speed), a wider scoop (bigger chunks per scoop), a longer arm (reach), drill gearing (auto-drill and tool power speed) and generator tuning (more power from every generator, so ore keeps feeding the Heart once the reactor runs flat out). They are saved and take effect at once.
 30. The pacing simulator buys upgrades as an attentive player would; the shipped costs keep every ore worth digging and no strategy stuck.
 
 Build order: 28 + 29 → 30.

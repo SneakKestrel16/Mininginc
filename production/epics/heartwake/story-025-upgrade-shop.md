@@ -31,7 +31,7 @@
 - [x] The power console's panel lists each upgrade with its level, cap, effect and the ore the next level costs.
 - [x] Buying takes the ore and raises the level; it is refused when ore is short or the cap is reached.
 - [x] Each level costs more than the last.
-- [x] Tool motor speeds hand digging; wider scoop carves bigger chunks; longer arm adds reach; drill gearing speeds drill power.
+- [x] Tool motor speeds hand digging; wider scoop carves bigger chunks; longer arm adds reach; drill gearing speeds drill power; generator tuning (added in story 026) raises every generator's output.
 - [x] Upgrade levels are saved and loaded, and take effect at once; older saves load with none bought.
 
 ---

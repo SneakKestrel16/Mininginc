@@ -1,7 +1,7 @@
 # Story 026: Pacing with upgrades
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Logic
 > **Estimate**: S
@@ -28,9 +28,9 @@
 
 *From `design/game-brief.md` (Milestone 5 item 30), scoped to this story:*
 
-- [ ] The pacing simulator buys upgrades with ore not needed for machines or drills.
-- [ ] With the shipped costs every strategy still wakes the Heart, none gets stuck, and a drills-heavy split stays ahead of 100% to the Heart.
-- [ ] Every self-check passes.
+- [x] The pacing simulator buys upgrades with ore not needed for machines or drills.
+- [x] With the shipped costs every strategy still wakes the Heart, none gets stuck, and a drills-heavy split stays ahead of 100% to the Heart.
+- [x] Every self-check passes.
 
 ---
 
@@ -71,3 +71,17 @@
 
 - Depends on: `production/epics/heartwake/story-025-upgrade-shop.md`
 - Unlocks: none
+
+## Results (shipped tuning, seed 1234, tools/pacing_sim.gd)
+
+| Strategy | Sight | Awake | Story 024 (no shop) |
+|---|---|---|---|
+| hand only, 50% Heart | 29:58 | 47:07 | 68:14 |
+| 6 drills, 50% Heart | 35:16 | 45:48 | 56:08 |
+| 6 drills, 100% Heart | 30:25 | 47:43 | 68:14 |
+| 6 drills, 25% Heart | 34:18 | 54:11 | 74:08 |
+
+With only the first four upgrades, 100% Heart (44:56) beat 6 drills at 50% (52:39): once the
+reactor runs at its fuel cap, ore no longer raises power, so drill power was wasted. Generator
+tuning (+10% power per level) was added so ore keeps feeding the Heart. The drills lead is now
+narrow (about 2 minutes), on one seed and one player model.

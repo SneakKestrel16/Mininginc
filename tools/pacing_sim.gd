@@ -4,7 +4,8 @@
 ## TUNINGS lists candidate changes laid over the shipped data; "shipped" changes nothing.
 ## Each strategy is an attentive player in the 3D game: hand-drills one column down from
 ## the base, refuels and cools everything whenever there is room, builds the turbine and the
-## reactor as soon as copper allows, then places auto-drills with the copper left. It runs
+## reactor as soon as copper allows, places auto-drills, then spends spare ore on upgrades
+## (keeping coal and ice for the machines). It runs
 ## live play's simulation (Economy.advance) and scoops the real smooth world.
 extends SceneTree
 
@@ -12,6 +13,10 @@ const STEP := 0.5
 const LIMIT_SECONDS := 3.0 * 3600.0
 ## Fraction of the time the player spends hand-drilling rather than walking and feeding.
 const HAND_ATTENTION := 0.5
+## Upgrades bought in this order of preference once machines and drills stand.
+const UPGRADE_ORDER := ["generator_tuning", "drill_gearing", "tool_motor", "wide_scoop", "long_arm"]
+## Ore kept back from upgrades for the furnace, turbine and reactor cooling.
+const RESERVE := { "coal": 10, "ice": 10 }
 const TUNINGS := [
 	{ "name": "shipped" },
 ]
@@ -77,9 +82,13 @@ func _run(strategy: Dictionary, tuning: Dictionary) -> void:
 		var saving := not economy.turbine_built or (not economy.reactor_built and hand.depth_y < -100)
 		if placed < strategy["drills"] and not saving and mine.place_drill(Vector3i(20 + 4 * placed, 0, 20)):
 			events.append("drill %d %s" % [placed + 1, _clock(_t)])
+		if economy.reactor_built and placed >= strategy["drills"]:
+			for id in UPGRADE_ORDER:
+				if _can_spare(economy, id) and economy.buy_upgrade(id):
+					events.append("%s %d %s" % [id, economy.upgrades.levels[id], _clock(_t)])
 		# Drill power does nothing until a drill stands: until then everything goes to the Heart.
 		economy.split.heart_share = strategy["share"] if mine.drills else 1.0
-		_hand_dig(world, hand, veins, hand_rate * HAND_ATTENTION * STEP)
+		_hand_dig(world, hand, veins, hand_rate * (1.0 + economy.upgrades.effect("hand_speed")) * HAND_ATTENTION * STEP)
 		economy.advance(STEP, STEP)
 		if economy.power_per_second == 0.0 and mine.ores["coal"] == 0 and hand.stopped:
 			if stuck_since < 0.0:
@@ -131,6 +140,14 @@ func _see_ore(world: VoxelWorld, pos: Vector3i, veins: Array[Vector3i]) -> void:
 		var next: Vector3i = pos + side * 2
 		if world.is_solid(next) and world.material_at(next) > Blocks.ROCK and not next in veins and veins.size() < 30:
 			veins.append(next)
+
+
+# True when upgrade [param id]'s next level leaves the reserve untouched.
+func _can_spare(economy: Economy, id: String) -> bool:
+	var spare := economy.mine.ores.duplicate()
+	for ore in RESERVE:
+		spare[ore] = maxi(spare.get(ore, 0) - RESERVE[ore], 0)
+	return economy.upgrades.can_buy(id, spare)
 
 
 ## Lays [param tuning] over the loaded data. Keys: ore_scale (multiplies every ore
