@@ -68,6 +68,14 @@ func _initialize() -> void:
 	world.carve(Vector3(64, 0, 60), 3.0)
 	failures += _check(world.is_solid(Vector3i(64, 0, 60)), "a scoop spares the base")
 
+	# The Heart's cavern: open air deep down, sealed by rock all the way up.
+	var top := Vector3i(world.heart_center.floor())
+	var sealed := true
+	for y in range(top.y + int(world.heart_radius) + 1, 1):
+		sealed = sealed and world.is_solid(Vector3i(top.x, y, top.z))
+	failures += _check(not world.is_solid(top) and world.heart_center.y < -30 and sealed,
+			"the Heart's cavern is open air 30 m+ down, sealed above")
+
 	# Digging: hits wait until a scoop's hardness, then a ball of ground goes and its ore counts.
 	var spot := Vector3(20.5, -20.5, 20.5)
 	var cell := Vector3i(spot.floor())

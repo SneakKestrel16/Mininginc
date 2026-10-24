@@ -36,8 +36,10 @@ var wall_height: int
 var view_radius: int
 ## Radius of one scoop, in metres.
 var bite_radius: float
-## The Heart's cavern, generated as air: corners, inclusive.
-var chamber := AABB()
+## Centre of the Heart's cavern: a sealed ball of air deep under the base.
+var heart_center: Vector3
+## Radius of the Heart's cavern, in metres.
+var heart_radius: float
 # Where the machines stand: flat and never carved, so nothing floats.
 var _base := AABB()
 
@@ -65,7 +67,7 @@ var _ready_done := false
 
 func _ready() -> void:
 	var world := _load_json(WORLD_PATH, ["chunk_size", "world_size", "max_depth", "crust_depth", "wall_height",
-			"view_radius_chunks", "heart_chamber_min", "heart_chamber_max", "surface_bumps", "ore_noise_frequency",
+			"view_radius_chunks", "heart_cavern_center", "heart_cavern_radius", "surface_bumps", "ore_noise_frequency",
 			"bite_radius", "bite_cost", "base_min", "base_max"])
 	var ores := _load_json(ORES_PATH, ["hardness_base", "hardness_per_block", "frozen_from_depth",
 			"frozen_hardness_multiplier", "ores"])
@@ -81,9 +83,8 @@ func _ready() -> void:
 	_ore_frequency = world["ore_noise_frequency"]
 	bite_radius = world["bite_radius"]
 	_bite_cost = world["bite_cost"]
-	var low := Vector3(world["heart_chamber_min"][0], world["heart_chamber_min"][1], world["heart_chamber_min"][2])
-	var high := Vector3(world["heart_chamber_max"][0], world["heart_chamber_max"][1], world["heart_chamber_max"][2])
-	chamber = AABB(low, high - low)
+	heart_center = Vector3(world["heart_cavern_center"][0], world["heart_cavern_center"][1], world["heart_cavern_center"][2])
+	heart_radius = world["heart_cavern_radius"]
 	var base_low := Vector3(world["base_min"][0], world["base_min"][1], world["base_min"][2])
 	var base_high := Vector3(world["base_max"][0], world["base_max"][1], world["base_max"][2])
 	_base = AABB(base_low, base_high - base_low)
@@ -107,10 +108,12 @@ func _ready() -> void:
 		for cz in chunks:
 			_open_chunks[Vector3i(cx, 0, cz)] = true
 			_open_chunks[Vector3i(cx, -1, cz)] = true
-	for x in [chamber.position.x, chamber.end.x]:
-		for y in [chamber.position.y - 1, chamber.end.y + 1]:
-			for z in [chamber.position.z, chamber.end.z]:
-				_open_chunks[chunk_of(Vector3i(x, y, z))] = true
+	var low := chunk_of(Vector3i((heart_center - Vector3.ONE * (heart_radius + 1)).floor()))
+	var high := chunk_of(Vector3i((heart_center + Vector3.ONE * (heart_radius + 1)).ceil()))
+	for cx in range(low.x, high.x + 1):
+		for cy in range(low.y, high.y + 1):
+			for cz in range(low.z, high.z + 1):
+				_open_chunks[Vector3i(cx, cy, cz)] = true
 	_ready_done = true
 	_seed_noise()
 
@@ -128,10 +131,10 @@ func generated_density(pos: Vector3i) -> float:
 		return SOLID
 	if _is_wall(pos):
 		return SOLID if pos.y <= wall_height else -1.0
-	if _in_chamber(pos):
-		return -1.0
 	var bumps := 0.0 if _base.has_point(Vector3(pos.x, _base.position.y, pos.z)) else _bumps
-	return 1.0 - pos.y + bumps * _ground_noise.get_noise_2d(pos.x, pos.z)
+	var ground := 1.0 - pos.y + bumps * _ground_noise.get_noise_2d(pos.x, pos.z)
+	# The cavern: a smooth ball of air, cut the way a scoop cuts.
+	return minf(ground, Vector3(pos).distance_to(heart_center) - heart_radius)
 
 
 ## True when the sample at [param pos] is solid ground.
@@ -285,11 +288,6 @@ func chunk_node(key: Vector3i) -> Node3D:
 
 func _is_wall(pos: Vector3i) -> bool:
 	return pos.x == 0 or pos.z == 0 or pos.x == world_size - 1 or pos.z == world_size - 1
-
-
-func _in_chamber(pos: Vector3i) -> bool:
-	return pos.x >= chamber.position.x and pos.x <= chamber.end.x and pos.y >= chamber.position.y \
-			and pos.y <= chamber.end.y and pos.z >= chamber.position.z and pos.z <= chamber.end.z
 
 
 func _is_protected(pos: Vector3i) -> bool:

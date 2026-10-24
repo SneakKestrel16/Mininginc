@@ -76,10 +76,11 @@ kind = "reactor"
 size = Vector3(3, 3.5, 3)
 color = Color(0.32, 0.4, 0.3, 1)
 
-[node name="Heart" type="Node3D" parent="." node_paths=PackedStringArray("economy")]
-transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64.5, -2.5, 49.5)
+[node name="Heart" type="Node3D" parent="." node_paths=PackedStringArray("economy", "world")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64.5, -40.5, 49.5)
 script = ExtResource("14_heart")
 economy = NodePath("../Economy")
+world = NodePath("../World")
 
 [node name="OreSight" type="MultiMeshInstance3D" parent="." node_paths=PackedStringArray("economy", "world", "player")]
 script = ExtResource("17_sight")
@@ -87,9 +88,10 @@ economy = NodePath("../Economy")
 world = NodePath("../World")
 player = NodePath("../Player")
 
-[node name="Hud" parent="." node_paths=PackedStringArray("economy", "player") instance=ExtResource("15_hud")]
+[node name="Hud" parent="." node_paths=PackedStringArray("economy", "player", "heart") instance=ExtResource("15_hud")]
 economy = NodePath("../Economy")
 player = NodePath("../Player")
+heart = NodePath("../Heart")
 
 [node name="Console" type="Node3D" parent="Machines" node_paths=PackedStringArray("economy", "overlay")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64.5, 1, 61.5)

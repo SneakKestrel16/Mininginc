@@ -11,6 +11,8 @@ const SPOKEN_SECONDS := 5.0
 @export var economy: Economy
 ## Whose hand tool speed it shows.
 @export var player: Player
+## The buried Heart: the HUD says roughly how far it is.
+@export var heart: Node3D
 
 var _line_left := 0.0
 # Spoken lines still to show after the current one, oldest first.
@@ -35,6 +37,12 @@ func _process(delta: float) -> void:
 		counts.append("%s %d" % [id.capitalize(), ores[id]])
 	_inventory.text = "   ".join(counts)
 	_power.text = "Power %.1f/s   Hand tool %.1f hits/s" % [economy.power_per_second, player.hand_rate()]
+	if heart:
+		var to_heart := heart.global_position - player.global_position
+		# Rounded to 5 m: a sense of direction, not a map.
+		_power.text += "
+Heart: about %d m down, %d m across" % [snappedi(maxf(-to_heart.y, 0.0), 5),
+				snappedi(Vector2(to_heart.x, to_heart.z).length(), 5)]
 	var heart := economy.heart
 	var count := heart.stages.size()
 	var stage_name: String = "asleep" if heart.stage == 0 else heart.current()["name"]

@@ -1,7 +1,7 @@
 # Story 023: The Heart buried in the planet
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Visual/Feel
 > **Estimate**: S
@@ -28,10 +28,10 @@
 
 *From `design/game-brief.md` (Milestone 4 item 26), scoped to this story:*
 
-- [ ] The Heart lies in a sealed cavern deep below the base; nothing of it shows from the surface.
-- [ ] The player reaches it by digging down; the cavern is open air once broken into.
-- [ ] Its light and a low hum grow as the player gets closer, so they can dig toward it.
-- [ ] The HUD shows roughly how far below the Heart is.
+- [x] The Heart lies in a sealed cavern deep below the base; nothing of it shows from the surface.
+- [x] The player reaches it by digging down; the cavern is open air once broken into.
+- [x] Its light and a low hum grow as the player gets closer, so they can dig toward it.
+- [x] The HUD shows roughly how far below the Heart is.
 
 ---
 
