@@ -4,5 +4,12 @@
 	"furnace_fuel_capacity": 10,
 	"furnace_burn_seconds_per_coal": 5.0,
 	"furnace_power_per_second": 10.0,
-	"drill_hits_per_power_second": 0.1
+	"drill_hits_per_power_second": 0.1,
+	"turbine_build_copper": 5,
+	"turbine_fuel_capacity": 10,
+	"turbine_burn_seconds_per_coal": 5.0,
+	"turbine_power_per_second": 25.0,
+	"turbine_water_capacity": 50.0,
+	"turbine_water_per_second": 1.0,
+	"water_per_ice": 10.0
 }

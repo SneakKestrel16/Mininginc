@@ -21,7 +21,7 @@ func _ready() -> void:
 func _refresh() -> void:
 	var furnace := economy.furnace
 	var coal: int = economy.mine.ores.get("coal", 0)
-	_state_label.text = "Furnace: burning, %.1f/s" % economy.power_per_second if furnace.is_burning() \
+	_state_label.text = "Furnace: burning, %.1f/s" % economy.furnace_output if furnace.is_burning() \
 			else "Furnace: out of fuel"
 	_fuel_bar.value = furnace.fuel_level()
 	_fuel_label.text = "Fuel %.1f / %d" % [furnace.fuel_level(), furnace.capacity]

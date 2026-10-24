@@ -1,7 +1,7 @@
 # Story 005: Heart stages 1–3 (Flicker, Pulse, Breath)
 
 > **Epic**: Heartwake
-> **Status**: In Progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Estimate**: L
@@ -91,3 +91,10 @@
 
 - Depends on: `production/epics/heartwake/story-001-power-split.md`, `production/epics/heartwake/story-003-furnace.md`, `production/epics/heartwake/story-004-drills.md`
 - Unlocks: `production/epics/heartwake/story-006-steam-turbine.md`, `production/epics/heartwake/story-007-save-offline.md`
+
+## Completion Notes
+**Completed**: 2026-10-23
+**Criteria**: 8/8 passing (probe with thresholds 30/60/90; data ships 600/1500/3000)
+**Deviations**: None. `flicker.png` and `awake.png` predate the Frozen label's colour change, which neither image shows.
+**Test Evidence**: waived at qa.level minimal; self-check `tests/integration/heartwake/heart_stages_check.gd` passes; screenshots in `production/qa/evidence/story-005-heart-stages/`
+**Reviewed by**: self, no independent review

@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://src/ui/power_panel.gd" id="1_panel"]
 
 [node name="PowerPanel" type="PanelContainer"]
-custom_minimum_size = Vector2(480, 0)
+custom_minimum_size = Vector2(400, 0)
 script = ExtResource("1_panel")
 
 [node name="Margin" type="MarginContainer" parent="."]

@@ -1,0 +1,59 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/ui/turbine_panel.gd" id="1_panel"]
+
+[node name="TurbinePanel" type="PanelContainer"]
+custom_minimum_size = Vector2(400, 0)
+script = ExtResource("1_panel")
+
+[node name="Margin" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 16
+theme_override_constants/margin_top = 16
+theme_override_constants/margin_right = 16
+theme_override_constants/margin_bottom = 16
+
+[node name="Rows" type="VBoxContainer" parent="Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="StateLabel" type="Label" parent="Margin/Rows"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="BuildButton" type="Button" parent="Margin/Rows"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="Running" type="VBoxContainer" parent="Margin/Rows"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="FuelLabel" type="Label" parent="Margin/Rows/Running"]
+unique_name_in_owner = true
+layout_mode = 2
+
+[node name="WaterBar" type="ProgressBar" parent="Margin/Rows/Running"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 24)
+layout_mode = 2
+show_percentage = false
+
+[node name="WaterLabel" type="Label" parent="Margin/Rows/Running"]
+unique_name_in_owner = true
+layout_mode = 2
+horizontal_alignment = 1
+
+[node name="Buttons" type="HBoxContainer" parent="Margin/Rows/Running"]
+layout_mode = 2
+
+[node name="FeedButton" type="Button" parent="Margin/Rows/Running/Buttons"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="MeltButton" type="Button" parent="Margin/Rows/Running/Buttons"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3

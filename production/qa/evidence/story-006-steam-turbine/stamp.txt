@@ -1,0 +1,12 @@
+Reviewed-Content-Hash: src/economy/steam_turbine.gd ff3392e2fe354ab999ed4605d714a7f9336fa9c6
+Reviewed-Content-Hash: src/economy/economy.gd 6c90d8b74685f13236179581fd65d22245c98187
+Reviewed-Content-Hash: src/ui/turbine_panel.gd 99bb00bcc24f3365a60b2959519fc4ac4c2902c5
+Reviewed-Content-Hash: src/ui/turbine_panel.tscn 5fc770585420a717bc742458fa17e01385ae4040
+Reviewed-Content-Hash: src/ui/furnace_panel.gd 30c3c059f00408047ac148c980be01e61c0a9725
+Reviewed-Content-Hash: src/ui/furnace_panel.tscn 7ba215acfee7b90857db3ffd9034bfc5648093ce
+Reviewed-Content-Hash: src/ui/power_panel.tscn d3ab82ae3b8ddac5d07a3d8bb2354b54f2161d5b
+Reviewed-Content-Hash: src/ui/heart_panel.tscn 55e9a7c4da693d59f63852e3dfaab4084b10fde8
+Reviewed-Content-Hash: src/main.tscn 8884e9b1e09bc81a461657908bf8bd985e02a0ad
+Reviewed-Content-Hash: data/ores.json 399dba0fe7cf607901c89fb50137c742c18bbf54
+Reviewed-Content-Hash: data/economy.json 4d8c9fcd9bfe4b6e9523baa59024b54d75a9cc17
+Reviewed-Content-Hash: tests/unit/heartwake/steam_turbine_check.gd 5ff7e18a6fa432f717ba5dc849b8d96e7aa5a7a4

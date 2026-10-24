@@ -1,12 +1,12 @@
 # Story 006: Shallow layer + steam turbine
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: In Progress
 > **Layer**: Feature
 > **Type**: Logic
 > **Estimate**: M
 > **Manifest Version**: N/A (minimal — no control manifest)
-> **Last Updated**: [set by /dev-story when implementation begins]
+> **Last Updated**: 2026-10-23
 
 ## Context
 
@@ -53,12 +53,18 @@
 
 ## Files
 
-- `src/economy/steam_turbine.gd`
-- `data/ores.json`
-- `data/economy.json`
-- `tests/unit/heartwake/steam_turbine_test.gd`
-
----
+- src/economy/steam_turbine.gd
+- src/economy/economy.gd
+- src/ui/turbine_panel.gd
+- src/ui/turbine_panel.tscn
+- src/ui/furnace_panel.gd
+- src/ui/furnace_panel.tscn
+- src/ui/power_panel.tscn
+- src/ui/heart_panel.tscn
+- src/main.tscn
+- data/ores.json
+- data/economy.json
+- tests/unit/heartwake/steam_turbine_check.gd
 
 ## QA Test Cases
 

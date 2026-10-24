@@ -3,7 +3,7 @@
 [ext_resource type="Script" path="res://src/ui/heart_panel.gd" id="1_panel"]
 
 [node name="HeartPanel" type="PanelContainer"]
-custom_minimum_size = Vector2(480, 0)
+custom_minimum_size = Vector2(400, 0)
 script = ExtResource("1_panel")
 
 [node name="Margin" type="MarginContainer" parent="."]
@@ -23,7 +23,7 @@ layout_mode = 2
 
 [node name="LineLabel" type="Label" parent="Margin/Rows"]
 unique_name_in_owner = true
-custom_minimum_size = Vector2(448, 0)
+custom_minimum_size = Vector2(368, 0)
 layout_mode = 2
 autowrap_mode = 3
 

@@ -16,14 +16,27 @@ const STAGES_PATH := "res://data/heart_stages.json"
 ## The drills/Heart split this economy feeds.
 var split: PowerSplit
 
-## The hand-fed furnace, the only generator until story 006.
+## The hand-fed furnace.
 var furnace: Furnace
+
+## The steam turbine; it produces nothing until [member turbine_built].
+var turbine: SteamTurbine
+
+## True once the turbine has been built with copper.
+var turbine_built: bool = false
+
+## Copper the turbine costs to build.
+var turbine_cost: int
 
 ## The Heart, which stores the Heart share and grants each stage's bonus.
 var heart: Heart
 
 ## Power produced per second by all generators over the last tick.
 var power_per_second: float = 0.0
+## The furnace's part of [member power_per_second], bonus included.
+var furnace_output: float = 0.0
+## The turbine's part of [member power_per_second], bonus included.
+var turbine_output: float = 0.0
 
 ## Hits per second each unit of drill power lands on the shaft.
 var drill_hits_per_power: float
@@ -38,7 +51,9 @@ var _elapsed: float = 0.0
 func _ready() -> void:
 	var config := _load_json(CONFIG_PATH, ["tick_seconds", "heart_share_default",
 			"furnace_fuel_capacity", "furnace_burn_seconds_per_coal", "furnace_power_per_second",
-			"drill_hits_per_power_second"])
+			"drill_hits_per_power_second", "turbine_build_copper", "turbine_fuel_capacity",
+			"turbine_burn_seconds_per_coal", "turbine_power_per_second", "turbine_water_capacity",
+			"turbine_water_per_second", "water_per_ice"])
 	var stage_config := _load_json(STAGES_PATH, ["stages"])
 	if config.is_empty() or stage_config.is_empty() or not _valid_stages(stage_config["stages"]):
 		set_process(false)
@@ -52,6 +67,15 @@ func _ready() -> void:
 		config["furnace_power_per_second"],
 	)
 	drill_hits_per_power = config["drill_hits_per_power_second"]
+	turbine = SteamTurbine.new(
+		config["turbine_fuel_capacity"],
+		config["turbine_burn_seconds_per_coal"],
+		config["turbine_power_per_second"],
+		config["turbine_water_capacity"],
+		config["turbine_water_per_second"],
+		config["water_per_ice"],
+	)
+	turbine_cost = config["turbine_build_copper"]
 
 
 func _process(delta: float) -> void:
@@ -66,7 +90,10 @@ func _process(delta: float) -> void:
 func _tick() -> void:
 	if heart.has_effect("drones"):
 		feed_furnace()
-	power_per_second = furnace.tick(_tick_seconds) * (1.0 + heart.effect_total("output_bonus"))
+	var bonus := 1.0 + heart.effect_total("output_bonus")
+	furnace_output = furnace.tick(_tick_seconds) * bonus
+	turbine_output = turbine.tick(_tick_seconds) * bonus if turbine_built else 0.0
+	power_per_second = furnace_output + turbine_output
 	split.tick(power_per_second)
 	drill_hits_per_second = split.drill_power * drill_hits_per_power
 	mine.dig(drill_hits_per_second * _tick_seconds)
@@ -81,6 +108,28 @@ func feed_furnace() -> int:
 	return mine.take("coal", furnace.feed(mine.ores.get("coal", 0)))
 
 
+## True when the turbine is not built yet and the mine holds enough copper for it.
+func can_build_turbine() -> bool:
+	return not turbine_built and mine.ores.get("copper", 0) >= turbine_cost
+
+
+## Spends the copper and builds the turbine. Does nothing when [method can_build_turbine] is false.
+func build_turbine() -> void:
+	if can_build_turbine():
+		mine.take("copper", turbine_cost)
+		turbine_built = true
+
+
+## Moves as much of the mine's coal into the turbine as fits. Returns how many went in.
+func feed_turbine() -> int:
+	return mine.take("coal", turbine.boiler.feed(mine.ores.get("coal", 0)))
+
+
+## Melts as much of the mine's ice into the turbine's tank as fits. Returns how many melted.
+func melt_ice() -> int:
+	return mine.take("ice", turbine.melt(mine.ores.get("ice", 0)))
+
+
 ## Returns the JSON object at [param path], or an empty Dictionary after reporting why it
 ## is unusable. Not assert(): release exports strip asserts, and friends run release builds.
 func _load_json(path: String, keys: Array) -> Dictionary:
@@ -92,7 +141,8 @@ func _load_json(path: String, keys: Array) -> Dictionary:
 		if not config.has(key):
 			_fail("%s is missing \"%s\"" % [path, key])
 			return {}
-	for key in ["tick_seconds", "furnace_burn_seconds_per_coal"]:
+	for key in ["tick_seconds", "furnace_burn_seconds_per_coal", "turbine_burn_seconds_per_coal",
+			"turbine_water_per_second", "water_per_ice"]:
 		if config.has(key) and config[key] <= 0.0:
 			_fail("%s: %s must be above 0" % [path, key])
 			return {}

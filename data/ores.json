@@ -3,6 +3,9 @@
 	"hardness_per_block": 0.25,
 	"frozen_from_depth": 50,
 	"ores": [
-		{ "id": "coal", "min_depth": 0, "max_depth": 49, "chance": 0.35 }
+		{ "id": "coal", "min_depth": 0, "max_depth": 49, "chance": 0.35 },
+		{ "id": "ice", "min_depth": 50, "max_depth": 99, "chance": 0.3 },
+		{ "id": "copper", "min_depth": 50, "max_depth": 99, "chance": 0.2 },
+		{ "id": "coal", "min_depth": 50, "max_depth": 99, "chance": 0.15 }
 	]
 }
