@@ -1,7 +1,7 @@
 # Story 008: Mid layer uranium + fission reactor
 
 > **Epic**: Heartwake
-> **Status**: In Progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Logic
 > **Estimate**: M
@@ -87,3 +87,11 @@
 
 - Depends on: `production/epics/heartwake/story-006-steam-turbine.md`, `production/epics/heartwake/story-007-save-offline.md`
 - Unlocks: `production/epics/heartwake/story-009-reactor-cooling-waste.md`, `production/epics/heartwake/story-012-milestone-2-pacing.md`
+
+## Completion Notes
+**Completed**: 2026-10-23
+**Criteria**: 8/8 passing (probe set Heart stage 3 and gave 18 copper, 7 uranium; real clicks built and fed the reactor: 125/s with Pulse, heat rising)
+**Deviations**: Heat is capped at `reactor_heat_limit` with no scram yet; story 009 adds cooling and scram. Fixed in passing: the ore counts now stack one per line, since a fourth ore pushed the layout past the window. Copper and ice also appear below depth 100, so the reactor's 15 copper and story 009's cooling ice can be found there.
+**Known gap**: with the reactor running, 5 s offline steps ended one block shallower than 0.1 s live ticks over 5 minutes, because the reactor's power crosses a Heart stage inside a step. `save_offline_check.gd` compares offline and live play without the reactor; story 012 should look at the offline step size.
+**Test Evidence**: waived at qa.level minimal; self-check `tests/unit/heartwake/fission_reactor_check.gd` passes, `save_offline_check.gd` covers the format 2 round trip and format 1 load; screenshots in `production/qa/evidence/story-008-fission-reactor/`
+**Reviewed by**: self, no independent review
