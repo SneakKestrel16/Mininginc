@@ -1,4 +1,4 @@
-## The smooth moon (brief: Milestone 4 items 24Ã¢â‚¬â€œ25): a density field on a 1 m grid, generated
+## The smooth moon (brief: Milestone 4 items 24–25): a density field on a 1 m grid, generated
 ## from a seed, meshed per chunk with surface nets, and carved in round scoops. A sample is
 ## solid where its density is above 0. Samples are never stored whole: a sample is what the
 ## seed generates unless [member edits] says otherwise, so only carved ground needs saving.
