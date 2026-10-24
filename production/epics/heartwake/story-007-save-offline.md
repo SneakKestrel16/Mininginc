@@ -1,7 +1,7 @@
 # Story 007: Save/load + offline progress
 
 > **Epic**: Heartwake
-> **Status**: In Progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Estimate**: M
@@ -78,3 +78,10 @@
 
 - Depends on: `production/epics/heartwake/story-005-heart-stages.md`, `production/epics/heartwake/story-006-steam-turbine.md`
 - Unlocks: None
+
+## Completion Notes
+**Completed**: 2026-10-23
+**Criteria**: 7/7 passing (autosave seen at 30 s, not at 29 s; 20 h away capped to 8h 00m; probes used user://probe_save.json, never the real save)
+**Deviations**: None. Offline progress lives in `Economy.advance`, not a separate `offline_progress.gd`: it is the live simulation in bigger steps.
+**Test Evidence**: waived at qa.level minimal; self-check `tests/integration/heartwake/save_offline_check.gd` passes; screenshot `production/qa/evidence/story-007-save-offline/away-summary.png`
+**Reviewed by**: self, no independent review
