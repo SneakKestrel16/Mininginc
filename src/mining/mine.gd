@@ -48,15 +48,27 @@ func _ready() -> void:
 		world.block_broken.connect(_collect)
 
 
-## Shares [param hits] of drill power between the drills still digging; with none placed
-## the power does nothing. Ore they break is collected through the world's signal.
+## Shares [param hits] of drill power between the drills still digging and the hand tool,
+## which always takes one share: with no drills placed it gets all of it. Ore the drills
+## break is collected through the world's signal.
 func dig(hits: float = 1.0) -> void:
-	var working := drills.filter(func(d: AutoDrill) -> bool: return not d.stopped)
+	var working := working_drills()
 	if hits <= 0.0 or working.is_empty():
 		return
 	for drill in working:
-		drill.dig(hits / working.size())
+		drill.dig(hits / (working.size() + 1))
 	changed.emit()
+
+
+## Auto-drills not yet stopped at bedrock.
+func working_drills() -> Array:
+	return drills.filter(func(d: AutoDrill) -> bool: return not d.stopped)
+
+
+## Hits per second drill power adds to the hand tool, out of [param drill_hits_per_second]
+## for all drills: one share among the working drills and the tool.
+func hand_share(drill_hits_per_second: float) -> float:
+	return drill_hits_per_second / (working_drills().size() + 1)
 
 
 ## Spends copper and places an auto-drill on top of block [param at]. Returns the drill,

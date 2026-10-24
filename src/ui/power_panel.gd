@@ -29,4 +29,6 @@ func _refresh() -> void:
 		economy.power_per_second * (1.0 - split.heart_share),
 		economy.power_per_second * split.heart_share,
 	]
-	_drill_label.text = "Drill speed: %.2f hits/s" % economy.drill_hits_per_second
+	var drills := economy.mine.working_drills().size()
+	_drill_label.text = "Drill power: %.2f hits/s, shared by your hand tool%s" % [economy.drill_hits_per_second,
+			"" if drills == 0 else " and %d auto-drill%s" % [drills, "" if drills == 1 else "s"]]

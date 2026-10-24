@@ -9,6 +9,8 @@ const CONFIG_PATH := "res://data/world.json"
 @export var world: VoxelWorld
 ## Where ore goes and auto-drills are placed from.
 @export var mine: Mine
+## Its drill power adds to the hand tool's speed.
+@export var economy: Economy
 
 ## The block under the crosshair within reach, or null.
 var target: Variant = null
@@ -36,6 +38,7 @@ var _gravity: float
 var _reach: float
 var _drill_rate: float
 var _sensitivity: float
+var _power_bonus: float
 
 @onready var _head: Node3D = $Head
 @onready var _camera: Camera3D = $Head/Camera
@@ -47,7 +50,8 @@ var _sensitivity: float
 
 func _ready() -> void:
 	var config = JSON.parse_string(FileAccess.get_file_as_string(CONFIG_PATH))
-	var keys := ["move_speed", "jump_velocity", "gravity", "reach", "hand_drill_hits_per_second", "mouse_sensitivity"]
+	var keys := ["move_speed", "jump_velocity", "gravity", "reach", "hand_drill_hits_per_second", "mouse_sensitivity",
+			"hand_power_bonus"]
 	if not config is Dictionary or not config.has_all(keys):
 		var message := "%s is missing one of %s" % [CONFIG_PATH, ", ".join(keys)]
 		push_error(message)
@@ -60,6 +64,7 @@ func _ready() -> void:
 	_reach = config["reach"]
 	_drill_rate = config["hand_drill_hits_per_second"]
 	_sensitivity = config["mouse_sensitivity"]
+	_power_bonus = config["hand_power_bonus"]
 	_marker.top_level = true
 
 
@@ -89,6 +94,12 @@ func _unhandled_input(event: InputEvent) -> void:
 					mine.place_drill(target)
 
 
+## Hits per second the hand tool lands: its own rate plus its share of drill power.
+func hand_rate() -> float:
+	var bonus := mine.hand_share(economy.drill_hits_per_second) * _power_bonus if economy else 0.0
+	return _drill_rate + bonus
+
+
 ## Hands control (and the mouse) to the player, or takes it away.
 func set_controls(on: bool) -> void:
 	controls_enabled = on
@@ -116,7 +127,7 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	_aim()
 	if drilling and target != null:
-		world.hit(target, _drill_rate * delta)
+		world.hit(target, hand_rate() * delta)
 	_show_target()
 	_hint.visible = not controls_enabled and not hint_blocked
 	_prompt.visible = machine != null and controls_enabled

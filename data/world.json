@@ -11,6 +11,7 @@
 	"reach": 5.0,
 	"hand_drill_hits_per_second": 4.0,
 	"mouse_sensitivity": 0.0025,
+	"hand_power_bonus": 1.0,
 	"heart_chamber_min": [59, -9, 44],
 	"heart_chamber_max": [69, 0, 54],
 	"drill_build_copper": 3

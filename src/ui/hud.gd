@@ -9,6 +9,8 @@ const SPOKEN_SECONDS := 5.0
 
 ## The economy this HUD reports.
 @export var economy: Economy
+## Whose hand tool speed it shows.
+@export var player: Player
 
 var _line_left := 0.0
 # Spoken lines still to show after the current one, oldest first.
@@ -32,7 +34,7 @@ func _process(delta: float) -> void:
 	for id in ores:
 		counts.append("%s %d" % [id.capitalize(), ores[id]])
 	_inventory.text = "   ".join(counts)
-	_power.text = "Power %.1f/s" % economy.power_per_second
+	_power.text = "Power %.1f/s   Hand tool %.1f hits/s" % [economy.power_per_second, player.hand_rate()]
 	var heart := economy.heart
 	var count := heart.stages.size()
 	var stage_name: String = "asleep" if heart.stage == 0 else heart.current()["name"]

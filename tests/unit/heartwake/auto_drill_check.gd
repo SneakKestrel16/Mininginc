@@ -11,12 +11,14 @@ func _initialize() -> void:
 	failures += _check(a.ores.values().all(func(n: int) -> bool: return n == 0) and a.shaft.depth == 0,
 			"no drills: drill power does nothing, and the old shaft is not dug")
 	failures += _check(a.place_drill(Vector3i(20, 0, 20)) == null, "a drill needs copper")
+	failures += _check(a.hand_share(6.0) == 6.0, "no drills: all drill power goes to the hand tool")
 
 	a.ores["copper"] = a.drill_cost * 2
 	var first := a.place_drill(Vector3i(20, 0, 20))
 	failures += _check(first != null and a.ores["copper"] == a.drill_cost and a.place_drill(Vector3i(20, 0, 20)) == null,
 			"placing costs copper; one drill per column")
 	var second := a.place_drill(Vector3i(30, 0, 30))
+	failures += _check(a.hand_share(6.0) == 2.0, "two drills: the hand tool takes one share of three")
 	a.dig(40.0)
 	failures += _check(first.depth_y < 0 and second.depth_y < 0 and absi(first.depth_y - second.depth_y) <= 2,
 			"drill power is shared between the drills (%d, %d)" % [first.depth_y, second.depth_y])

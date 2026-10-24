@@ -87,8 +87,9 @@ economy = NodePath("../Economy")
 world = NodePath("../World")
 player = NodePath("../Player")
 
-[node name="Hud" parent="." node_paths=PackedStringArray("economy") instance=ExtResource("15_hud")]
+[node name="Hud" parent="." node_paths=PackedStringArray("economy", "player") instance=ExtResource("15_hud")]
 economy = NodePath("../Economy")
+player = NodePath("../Player")
 
 [node name="Console" type="Node3D" parent="Machines" node_paths=PackedStringArray("economy", "overlay")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64.5, 1, 61.5)
@@ -96,10 +97,11 @@ script = ExtResource("16_console")
 economy = NodePath("../../Economy")
 overlay = NodePath("../../Overlay")
 
-[node name="Player" parent="." node_paths=PackedStringArray("world", "mine") instance=ExtResource("11_player")]
+[node name="Player" parent="." node_paths=PackedStringArray("world", "mine", "economy") instance=ExtResource("11_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64.5, 1.1, 64.5)
 world = NodePath("../World")
 mine = NodePath("../Mine")
+economy = NodePath("../Economy")
 
 [node name="Overlay" type="CanvasLayer" parent="." node_paths=PackedStringArray("player")]
 layer = 2
