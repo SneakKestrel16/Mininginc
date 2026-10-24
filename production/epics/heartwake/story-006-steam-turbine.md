@@ -1,7 +1,7 @@
 # Story 006: Shallow layer + steam turbine
 
 > **Epic**: Heartwake
-> **Status**: In Progress
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Logic
 > **Estimate**: M
@@ -85,3 +85,10 @@
 
 - Depends on: `production/epics/heartwake/story-003-furnace.md`, `production/epics/heartwake/story-005-heart-stages.md`
 - Unlocks: `production/epics/heartwake/story-007-save-offline.md`
+
+## Completion Notes
+**Completed**: 2026-10-23
+**Criteria**: 6/6 passing (probe set Heart stage 3 to reach the thawed layer; coal-out stall covered by the self-check, water-out stall on screen)
+**Deviations**: None. Fixed in passing: the furnace panel showed total power as its own output.
+**Test Evidence**: waived at qa.level minimal; self-check `tests/unit/heartwake/steam_turbine_check.gd` passes; screenshots in `production/qa/evidence/story-006-steam-turbine/`
+**Reviewed by**: self, no independent review

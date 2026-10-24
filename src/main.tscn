@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene load_steps=9 format=3]
 
 [ext_resource type="Script" path="res://src/economy/economy.gd" id="1_economy"]
 [ext_resource type="PackedScene" path="res://src/ui/power_panel.tscn" id="2_panel"]
@@ -7,6 +7,7 @@
 [ext_resource type="PackedScene" path="res://src/ui/furnace_panel.tscn" id="5_furnace"]
 [ext_resource type="PackedScene" path="res://src/ui/heart_panel.tscn" id="6_heart"]
 [ext_resource type="PackedScene" path="res://src/ui/turbine_panel.tscn" id="7_turbine"]
+[ext_resource type="Script" path="res://src/save/save_game.gd" id="8_save"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -22,6 +23,12 @@ script = ExtResource("3_mine")
 [node name="Economy" type="Node" parent="." node_paths=PackedStringArray("mine")]
 script = ExtResource("1_economy")
 mine = NodePath("../Mine")
+
+[node name="SaveGame" type="Node" parent="." node_paths=PackedStringArray("economy", "mine", "away_dialog")]
+script = ExtResource("8_save")
+economy = NodePath("../Economy")
+mine = NodePath("../Mine")
+away_dialog = NodePath("../AwayDialog")
 
 [node name="Center" type="CenterContainer" parent="."]
 layout_mode = 1
@@ -64,3 +71,6 @@ economy = NodePath("../../../../Economy")
 [node name="HeartPanel" parent="Center/Columns/Panels" node_paths=PackedStringArray("economy") instance=ExtResource("6_heart")]
 layout_mode = 2
 economy = NodePath("../../../../Economy")
+
+[node name="AwayDialog" type="AcceptDialog" parent="."]
+title = "Heartwake"

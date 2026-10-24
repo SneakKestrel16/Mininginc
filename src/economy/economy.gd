@@ -82,24 +82,38 @@ func _process(delta: float) -> void:
 	_elapsed += delta
 	while _elapsed >= _tick_seconds:
 		_elapsed -= _tick_seconds
-		_tick()
+		_tick(_tick_seconds)
+
+
+## Runs [param seconds] of play in ticks of [param step] seconds: the same simulation as
+## live play, in bigger steps. Offline progress uses it.
+func advance(seconds: float, step: float) -> void:
+	var left := seconds
+	while left > 0.0:
+		_tick(minf(step, left))
+		left -= step
+
+
+## Applies every stage bonus that does not wait for a tick, after a save is loaded.
+func apply_heart() -> void:
+	mine.thaw_to(int(heart.effect_total("thaw_to_depth")))
 
 
 # Bonuses are read from the Heart's stage every tick, never stored in the systems they
-# change, so the stage index alone restores them (story 007).
-func _tick() -> void:
+# change, so the stage index alone restores them.
+func _tick(seconds: float) -> void:
 	if heart.has_effect("drones"):
 		feed_furnace()
 	var bonus := 1.0 + heart.effect_total("output_bonus")
-	furnace_output = furnace.tick(_tick_seconds) * bonus
-	turbine_output = turbine.tick(_tick_seconds) * bonus if turbine_built else 0.0
+	furnace_output = furnace.tick(seconds) * bonus
+	turbine_output = turbine.tick(seconds) * bonus if turbine_built else 0.0
 	power_per_second = furnace_output + turbine_output
 	split.tick(power_per_second)
 	drill_hits_per_second = split.drill_power * drill_hits_per_power
-	mine.dig(drill_hits_per_second * _tick_seconds)
-	for index in heart.add(split.heart_power * _tick_seconds):
+	mine.dig(drill_hits_per_second * seconds)
+	for index in heart.add(split.heart_power * seconds):
 		stage_reached.emit(index)
-	mine.thaw_to(int(heart.effect_total("thaw_to_depth")))
+	apply_heart()
 	ticked.emit()
 
 

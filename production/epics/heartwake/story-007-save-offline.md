@@ -1,12 +1,12 @@
 # Story 007: Save/load + offline progress
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: In Progress
 > **Layer**: Feature
 > **Type**: Integration
 > **Estimate**: M
 > **Manifest Version**: N/A (minimal — no control manifest)
-> **Last Updated**: [set by /dev-story when implementation begins]
+> **Last Updated**: 2026-10-23
 
 ## Context
 
@@ -53,11 +53,11 @@
 
 ## Files
 
-- `src/save/save_game.gd`
-- `src/save/offline_progress.gd`
-- `tests/integration/heartwake/save_offline_test.gd`
-
----
+- src/save/save_game.gd
+- src/economy/economy.gd
+- src/main.tscn
+- data/save.json
+- tests/integration/heartwake/save_offline_check.gd
 
 ## QA Test Cases
 

@@ -1,0 +1,5 @@
+Reviewed-Content-Hash: src/save/save_game.gd 6a1541623103334ebf8b491d078813bc83a7cf6d
+Reviewed-Content-Hash: src/economy/economy.gd 8d488056873a096c2e6d79697f14fade05a1028f
+Reviewed-Content-Hash: src/main.tscn fa12460535c276e9d5d75d90d579930799645a8c
+Reviewed-Content-Hash: data/save.json 0ecd9e3007a06cfe882adafdf712be599fb64bae
+Reviewed-Content-Hash: tests/integration/heartwake/save_offline_check.gd 842f4e1c2d63cb36331dba13e93b88b65dc72302
