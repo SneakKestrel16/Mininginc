@@ -26,7 +26,9 @@ func _initialize() -> void:
 	a.mine.ores["uranium"] = 2
 	a.economy.reactor_built = true
 	a.economy.reactor.core.fuel = 1
-	a.economy.reactor.heat = 30.0
+	a.economy.reactor.heat = 80.0
+	a.economy.reactor.scrammed = true
+	a.economy.reactor.waste = 3.5
 	var data := SaveGame.capture(a.economy, a.mine, 1000.0)
 	failures += _check(data["version"] == SaveGame.FORMAT_VERSION, "the save carries its format version")
 

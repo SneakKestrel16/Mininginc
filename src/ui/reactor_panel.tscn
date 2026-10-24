@@ -45,7 +45,20 @@ unique_name_in_owner = true
 layout_mode = 2
 horizontal_alignment = 1
 
-[node name="FeedButton" type="Button" parent="Margin/Rows/Running"]
+[node name="WasteLabel" type="Label" parent="Margin/Rows/Running"]
 unique_name_in_owner = true
 layout_mode = 2
+
+[node name="Buttons" type="HBoxContainer" parent="Margin/Rows/Running"]
+layout_mode = 2
+
+[node name="FeedButton" type="Button" parent="Margin/Rows/Running/Buttons"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="CoolButton" type="Button" parent="Margin/Rows/Running/Buttons"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
 size_flags_horizontal = 3

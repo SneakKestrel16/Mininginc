@@ -66,7 +66,8 @@ func _ready() -> void:
 			"turbine_burn_seconds_per_coal", "turbine_power_per_second", "turbine_water_capacity",
 			"turbine_water_per_second", "water_per_ice", "reactor_build_copper", "reactor_fuel_capacity",
 			"reactor_burn_seconds_per_uranium", "reactor_power_per_second", "reactor_heat_per_second",
-			"reactor_heat_limit"])
+			"reactor_heat_limit", "reactor_heat_restart", "reactor_cooling_per_second", "reactor_heat_per_ice",
+			"reactor_waste_per_uranium"])
 	var stage_config := _load_json(STAGES_PATH, ["stages"])
 	if config.is_empty() or stage_config.is_empty() or not _valid_stages(stage_config["stages"]):
 		set_process(false)
@@ -95,6 +96,10 @@ func _ready() -> void:
 		config["reactor_power_per_second"],
 		config["reactor_heat_per_second"],
 		config["reactor_heat_limit"],
+		config["reactor_heat_restart"],
+		config["reactor_cooling_per_second"],
+		config["reactor_heat_per_ice"],
+		config["reactor_waste_per_uranium"],
 	)
 	reactor_cost = config["reactor_build_copper"]
 
@@ -183,6 +188,11 @@ func feed_reactor() -> int:
 	return mine.take("uranium", reactor.core.feed(mine.ores.get("uranium", 0)))
 
 
+## Melts as much of the mine's ice against the reactor's heat as it takes. Returns how many melted.
+func cool_reactor() -> int:
+	return mine.take("ice", reactor.cool(mine.ores.get("ice", 0)))
+
+
 ## Returns the JSON object at [param path], or an empty Dictionary after reporting why it
 ## is unusable. Not assert(): release exports strip asserts, and friends run release builds.
 func _load_json(path: String, keys: Array) -> Dictionary:
@@ -196,10 +206,13 @@ func _load_json(path: String, keys: Array) -> Dictionary:
 			return {}
 	for key in ["tick_seconds", "furnace_burn_seconds_per_coal", "turbine_burn_seconds_per_coal",
 			"turbine_water_per_second", "water_per_ice", "reactor_burn_seconds_per_uranium",
-			"reactor_power_per_second", "reactor_heat_limit"]:
+			"reactor_power_per_second", "reactor_heat_limit", "reactor_heat_per_ice"]:
 		if config.has(key) and config[key] <= 0.0:
 			_fail("%s: %s must be above 0" % [path, key])
 			return {}
+	if config.has("reactor_heat_restart") and not config["reactor_heat_restart"] < config["reactor_heat_limit"]:
+		_fail("%s: reactor_heat_restart must be below reactor_heat_limit" % path)
+		return {}
 	return config
 
 

@@ -1,7 +1,7 @@
 # Story 009: Reactor cooling, scram + waste
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: In Progress
 > **Layer**: Feature
 > **Type**: Logic
 > **Estimate**: M
@@ -61,6 +61,7 @@
 - src/ui/reactor_panel.tscn
 - data/economy.json
 - tests/unit/heartwake/fission_reactor_check.gd
+- tests/integration/heartwake/save_offline_check.gd
 
 ## QA Test Cases
 

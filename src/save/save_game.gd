@@ -108,6 +108,8 @@ static func capture(economy: Economy, mine: Mine, now: float) -> Dictionary:
 			"fuel": economy.reactor.core.fuel,
 			"burn_left": economy.reactor.core.burn_left,
 			"heat": economy.reactor.heat,
+			"scrammed": economy.reactor.scrammed,
+			"waste": economy.reactor.waste,
 		},
 	}
 
@@ -152,6 +154,8 @@ static func apply(data: Dictionary, economy: Economy, mine: Mine) -> void:
 		economy.reactor.core.fuel = int(data["reactor"]["fuel"])
 		economy.reactor.core.burn_left = data["reactor"]["burn_left"]
 		economy.reactor.heat = data["reactor"]["heat"]
+		economy.reactor.scrammed = data["reactor"].get("scrammed", false)
+		economy.reactor.waste = data["reactor"].get("waste", 0.0)
 	economy.apply_heart()
 	mine.changed.emit()
 

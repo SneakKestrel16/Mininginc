@@ -17,5 +17,9 @@
 	"reactor_burn_seconds_per_uranium": 30.0,
 	"reactor_power_per_second": 100.0,
 	"reactor_heat_per_second": 1.0,
-	"reactor_heat_limit": 100.0
+	"reactor_heat_limit": 100.0,
+	"reactor_heat_restart": 50.0,
+	"reactor_cooling_per_second": 0.2,
+	"reactor_heat_per_ice": 10.0,
+	"reactor_waste_per_uranium": 1.0
 }

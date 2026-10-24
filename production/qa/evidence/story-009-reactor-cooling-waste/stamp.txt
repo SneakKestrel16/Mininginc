@@ -1,0 +1,8 @@
+Reviewed-Content-Hash: src/economy/fission_reactor.gd ebd8d80245af147daa26ae377afd3699e7a81542
+Reviewed-Content-Hash: src/economy/economy.gd 52632e0b9b078c190e5c1cbb7c4c8ac424c07c42
+Reviewed-Content-Hash: src/save/save_game.gd f04f5bb051e4e82a92fba0534219268dceab39f2
+Reviewed-Content-Hash: src/ui/reactor_panel.gd 4fcd97ee51f53bea717b0e98c24b16a5dfc27cc8
+Reviewed-Content-Hash: src/ui/reactor_panel.tscn f358e3f65c2be4d07c2a93d937c611f367f45541
+Reviewed-Content-Hash: data/economy.json 59c20b4027c56317acb2a690a98ff9bbe98b3311
+Reviewed-Content-Hash: tests/unit/heartwake/fission_reactor_check.gd 26316b43004e4411fe8e1803f81adf5f84890e3e
+Reviewed-Content-Hash: tests/integration/heartwake/save_offline_check.gd f245a6f431da31239b46219e2a292c9fb6c1ebe8
