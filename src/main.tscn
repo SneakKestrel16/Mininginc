@@ -1,18 +1,16 @@
-[gd_scene load_steps=14 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://src/economy/economy.gd" id="1_economy"]
 [ext_resource type="PackedScene" path="res://src/ui/power_panel.tscn" id="2_panel"]
 [ext_resource type="Script" path="res://src/mining/mine.gd" id="3_mine"]
 [ext_resource type="PackedScene" path="res://src/mining/dig_shaft_view.tscn" id="4_shaft"]
-[ext_resource type="PackedScene" path="res://src/ui/furnace_panel.tscn" id="5_furnace"]
 [ext_resource type="PackedScene" path="res://src/ui/heart_panel.tscn" id="6_heart"]
-[ext_resource type="PackedScene" path="res://src/ui/turbine_panel.tscn" id="7_turbine"]
 [ext_resource type="Script" path="res://src/save/save_game.gd" id="8_save"]
-[ext_resource type="PackedScene" path="res://src/ui/reactor_panel.tscn" id="9_reactor"]
 
 [ext_resource type="Script" path="res://src/world/voxel_world.gd" id="10_world"]
 [ext_resource type="PackedScene" path="res://src/player/player.tscn" id="11_player"]
 [ext_resource type="Script" path="res://src/ui/overlay.gd" id="12_overlay"]
+[ext_resource type="Script" path="res://src/machines/machine.gd" id="13_machine"]
 
 [sub_resource type="Environment" id="Env"]
 background_mode = 1
@@ -49,6 +47,31 @@ shadow_enabled = true
 [node name="Environment" type="WorldEnvironment" parent="."]
 environment = SubResource("Env")
 
+[node name="Machines" type="Node3D" parent="."]
+
+[node name="Furnace" type="Node3D" parent="Machines" node_paths=PackedStringArray("economy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 60, 1, 58)
+script = ExtResource("13_machine")
+economy = NodePath("../../Economy")
+size = Vector3(2, 2, 2)
+color = Color(0.35, 0.25, 0.2, 1)
+
+[node name="Turbine" type="Node3D" parent="Machines" node_paths=PackedStringArray("economy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64.5, 1, 57)
+script = ExtResource("13_machine")
+economy = NodePath("../../Economy")
+kind = "turbine"
+size = Vector3(3, 2.5, 2)
+color = Color(0.3, 0.38, 0.45, 1)
+
+[node name="Reactor" type="Node3D" parent="Machines" node_paths=PackedStringArray("economy")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 69.5, 1, 58)
+script = ExtResource("13_machine")
+economy = NodePath("../../Economy")
+kind = "reactor"
+size = Vector3(3, 3.5, 3)
+color = Color(0.32, 0.4, 0.3, 1)
+
 [node name="Player" parent="." node_paths=PackedStringArray("world") instance=ExtResource("11_player")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64.5, 1.1, 64.5)
 world = NodePath("../World")
@@ -80,23 +103,6 @@ theme_override_constants/separation = 24
 [node name="DigShaftView" parent="Overlay/Center/Columns" node_paths=PackedStringArray("mine") instance=ExtResource("4_shaft")]
 layout_mode = 2
 mine = NodePath("../../../../Mine")
-
-[node name="Generators" type="VBoxContainer" parent="Overlay/Center/Columns"]
-layout_mode = 2
-size_flags_vertical = 4
-theme_override_constants/separation = 16
-
-[node name="FurnacePanel" parent="Overlay/Center/Columns/Generators" node_paths=PackedStringArray("economy") instance=ExtResource("5_furnace")]
-layout_mode = 2
-economy = NodePath("../../../../../Economy")
-
-[node name="TurbinePanel" parent="Overlay/Center/Columns/Generators" node_paths=PackedStringArray("economy") instance=ExtResource("7_turbine")]
-layout_mode = 2
-economy = NodePath("../../../../../Economy")
-
-[node name="ReactorPanel" parent="Overlay/Center/Columns/Generators" node_paths=PackedStringArray("economy") instance=ExtResource("9_reactor")]
-layout_mode = 2
-economy = NodePath("../../../../../Economy")
 
 [node name="Panels" type="VBoxContainer" parent="Overlay/Center/Columns"]
 layout_mode = 2

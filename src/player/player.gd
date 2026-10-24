@@ -10,6 +10,8 @@ const CONFIG_PATH := "res://data/world.json"
 
 ## The block under the crosshair within reach, or null.
 var target: Variant = null
+## The machine under the crosshair within reach, or null.
+var machine: WorldMachine = null
 ## True while the player is in control. A click on the game turns it on and takes the
 ## mouse; Esc or an overlay turns it off. Never on at start, so the game (or a check run)
 ## never grabs the mouse by itself.
@@ -29,6 +31,7 @@ var _sensitivity: float
 @onready var _marker: MeshInstance3D = $TargetMarker
 @onready var _marker_material: StandardMaterial3D = _marker.material_override
 @onready var _hint: Label = $Crosshair/Hint
+@onready var _prompt: Label = $Crosshair/Prompt
 
 
 func _ready() -> void:
@@ -55,12 +58,21 @@ func _unhandled_input(event: InputEvent) -> void:
 			set_controls(true)
 			get_viewport().set_input_as_handled()  # this click only takes the mouse
 		return
-	if event is InputEventMouseMotion:
+	# Only a held mouse turns the view: a free cursor passing over the window must not.
+	if event is InputEventMouseMotion and Input.mouse_mode == Input.MOUSE_MODE_CAPTURED:
 		rotate_y(-event.relative.x * _sensitivity)
 		_head.rotate_x(-event.relative.y * _sensitivity)
 		_head.rotation.x = clampf(_head.rotation.x, -PI / 2.0 + 0.01, PI / 2.0 - 0.01)
-	elif event is InputEventKey and event.pressed and event.physical_keycode == KEY_ESCAPE:
-		set_controls(false)
+	elif event is InputEventKey and event.pressed and not event.echo:
+		match event.physical_keycode:
+			KEY_ESCAPE:
+				set_controls(false)
+			KEY_E:
+				if machine:
+					machine.use_primary()
+			KEY_Q:
+				if machine:
+					machine.use_secondary()
 
 
 ## Hands control (and the mouse) to the player, or takes it away.
@@ -90,6 +102,9 @@ func _physics_process(delta: float) -> void:
 		world.hit(target, _drill_rate * delta)
 	_show_target()
 	_hint.visible = not controls_enabled and not hint_blocked
+	_prompt.visible = machine != null
+	if machine:
+		_prompt.text = machine.prompt()
 
 
 ## Finds the block under the crosshair within reach.
@@ -98,8 +113,13 @@ func _aim() -> void:
 	var query := PhysicsRayQueryParameters3D.create(from, from - _camera.global_basis.z * _reach)
 	query.exclude = [get_rid()]
 	var hit := get_world_3d().direct_space_state.intersect_ray(query)
+	target = null
+	machine = null
 	if hit.is_empty():
-		target = null
+		return
+	var owner_node: Node = hit["collider"].get_parent()
+	if owner_node is WorldMachine:
+		machine = owner_node
 		return
 	# Step half a block into the face hit, so the point lands inside the solid block.
 	target = Vector3i((hit["position"] - hit["normal"] * 0.5).floor())

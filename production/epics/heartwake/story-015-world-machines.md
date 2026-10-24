@@ -1,7 +1,7 @@
 # Story 015: Machines in the world
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Estimate**: M
@@ -54,10 +54,12 @@
 ## Files
 
 - src/machines/machine.gd
-- src/machines/furnace_machine.tscn
-- src/machines/turbine_machine.tscn
-- src/machines/reactor_machine.tscn
+- src/player/player.gd
+- src/player/player.tscn
 - src/main.tscn
+- src/ui/furnace_panel.gd (deleted)
+- src/ui/turbine_panel.gd (deleted)
+- src/ui/reactor_panel.gd (deleted)
 
 ## QA Test Cases
 
@@ -78,3 +80,11 @@
 
 - Depends on: `production/epics/heartwake/story-014-first-person-miner.md`
 - Unlocks: `production/epics/heartwake/story-016-heart-and-hud.md`
+
+## Completion Notes
+**Completed**: 2026-10-23
+**Criteria**: 6/6 passing (windowed probe on the second monitor, no mouse capture: looked at each machine, E fed the furnace, E built then fed the turbine, Q melted ice, E built and fed the reactor, a forced overheat showed the red scram lamp and Q cooled it back below restart; total power matched the economy)
+**Deviations**: One `WorldMachine` script builds all three machines from primitives, picked by `kind`, instead of a scene per machine. The 2D furnace, turbine and reactor panels are deleted. Mouse-look now turns the view only while the game holds the mouse, so a free cursor over the window never moves it.
+**Known gap**: machines stand on the surface blocks; digging out the block under one leaves it floating.
+**Test Evidence**: waived at qa.level minimal; no new self-check (input-driven); screenshots in `production/qa/evidence/story-015-world-machines/`
+**Reviewed by**: self, no independent review

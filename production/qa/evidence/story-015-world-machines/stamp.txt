@@ -1,0 +1,4 @@
+Reviewed-Content-Hash: src/machines/machine.gd adfb781860f176066767ad802b785a532d118ce1
+Reviewed-Content-Hash: src/player/player.gd f974504e9a67b8edc4b7320e722e202c4d2166a9
+Reviewed-Content-Hash: src/player/player.tscn 7602f77febe49df618fd46138319c56455dc9326
+Reviewed-Content-Hash: src/main.tscn fec27ce55e939db7dd0b67e67131d14e0ab5e6f1
