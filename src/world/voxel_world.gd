@@ -154,7 +154,9 @@ func hit(pos: Vector3i, hits: float) -> String:
 	if hits <= 0.0 or needed == 0.0 or is_inf(needed):
 		return ""
 	damage[pos] = damage.get(pos, 0.0) + hits
-	if damage[pos] < needed:
+	# A hair under counts: hits are summed in floats, which can stop just short of a
+	# whole number and leave a block that one more tiny hit never breaks.
+	if damage[pos] < needed - 0.0001:
 		return ""
 	var block_name: String = Blocks.NAMES[block_at(pos)]
 	break_block(pos)

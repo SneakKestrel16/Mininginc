@@ -55,6 +55,10 @@ func _initialize() -> void:
 	failures += _check(world.hit(ore_pos, 1.0) == "coal" and world.block_at(ore_pos) == Blocks.AIR and not world.damage.has(ore_pos),
 			"then breaks, reporting what it held")
 
+	# Damage stopping a float's hair short of the hardness still breaks the block.
+	var crust := Vector3i(30, 0, 30)
+	failures += _check(world.hit(crust, world.hardness(crust) - 0.00001) == "crust", "a hair short of the hardness breaks the block")
+
 	# Drawing: a flat inner surface chunk shows one top face per column and nothing else.
 	world.update_around(Vector3(40, 1, 40))  # the player calls this every frame
 	var inner: Node3D = world.chunk_node(Vector3i(2, 0, 2))

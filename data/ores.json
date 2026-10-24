@@ -4,13 +4,13 @@
 	"frozen_from_depth": 50,
 	"frozen_hardness_multiplier": 2.0,
 	"ores": [
-		{ "id": "coal", "min_depth": 0, "max_depth": 49, "chance": 0.35 },
-		{ "id": "ice", "min_depth": 50, "max_depth": 99, "chance": 0.3 },
-		{ "id": "copper", "min_depth": 50, "max_depth": 99, "chance": 0.2 },
-		{ "id": "coal", "min_depth": 50, "max_depth": 99, "chance": 0.15 },
-		{ "id": "coal", "min_depth": 100, "max_depth": 1000000, "chance": 0.3 },
-		{ "id": "uranium", "min_depth": 100, "max_depth": 1000000, "chance": 0.12 },
-		{ "id": "ice", "min_depth": 100, "max_depth": 1000000, "chance": 0.15 },
-		{ "id": "copper", "min_depth": 100, "max_depth": 1000000, "chance": 0.1 }
+		{ "id": "coal", "min_depth": 0, "max_depth": 49, "chance": 0.175 },
+		{ "id": "ice", "min_depth": 50, "max_depth": 99, "chance": 0.15 },
+		{ "id": "copper", "min_depth": 50, "max_depth": 99, "chance": 0.1 },
+		{ "id": "coal", "min_depth": 50, "max_depth": 99, "chance": 0.075 },
+		{ "id": "coal", "min_depth": 100, "max_depth": 1000000, "chance": 0.15 },
+		{ "id": "uranium", "min_depth": 100, "max_depth": 1000000, "chance": 0.06 },
+		{ "id": "ice", "min_depth": 100, "max_depth": 1000000, "chance": 0.075 },
+		{ "id": "copper", "min_depth": 100, "max_depth": 1000000, "chance": 0.05 }
 	]
 }

@@ -2,35 +2,35 @@
 	"stages": [
 		{
 			"name": "Flicker",
-			"threshold": 150.0,
+			"threshold": 300.0,
 			"effect": "drones",
 			"value": 0,
 			"line": "Lights flicker on far below. Small drones climb the shaft to tend your furnace."
 		},
 		{
 			"name": "Pulse",
-			"threshold": 500.0,
+			"threshold": 1500.0,
 			"effect": "output_bonus",
 			"value": 0.25,
 			"line": "A heartbeat rolls up through the ice. Every generator runs hotter."
 		},
 		{
 			"name": "Breath",
-			"threshold": 1000.0,
+			"threshold": 6000.0,
 			"effect": "thaw_to_depth",
 			"value": 100,
 			"line": "Vents open in the deep. Warm air thaws the frozen rock below you."
 		},
 		{
 			"name": "Sight",
-			"threshold": 2500.0,
+			"threshold": 25000.0,
 			"effect": "ore_sight",
 			"value": 6,
 			"line": "The Heart opens an eye. Veins of ore glow through the rock around you."
 		},
 		{
 			"name": "Voice",
-			"threshold": 5000.0,
+			"threshold": 90000.0,
 			"effect": "drill_bonus",
 			"value": 1.0,
 			"line": "The Heart speaks. Your drills bite twice as hard.",

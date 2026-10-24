@@ -57,7 +57,8 @@ func _initialize() -> void:
 	offline.economy.advance(300.0, 5.0)
 	failures += _check(offline.mine.drills[0].depth_y < a.mine.drills[0].depth_y,
 			"placed drills keep boring down while away")
-	failures += _check(live.mine.drills[0].depth_y == offline.mine.drills[0].depth_y and live.mine.ores == offline.mine.ores
+	# Within one block: the stage bonus starts at the end of the 5 s step it is reached in.
+	failures += _check(absi(live.mine.drills[0].depth_y - offline.mine.drills[0].depth_y) <= 1 and live.mine.ores == offline.mine.ores
 			# A stage reached inside a 5 s step starts its bonus at the step's end: within one step of power.
 			and absf(live.economy.heart.progress - offline.economy.heart.progress) < 20.0,
 			"5 s offline steps match 0.1 s live ticks over 5 minutes")
