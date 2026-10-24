@@ -1,0 +1,11 @@
+Reviewed-Content-Hash: src/economy/fission_reactor.gd f75f45cc34877a12eeef52d10e5ee59c615c63b9
+Reviewed-Content-Hash: src/economy/economy.gd 635824503673a0114638a2729367d592be7434a2
+Reviewed-Content-Hash: src/save/save_game.gd 91bc42dd9a3519a542e81e75682e75e2cfe41ade
+Reviewed-Content-Hash: src/ui/reactor_panel.gd b07862b561a7aa150edb8dd8e1aff4a99f3f9186
+Reviewed-Content-Hash: src/ui/reactor_panel.tscn d20f218bf75c9ab51509cce32d8a853c4a329516
+Reviewed-Content-Hash: src/mining/dig_shaft_view.gd cac449dea6aa2577d7ca965e682a6ff362a42ed9
+Reviewed-Content-Hash: src/main.tscn 87b5f87362b8fcd16ea77f84c86e891485818f0d
+Reviewed-Content-Hash: data/ores.json 8b14440091ce54c7239f6bab16406be311bafaed
+Reviewed-Content-Hash: data/economy.json b8b537072884bc4d12f85e3465cf4b833a037aba
+Reviewed-Content-Hash: tests/unit/heartwake/fission_reactor_check.gd 495b3977d053aa8500c4e834578219f0defd4641
+Reviewed-Content-Hash: tests/integration/heartwake/save_offline_check.gd c7ea19ad64d1d5a9091642d42da61be4d1d5abbd

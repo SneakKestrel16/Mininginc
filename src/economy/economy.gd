@@ -28,6 +28,15 @@ var turbine_built: bool = false
 ## Copper the turbine costs to build.
 var turbine_cost: int
 
+## The fission reactor; it produces nothing until [member reactor_built].
+var reactor: FissionReactor
+
+## True once the reactor has been built with copper.
+var reactor_built: bool = false
+
+## Copper the reactor costs to build.
+var reactor_cost: int
+
 ## The Heart, which stores the Heart share and grants each stage's bonus.
 var heart: Heart
 
@@ -37,6 +46,8 @@ var power_per_second: float = 0.0
 var furnace_output: float = 0.0
 ## The turbine's part of [member power_per_second], bonus included.
 var turbine_output: float = 0.0
+## The reactor's part of [member power_per_second], bonus included.
+var reactor_output: float = 0.0
 
 ## Hits per second each unit of drill power lands on the shaft.
 var drill_hits_per_power: float
@@ -53,7 +64,9 @@ func _ready() -> void:
 			"furnace_fuel_capacity", "furnace_burn_seconds_per_coal", "furnace_power_per_second",
 			"drill_hits_per_power_second", "turbine_build_copper", "turbine_fuel_capacity",
 			"turbine_burn_seconds_per_coal", "turbine_power_per_second", "turbine_water_capacity",
-			"turbine_water_per_second", "water_per_ice"])
+			"turbine_water_per_second", "water_per_ice", "reactor_build_copper", "reactor_fuel_capacity",
+			"reactor_burn_seconds_per_uranium", "reactor_power_per_second", "reactor_heat_per_second",
+			"reactor_heat_limit"])
 	var stage_config := _load_json(STAGES_PATH, ["stages"])
 	if config.is_empty() or stage_config.is_empty() or not _valid_stages(stage_config["stages"]):
 		set_process(false)
@@ -76,6 +89,14 @@ func _ready() -> void:
 		config["water_per_ice"],
 	)
 	turbine_cost = config["turbine_build_copper"]
+	reactor = FissionReactor.new(
+		config["reactor_fuel_capacity"],
+		config["reactor_burn_seconds_per_uranium"],
+		config["reactor_power_per_second"],
+		config["reactor_heat_per_second"],
+		config["reactor_heat_limit"],
+	)
+	reactor_cost = config["reactor_build_copper"]
 
 
 func _process(delta: float) -> void:
@@ -107,7 +128,8 @@ func _tick(seconds: float) -> void:
 	var bonus := 1.0 + heart.effect_total("output_bonus")
 	furnace_output = furnace.tick(seconds) * bonus
 	turbine_output = turbine.tick(seconds) * bonus if turbine_built else 0.0
-	power_per_second = furnace_output + turbine_output
+	reactor_output = reactor.tick(seconds) * bonus if reactor_built else 0.0
+	power_per_second = furnace_output + turbine_output + reactor_output
 	split.tick(power_per_second)
 	drill_hits_per_second = split.drill_power * drill_hits_per_power
 	mine.dig(drill_hits_per_second * seconds)
@@ -144,6 +166,23 @@ func melt_ice() -> int:
 	return mine.take("ice", turbine.melt(mine.ores.get("ice", 0)))
 
 
+## True when the reactor is not built yet and the mine holds enough copper for it.
+func can_build_reactor() -> bool:
+	return not reactor_built and mine.ores.get("copper", 0) >= reactor_cost
+
+
+## Spends the copper and builds the reactor. Does nothing when [method can_build_reactor] is false.
+func build_reactor() -> void:
+	if can_build_reactor():
+		mine.take("copper", reactor_cost)
+		reactor_built = true
+
+
+## Moves as much of the mine's uranium into the reactor as fits. Returns how many went in.
+func feed_reactor() -> int:
+	return mine.take("uranium", reactor.core.feed(mine.ores.get("uranium", 0)))
+
+
 ## Returns the JSON object at [param path], or an empty Dictionary after reporting why it
 ## is unusable. Not assert(): release exports strip asserts, and friends run release builds.
 func _load_json(path: String, keys: Array) -> Dictionary:
@@ -156,7 +195,8 @@ func _load_json(path: String, keys: Array) -> Dictionary:
 			_fail("%s is missing \"%s\"" % [path, key])
 			return {}
 	for key in ["tick_seconds", "furnace_burn_seconds_per_coal", "turbine_burn_seconds_per_coal",
-			"turbine_water_per_second", "water_per_ice"]:
+			"turbine_water_per_second", "water_per_ice", "reactor_burn_seconds_per_uranium",
+			"reactor_power_per_second", "reactor_heat_limit"]:
 		if config.has(key) and config[key] <= 0.0:
 			_fail("%s: %s must be above 0" % [path, key])
 			return {}

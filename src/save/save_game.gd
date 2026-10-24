@@ -5,7 +5,7 @@ class_name SaveGame
 extends Node
 
 ## Bumped when the save layout changes, so a later build can migrate older saves.
-const FORMAT_VERSION := 1
+const FORMAT_VERSION := 2
 const CONFIG_PATH := "res://data/save.json"
 
 @export var economy: Economy
@@ -103,6 +103,12 @@ static func capture(economy: Economy, mine: Mine, now: float) -> Dictionary:
 			"burn_left": economy.turbine.boiler.burn_left,
 			"water": economy.turbine.water,
 		},
+		"reactor": {
+			"built": economy.reactor_built,
+			"fuel": economy.reactor.core.fuel,
+			"burn_left": economy.reactor.core.burn_left,
+			"heat": economy.reactor.heat,
+		},
 	}
 
 
@@ -117,6 +123,8 @@ static func validate(data: Variant) -> String:
 	for key in ["saved_at", "mine", "heart_share", "heart", "furnace", "turbine"]:
 		if not data.has(key):
 			return "missing \"%s\"" % key
+	if int(data["version"]) >= 2 and not data.has("reactor"):
+		return "missing \"reactor\""
 	return ""
 
 
@@ -138,6 +146,12 @@ static func apply(data: Dictionary, economy: Economy, mine: Mine) -> void:
 	economy.turbine.boiler.fuel = int(data["turbine"]["fuel"])
 	economy.turbine.boiler.burn_left = data["turbine"]["burn_left"]
 	economy.turbine.water = data["turbine"]["water"]
+	# Format 1 (v0.1.x) predates the reactor: it stays unbuilt.
+	if data.has("reactor"):
+		economy.reactor_built = data["reactor"]["built"]
+		economy.reactor.core.fuel = int(data["reactor"]["fuel"])
+		economy.reactor.core.burn_left = data["reactor"]["burn_left"]
+		economy.reactor.heat = data["reactor"]["heat"]
 	economy.apply_heart()
 	mine.changed.emit()
 

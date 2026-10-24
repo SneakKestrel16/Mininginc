@@ -11,5 +11,11 @@
 	"turbine_power_per_second": 25.0,
 	"turbine_water_capacity": 50.0,
 	"turbine_water_per_second": 1.0,
-	"water_per_ice": 10.0
+	"water_per_ice": 10.0,
+	"reactor_build_copper": 15,
+	"reactor_fuel_capacity": 5,
+	"reactor_burn_seconds_per_uranium": 30.0,
+	"reactor_power_per_second": 100.0,
+	"reactor_heat_per_second": 1.0,
+	"reactor_heat_limit": 100.0
 }

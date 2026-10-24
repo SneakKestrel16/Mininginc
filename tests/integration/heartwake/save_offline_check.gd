@@ -7,7 +7,7 @@ extends SceneTree
 func _initialize() -> void:
 	var failures := 0
 
-	# A game in a known state: Flicker reached, coal in stock and in the furnace, turbine built.
+	# A game in a known state: Flicker reached, coal in stock and in the furnace, turbine and reactor built.
 	var a := await _game()
 	a.mine.shaft.shaft_seed = 99
 	a.mine.shaft.depth = 7
@@ -20,6 +20,13 @@ func _initialize() -> void:
 	a.economy.furnace.burn_left = 2.0
 	a.economy.turbine_built = true
 	a.economy.turbine.water = 12.0
+	# The economy checks below run without the reactor: its power would race the Heart past
+	# the stages they test.
+	var base := SaveGame.capture(a.economy, a.mine, 1000.0)
+	a.mine.ores["uranium"] = 2
+	a.economy.reactor_built = true
+	a.economy.reactor.core.fuel = 1
+	a.economy.reactor.heat = 30.0
 	var data := SaveGame.capture(a.economy, a.mine, 1000.0)
 	failures += _check(data["version"] == SaveGame.FORMAT_VERSION, "the save carries its format version")
 
@@ -32,7 +39,7 @@ func _initialize() -> void:
 	var live := await _game()
 	var offline := await _game()
 	for g in [live, offline]:
-		SaveGame.apply(JSON.parse_string(JSON.stringify(data)), g.economy, g.mine)
+		SaveGame.apply(JSON.parse_string(JSON.stringify(base)), g.economy, g.mine)
 	for i in 3000:
 		live.economy.advance(0.1, 0.1)
 	offline.economy.advance(300.0, 5.0)
@@ -42,7 +49,7 @@ func _initialize() -> void:
 
 	# Drones keep a fed furnace burning while coal lasts; without them it burns out.
 	var hand := await _game()
-	SaveGame.apply(JSON.parse_string(JSON.stringify(data)), hand.economy, hand.mine)
+	SaveGame.apply(JSON.parse_string(JSON.stringify(base)), hand.economy, hand.mine)
 	hand.economy.heart.stage = 0
 	hand.economy.advance(600.0, 5.0)
 	failures += _check(not hand.economy.furnace.is_burning() and hand.mine.ores["coal"] >= 6, "offline without drones: the furnace burns out, no coal fed in")
@@ -50,6 +57,18 @@ func _initialize() -> void:
 
 	failures += _check(SaveGame.validate("x") != "" and SaveGame.validate({}) != "" and SaveGame.validate({ "version": 99 }) != "", "bad saves are refused")
 	failures += _check(SaveGame.validate(data) == "", "a good save is accepted")
+
+	# A v0.1.x save (format 1) has no reactor: it loads with the reactor unbuilt.
+	var old: Dictionary = JSON.parse_string(JSON.stringify(data))
+	old["version"] = 1
+	old.erase("reactor")
+	var v1 := await _game()
+	failures += _check(SaveGame.validate(old) == "", "a format 1 save is accepted")
+	SaveGame.apply(old, v1.economy, v1.mine)
+	failures += _check(v1.mine.shaft.depth == 7 and v1.economy.turbine_built and not v1.economy.reactor_built,
+			"a format 1 save loads, with no reactor")
+	old["version"] = 2
+	failures += _check(SaveGame.validate(old) != "", "a format 2 save without a reactor is refused")
 
 	# An unreadable file is moved aside, not overwritten, and the game starts new.
 	var path := "user://check_save.json"

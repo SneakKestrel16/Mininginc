@@ -8,6 +8,9 @@
 		{ "id": "ice", "min_depth": 50, "max_depth": 99, "chance": 0.3 },
 		{ "id": "copper", "min_depth": 50, "max_depth": 99, "chance": 0.2 },
 		{ "id": "coal", "min_depth": 50, "max_depth": 99, "chance": 0.15 },
-		{ "id": "coal", "min_depth": 100, "max_depth": 1000000, "chance": 0.3 }
+		{ "id": "coal", "min_depth": 100, "max_depth": 1000000, "chance": 0.3 },
+		{ "id": "uranium", "min_depth": 100, "max_depth": 1000000, "chance": 0.12 },
+		{ "id": "ice", "min_depth": 100, "max_depth": 1000000, "chance": 0.15 },
+		{ "id": "copper", "min_depth": 100, "max_depth": 1000000, "chance": 0.1 }
 	]
 }

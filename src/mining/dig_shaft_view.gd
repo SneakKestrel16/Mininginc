@@ -37,7 +37,7 @@ func _refresh() -> void:
 	var counts := PackedStringArray()
 	for id in mine.ores:
 		counts.append("%s: %d" % [id.capitalize(), mine.ores[id]])
-	_ore_label.text = "  ".join(counts)
+	_ore_label.text = "\n".join(counts)
 	_shaft.queue_redraw()
 
 

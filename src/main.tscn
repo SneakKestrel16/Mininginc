@@ -1,4 +1,4 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://src/economy/economy.gd" id="1_economy"]
 [ext_resource type="PackedScene" path="res://src/ui/power_panel.tscn" id="2_panel"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" path="res://src/ui/heart_panel.tscn" id="6_heart"]
 [ext_resource type="PackedScene" path="res://src/ui/turbine_panel.tscn" id="7_turbine"]
 [ext_resource type="Script" path="res://src/save/save_game.gd" id="8_save"]
+[ext_resource type="PackedScene" path="res://src/ui/reactor_panel.tscn" id="9_reactor"]
 
 [node name="Main" type="Control"]
 layout_mode = 3
@@ -56,6 +57,10 @@ layout_mode = 2
 economy = NodePath("../../../../Economy")
 
 [node name="TurbinePanel" parent="Center/Columns/Generators" node_paths=PackedStringArray("economy") instance=ExtResource("7_turbine")]
+layout_mode = 2
+economy = NodePath("../../../../Economy")
+
+[node name="ReactorPanel" parent="Center/Columns/Generators" node_paths=PackedStringArray("economy") instance=ExtResource("9_reactor")]
 layout_mode = 2
 economy = NodePath("../../../../Economy")
 

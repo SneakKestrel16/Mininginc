@@ -1,7 +1,7 @@
 # Story 008: Mid layer uranium + fission reactor
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: In Progress
 > **Layer**: Feature
 > **Type**: Logic
 > **Estimate**: M
@@ -61,10 +61,12 @@
 - src/save/save_game.gd
 - src/ui/reactor_panel.gd
 - src/ui/reactor_panel.tscn
+- src/mining/dig_shaft_view.gd
 - src/main.tscn
 - data/ores.json
 - data/economy.json
 - tests/unit/heartwake/fission_reactor_check.gd
+- tests/integration/heartwake/save_offline_check.gd
 
 ## QA Test Cases
 
