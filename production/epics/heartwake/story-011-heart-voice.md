@@ -1,7 +1,7 @@
 # Story 011: Heart stage 5: Voice
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Estimate**: S
@@ -53,11 +53,9 @@
 
 ## Files
 
-- src/heart/heart.gd
-- src/economy/economy.gd
-- src/ui/heart_panel.gd
-- src/ui/heart_panel.tscn
 - data/heart_stages.json
+- src/economy/economy.gd
+- src/ui/hud.gd
 - tests/integration/heartwake/heart_stages_check.gd
 
 ## QA Test Cases
@@ -79,3 +77,10 @@
 
 - Depends on: `production/epics/heartwake/story-010-heart-sight.md`
 - Unlocks: `production/epics/heartwake/story-012-milestone-2-pacing.md`
+
+## Completion Notes
+**Completed**: 2026-10-23
+**Criteria**: 6/6 passing (windowed probe on the second monitor: crossing Voice showed its line, then four spoken lines 5 s apart; L replayed them; drill speed went from 1.25 to 2.5 hits/s; the HUD said every stage is reached)
+**Deviations**: The bonus is a new effect, `drill_bonus` (value 1.0: drills land twice the hits), rather than more `output_bonus`: it is what makes power sent to the drills worth more after Voice. Spoken lines live in the stage's `lines` array; the HUD offers [L] once any reached stage has them. Threshold 5000 is a placeholder for story 012.
+**Test Evidence**: waived at qa.level minimal; `tests/integration/heartwake/heart_stages_check.gd` covers the shipped Voice stage; screenshot in `production/qa/evidence/story-011-heart-voice/`
+**Reviewed by**: self, no independent review

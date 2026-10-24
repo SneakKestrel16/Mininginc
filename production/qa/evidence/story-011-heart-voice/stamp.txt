@@ -1,0 +1,4 @@
+Reviewed-Content-Hash: data/heart_stages.json cb88ff53640ae3680579a571cfd234b90a8956f5
+Reviewed-Content-Hash: src/economy/economy.gd ddaa60358825f6f220f38bfb480da142f638f7a8
+Reviewed-Content-Hash: src/ui/hud.gd 5bd9ca549d70a018b6d48eab766577a65232ab88
+Reviewed-Content-Hash: tests/integration/heartwake/heart_stages_check.gd 6666e74d197962bb6e581a76a567939a1caac135

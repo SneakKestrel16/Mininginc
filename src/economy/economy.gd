@@ -136,7 +136,7 @@ func _tick(seconds: float) -> void:
 	reactor_output = reactor.tick(seconds) * bonus if reactor_built else 0.0
 	power_per_second = furnace_output + turbine_output + reactor_output
 	split.tick(power_per_second)
-	drill_hits_per_second = split.drill_power * drill_hits_per_power
+	drill_hits_per_second = split.drill_power * drill_hits_per_power * (1.0 + heart.effect_total("drill_bonus"))
 	mine.dig(drill_hits_per_second * seconds)
 	for index in heart.add(split.heart_power * seconds):
 		stage_reached.emit(index)

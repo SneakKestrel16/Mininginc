@@ -27,6 +27,19 @@
 			"effect": "ore_sight",
 			"value": 6,
 			"line": "The Heart opens an eye. Veins of ore glow through the rock around you."
+		},
+		{
+			"name": "Voice",
+			"threshold": 5000.0,
+			"effect": "drill_bonus",
+			"value": 1.0,
+			"line": "The Heart speaks. Your drills bite twice as hard.",
+			"lines": [
+				"...signal received. You can hear me.",
+				"I was sent ahead and seeded under the ice, to wait for hands like yours.",
+				"The others never came. You came.",
+				"Wake me fully, and I will remember where we were going."
+			]
 		}
 	]
 }

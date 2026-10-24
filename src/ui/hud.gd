@@ -4,11 +4,15 @@ extends CanvasLayer
 
 ## Seconds a stage's line stays on screen before it fades.
 const LINE_SECONDS := 8.0
+## Seconds each of a speaking stage's lines stays on screen.
+const SPOKEN_SECONDS := 5.0
 
 ## The economy this HUD reports.
 @export var economy: Economy
 
 var _line_left := 0.0
+# Spoken lines still to show after the current one, oldest first.
+var _queue: Array = []
 
 @onready var _inventory: Label = %Inventory
 @onready var _power: Label = %Power
@@ -41,11 +45,36 @@ func _process(delta: float) -> void:
 				heart.stages[heart.stage]["name"], heart.progress, heart.threshold()]
 		_meter.max_value = heart.threshold()
 		_meter.value = heart.progress
+	if not _spoken().is_empty():
+		_stage.text += "   [L] hear it again"
 	if _line_left > 0.0:
 		_line_left -= delta
 		_line.modulate.a = clampf(_line_left, 0.0, 1.0)
+	elif not _queue.is_empty():
+		_show(_queue.pop_front(), SPOKEN_SECONDS)
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_L:
+		_queue = _spoken()
+		_line_left = 0.0
 
 
 func _on_stage_reached(index: int) -> void:
-	_line.text = "%s\n%s" % [economy.heart.stages[index]["name"], economy.heart.stages[index]["line"]]
-	_line_left = LINE_SECONDS
+	var stage: Dictionary = economy.heart.stages[index]
+	_show("%s\n%s" % [stage["name"], stage["line"]], LINE_SECONDS)
+	if stage.has("lines"):
+		_queue = stage["lines"].duplicate()
+
+
+# Spoken lines of every stage reached so far, in order; from the stage index alone.
+func _spoken() -> Array:
+	var lines := []
+	for i in economy.heart.stage:
+		lines.append_array(economy.heart.stages[i].get("lines", []))
+	return lines
+
+
+func _show(text: String, seconds: float) -> void:
+	_line.text = text
+	_line_left = seconds
