@@ -3,7 +3,7 @@
 **One-sentence pitch:** A lone miner on a frozen moon splits every watt between the drills that keep them alive and a buried machine called the Heart, which wakes one stage at a time and shows more of what it is.
 
 ## Core loop
-- Dig down into the ground, by clicking at first and then with power-hungry drills. Ores are hidden in the rock and show up as you dig; deeper rock is harder and costs more power.
+- Walk the moon in first person and dig into voxel rock with a hand drill, then with power-hungry auto-drills. Ores are hidden in the rock and show up as you dig; deeper rock is harder and costs more power.
 - Burn ore in generators to make power.
 - Set the slider: power to the drills grows income, power to the Heart moves it toward its next stage.
 - Each stage gives a permanent bonus and a story beat, which changes the best slider setting.
@@ -33,6 +33,19 @@ Shipped MVP is v0.1.1. This milestone gives power spent on the drills a payoff p
 14. Retune with the pacing simulator so that a split favouring the drills reaches Voice sooner than 100% to the Heart.
 
 Build order: 8 → 9 → 10 → 11 → 12 → 13 → 14. Thresholds and reactor numbers live in `data/*.json` and are set by step 14.
+
+## Milestone 3D — first-person on the moon
+Chosen 2026-10-23 after stories 008–009: the 2D panels did not feel like the intended game. The player picked a first-person miner on voxel terrain. The economy (furnace, turbine, reactor, Heart, slider, saves) stays; what you see and do moves into a 3D world. Stories 010–012 (Sight, Voice, pacing) wait until this lands; Sight then becomes ore veins glowing through the rock.
+
+15. Voxel moon: block terrain generated from the seed in chunks. The surface is an ice crust; ores sit in the rock by depth (coal near the top, then ice and copper, uranium from 100 m down). Frozen rock below 50 m is harder until Breath.
+16. First-person miner: walk, jump, look; hold click with the hand drill to break the block you aim at. Harder blocks take longer. Broken ore goes into your inventory (the old ore counters).
+17. Base machines in the world: the furnace, turbine and reactor are 3D objects. Look at one and press E to feed it, melt ice into it or cool it. Its state shows on the machine (glow, gauge) plus a small prompt.
+18. The Heart: a huge buried machine near the base. It glows and pulses brighter each stage; stage lines appear as on-screen text.
+19. HUD: crosshair, inventory strip, power readout and Heart stage.
+20. Power console and auto-drills: a terminal at the base holds the Drills/Heart slider. Auto-drills are machines you place on the ground; they bore straight down using drill power and collect what they hit.
+21. Saves keep the world's dug blocks, the player's position and placed drills, plus the economy; offline progress still runs.
+
+Build order: 15 → 16 → 17 → 18 → 19 → 20 → 21.
 
 ## Out of scope — not building this
 - Deeper tiers (Deep, Abyss, Core) and their twists: waste that later becomes fuel, the crystal placement grid, transmission loss.
