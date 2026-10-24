@@ -1,0 +1,8 @@
+{
+	"chunk_size": 16,
+	"world_size": 128,
+	"max_depth": 400,
+	"crust_depth": 2,
+	"wall_height": 4,
+	"view_radius_chunks": 4
+}

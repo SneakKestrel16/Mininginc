@@ -1,7 +1,7 @@
 # Story 013: Voxel moon terrain
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Core
 > **Type**: Logic
 > **Estimate**: L
@@ -56,7 +56,6 @@
 ## Files
 
 - src/world/voxel_world.gd
-- src/world/voxel_chunk.gd
 - src/world/blocks.gd
 - data/world.json
 - tests/unit/heartwake/voxel_world_check.gd
@@ -80,3 +79,11 @@
 
 - Depends on: `production/epics/heartwake/story-009-reactor-cooling-waste.md`
 - Unlocks: `production/epics/heartwake/story-014-first-person-miner.md`
+
+## Completion Notes
+**Completed**: 2026-10-23
+**Criteria**: 7/7 passing (self-check plus a rendered probe: 64 surface chunks build in about 0.2 s, a 70 m pit's 80 chunks in about 0.4 s)
+**Deviations**: No separate chunk script: `VoxelWorld` builds each chunk as a node with a mesh and a trimesh collision body. Blocks are never stored whole; a block is what the seed generates unless `edits` changes it, so story 018 saves only edits. Chunks are drawn only where air can touch a face (the surface layer and around dug blocks); solid rock is never meshed. A block's shade varies slightly by position so flat ground reads as blocks.
+**Known gap**: ore chances are the shaft's per-block chances, so coal speckles about a third of shallow rock; the pacing story should retune density, or add veins.
+**Test Evidence**: waived at qa.level minimal; self-check `tests/unit/heartwake/voxel_world_check.gd` passes; screenshots in `production/qa/evidence/story-013-voxel-moon/`
+**Reviewed by**: self, no independent review
