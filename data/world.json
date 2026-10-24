@@ -4,5 +4,11 @@
 	"max_depth": 400,
 	"crust_depth": 2,
 	"wall_height": 4,
-	"view_radius_chunks": 4
+	"view_radius_chunks": 4,
+	"move_speed": 5.0,
+	"jump_velocity": 4.0,
+	"gravity": 5.0,
+	"reach": 5.0,
+	"hand_drill_hits_per_second": 4.0,
+	"mouse_sensitivity": 0.0025
 }

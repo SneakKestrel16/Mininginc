@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=14 format=3]
 
 [ext_resource type="Script" path="res://src/economy/economy.gd" id="1_economy"]
 [ext_resource type="PackedScene" path="res://src/ui/power_panel.tscn" id="2_panel"]
@@ -10,16 +10,22 @@
 [ext_resource type="Script" path="res://src/save/save_game.gd" id="8_save"]
 [ext_resource type="PackedScene" path="res://src/ui/reactor_panel.tscn" id="9_reactor"]
 
-[node name="Main" type="Control"]
-layout_mode = 3
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+[ext_resource type="Script" path="res://src/world/voxel_world.gd" id="10_world"]
+[ext_resource type="PackedScene" path="res://src/player/player.tscn" id="11_player"]
+[ext_resource type="Script" path="res://src/ui/overlay.gd" id="12_overlay"]
 
-[node name="Mine" type="Node" parent="."]
+[sub_resource type="Environment" id="Env"]
+background_mode = 1
+background_color = Color(0.02, 0.02, 0.05, 1)
+ambient_light_source = 2
+ambient_light_color = Color(0.45, 0.5, 0.65, 1)
+ambient_light_energy = 0.6
+
+[node name="Main" type="Node3D"]
+
+[node name="Mine" type="Node" parent="." node_paths=PackedStringArray("world")]
 script = ExtResource("3_mine")
+world = NodePath("../World")
 
 [node name="Economy" type="Node" parent="." node_paths=PackedStringArray("mine")]
 script = ExtResource("1_economy")
@@ -31,7 +37,35 @@ economy = NodePath("../Economy")
 mine = NodePath("../Mine")
 away_dialog = NodePath("../AwayDialog")
 
-[node name="Center" type="CenterContainer" parent="."]
+[node name="World" type="Node3D" parent="."]
+script = ExtResource("10_world")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+transform = Transform3D(0.8660, 0.0000, -0.5000, -0.3830, 0.6428, -0.6634, 0.3214, 0.7660, 0.5567, 0, 20, 0)
+light_color = Color(0.9, 0.93, 1, 1)
+light_energy = 0.8
+shadow_enabled = true
+
+[node name="Environment" type="WorldEnvironment" parent="."]
+environment = SubResource("Env")
+
+[node name="Player" parent="." node_paths=PackedStringArray("world") instance=ExtResource("11_player")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64.5, 1.1, 64.5)
+world = NodePath("../World")
+
+[node name="Overlay" type="CanvasLayer" parent="." node_paths=PackedStringArray("player")]
+script = ExtResource("12_overlay")
+player = NodePath("../Player")
+
+[node name="Shade" type="ColorRect" parent="Overlay"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.6)
+
+[node name="Center" type="CenterContainer" parent="Overlay"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
@@ -39,43 +73,43 @@ anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Columns" type="HBoxContainer" parent="Center"]
+[node name="Columns" type="HBoxContainer" parent="Overlay/Center"]
 layout_mode = 2
 theme_override_constants/separation = 24
 
-[node name="DigShaftView" parent="Center/Columns" node_paths=PackedStringArray("mine") instance=ExtResource("4_shaft")]
+[node name="DigShaftView" parent="Overlay/Center/Columns" node_paths=PackedStringArray("mine") instance=ExtResource("4_shaft")]
 layout_mode = 2
-mine = NodePath("../../../Mine")
+mine = NodePath("../../../../Mine")
 
-[node name="Generators" type="VBoxContainer" parent="Center/Columns"]
+[node name="Generators" type="VBoxContainer" parent="Overlay/Center/Columns"]
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_constants/separation = 16
 
-[node name="FurnacePanel" parent="Center/Columns/Generators" node_paths=PackedStringArray("economy") instance=ExtResource("5_furnace")]
+[node name="FurnacePanel" parent="Overlay/Center/Columns/Generators" node_paths=PackedStringArray("economy") instance=ExtResource("5_furnace")]
 layout_mode = 2
-economy = NodePath("../../../../Economy")
+economy = NodePath("../../../../../Economy")
 
-[node name="TurbinePanel" parent="Center/Columns/Generators" node_paths=PackedStringArray("economy") instance=ExtResource("7_turbine")]
+[node name="TurbinePanel" parent="Overlay/Center/Columns/Generators" node_paths=PackedStringArray("economy") instance=ExtResource("7_turbine")]
 layout_mode = 2
-economy = NodePath("../../../../Economy")
+economy = NodePath("../../../../../Economy")
 
-[node name="ReactorPanel" parent="Center/Columns/Generators" node_paths=PackedStringArray("economy") instance=ExtResource("9_reactor")]
+[node name="ReactorPanel" parent="Overlay/Center/Columns/Generators" node_paths=PackedStringArray("economy") instance=ExtResource("9_reactor")]
 layout_mode = 2
-economy = NodePath("../../../../Economy")
+economy = NodePath("../../../../../Economy")
 
-[node name="Panels" type="VBoxContainer" parent="Center/Columns"]
+[node name="Panels" type="VBoxContainer" parent="Overlay/Center/Columns"]
 layout_mode = 2
 size_flags_vertical = 4
 theme_override_constants/separation = 16
 
-[node name="PowerPanel" parent="Center/Columns/Panels" node_paths=PackedStringArray("economy") instance=ExtResource("2_panel")]
+[node name="PowerPanel" parent="Overlay/Center/Columns/Panels" node_paths=PackedStringArray("economy") instance=ExtResource("2_panel")]
 layout_mode = 2
-economy = NodePath("../../../../Economy")
+economy = NodePath("../../../../../Economy")
 
-[node name="HeartPanel" parent="Center/Columns/Panels" node_paths=PackedStringArray("economy") instance=ExtResource("6_heart")]
+[node name="HeartPanel" parent="Overlay/Center/Columns/Panels" node_paths=PackedStringArray("economy") instance=ExtResource("6_heart")]
 layout_mode = 2
-economy = NodePath("../../../../Economy")
+economy = NodePath("../../../../../Economy")
 
 [node name="AwayDialog" type="AcceptDialog" parent="."]
 title = "Heartwake"

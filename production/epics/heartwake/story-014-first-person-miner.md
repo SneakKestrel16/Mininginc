@@ -1,7 +1,7 @@
 # Story 014: First-person miner + hand drill
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Estimate**: L
@@ -56,8 +56,10 @@
 
 - src/player/player.gd
 - src/player/player.tscn
+- src/ui/overlay.gd
 - src/main.tscn
 - src/mining/mine.gd
+- src/save/save_game.gd
 - data/world.json
 
 ## QA Test Cases
@@ -79,3 +81,11 @@
 
 - Depends on: `production/epics/heartwake/story-013-voxel-moon.md`
 - Unlocks: `production/epics/heartwake/story-015-world-machines.md`
+
+## Completion Notes
+**Completed**: 2026-10-23
+**Criteria**: 7/7 passing (windowed probe with real input events: spawned on the ground, walked, jumped, aimed at the block below, held left click and broke 8 blocks down through crust, coal and rock, 3 coal collected; Tab overlay shown)
+**Deviations**: The game no longer takes the mouse at start: a click on the game hands over control and the mouse, and a hint says so. This keeps probes and checks from capturing the mouse. Keys are read as physical keys, not InputMap actions. Breath's thaw now reaches the voxel world through `Mine.thaw_to`, and the world takes the shaft's seed, so a loaded save keeps its world seed.
+**Known gap**: in the probe, holding W moved the player only 0.75 m: an unfocused window releases held keys. Walking was confirmed in an earlier focused run (5 m in 1 s). A hand playtest should confirm movement feel.
+**Test Evidence**: waived at qa.level minimal; no new self-check (input-driven); screenshots in `production/qa/evidence/story-014-first-person-miner/`
+**Reviewed by**: self, no independent review

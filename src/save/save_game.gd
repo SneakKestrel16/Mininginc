@@ -134,6 +134,8 @@ static func validate(data: Variant) -> String:
 static func apply(data: Dictionary, economy: Economy, mine: Mine) -> void:
 	var shaft := mine.shaft
 	shaft.shaft_seed = int(data["mine"]["seed"])
+	if mine.world:
+		mine.world.world_seed = shaft.shaft_seed
 	shaft.depth = int(data["mine"]["depth"])
 	shaft.damage = data["mine"]["damage"]
 	shaft.revealed = data["mine"]["revealed"]

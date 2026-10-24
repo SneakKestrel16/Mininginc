@@ -7,7 +7,11 @@ signal changed
 
 const CONFIG_PATH := "res://data/ores.json"
 
-## The shaft being dug.
+## The voxel moon the player digs; ore broken there is collected here. Optional, so
+## checks can run a Mine alone.
+@export var world: VoxelWorld
+
+## The shaft the economy's drills dig until story 017 moves them into the world.
 var shaft: DigShaft
 
 ## Ore id to amount found so far. Rock is not counted.
@@ -26,6 +30,9 @@ func _ready() -> void:
 	shaft = DigShaft.new(randi(), config["hardness_base"], config["hardness_per_block"], config["ores"],
 			config["frozen_from_depth"], config["frozen_hardness_multiplier"])
 	_base_frozen_from = config["frozen_from_depth"]
+	if world:
+		world.world_seed = shaft.shaft_seed
+		world.block_broken.connect(_collect)
 
 
 ## Lands [param hits] on the shaft and collects any ore it breaks out. Clicks land 1 hit;
@@ -45,6 +52,14 @@ func thaw_to(depth: int) -> void:
 	var floor_depth := maxi(_base_frozen_from, depth)
 	if floor_depth != shaft.frozen_from:
 		shaft.frozen_from = floor_depth
+		changed.emit()
+	if world:
+		world.thaw_to(depth)
+
+
+func _collect(_pos: Vector3i, block_name: String) -> void:
+	if block_name in ores:
+		ores[block_name] += 1
 		changed.emit()
 
 

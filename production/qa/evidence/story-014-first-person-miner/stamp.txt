@@ -1,0 +1,7 @@
+Reviewed-Content-Hash: src/player/player.gd 5a2da55997bf6dd4b22d13a450666635670f35f5
+Reviewed-Content-Hash: src/player/player.tscn fae1978956ba8c7fe993cf8de2dd8d240a54e589
+Reviewed-Content-Hash: src/ui/overlay.gd cb646e70f5ad7a98bd3395b6bf70e23801c0ac2e
+Reviewed-Content-Hash: src/main.tscn 332979d3a7c10646ac8d761baee5acbc8f8b5f59
+Reviewed-Content-Hash: src/mining/mine.gd 34f565939a1b84db144f684dccabbb1e0d92401a
+Reviewed-Content-Hash: src/save/save_game.gd 230572dffc19fff7f62e50654e3fe71f52497f96
+Reviewed-Content-Hash: data/world.json 67e4ea0e9418cd78b2776a7800ec838e412247a7

@@ -1,0 +1,67 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://src/player/player.gd" id="1_player"]
+
+[sub_resource type="CapsuleShape3D" id="Capsule"]
+radius = 0.35
+height = 1.7
+
+[sub_resource type="BoxMesh" id="MarkerMesh"]
+size = Vector3(1.02, 1.02, 1.02)
+
+[sub_resource type="StandardMaterial3D" id="MarkerMaterial"]
+transparency = 1
+shading_mode = 0
+albedo_color = Color(0.05, 0.02, 0, 0.12)
+
+[node name="Player" type="CharacterBody3D"]
+script = ExtResource("1_player")
+
+[node name="Shape" type="CollisionShape3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.85, 0)
+shape = SubResource("Capsule")
+
+[node name="Head" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1.55, 0)
+
+[node name="Camera" type="Camera3D" parent="Head"]
+fov = 80.0
+
+[node name="Headlamp" type="SpotLight3D" parent="Head"]
+light_energy = 1.0
+spot_range = 18.0
+spot_angle = 50.0
+spot_angle_attenuation = 0.5
+
+[node name="TargetMarker" type="MeshInstance3D" parent="."]
+mesh = SubResource("MarkerMesh")
+material_override = SubResource("MarkerMaterial")
+
+[node name="Crosshair" type="CanvasLayer" parent="."]
+
+[node name="Dot" type="Label" parent="Crosshair"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -6.0
+offset_top = -14.0
+offset_right = 6.0
+offset_bottom = 12.0
+text = "+"
+horizontal_alignment = 1
+
+[node name="Hint" type="Label" parent="Crosshair"]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -340.0
+offset_top = 30.0
+offset_right = 340.0
+offset_bottom = 80.0
+text = "Click to play
+WASD move · Space jump · hold left click to drill · Esc frees the mouse · Tab panels"
+horizontal_alignment = 1
