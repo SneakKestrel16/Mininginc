@@ -1,7 +1,7 @@
 # Story 019: Dev menu
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: UI
 > **Estimate**: S
@@ -53,8 +53,8 @@
 ## Files
 
 - src/ui/dev_menu.gd
-- src/ui/dev_menu.tscn
 - src/player/player.gd
+- src/player/player.tscn
 - src/main.tscn
 
 ## QA Test Cases
@@ -76,3 +76,10 @@
 
 - Depends on: `production/epics/heartwake/story-018-world-saves.md`
 - Unlocks: `production/epics/heartwake/story-020-hand-tool-power.md`
+
+## Completion Notes
+**Completed**: 2026-10-24
+**Criteria**: 6/6 passing (windowed probe on the second monitor pressing each control: +25 copper, set stage 3 thawed the frozen floor to 100 m, Fill meter reached stage 4, +1 min burned 6 coal from the furnace, fly held height with collision off, To Heart moved the player beside the Heart)
+**Deviations**: Built in code with no scene file. Fill meter adds exactly what the meter lacks, so the stage's line and bonuses play as in normal play. Fly is three times walking speed.
+**Test Evidence**: waived at qa.level minimal; screenshot in `production/qa/evidence/story-019-dev-menu/`
+**Reviewed by**: self, no independent review

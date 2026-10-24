@@ -23,6 +23,12 @@ var controls_enabled := false
 var _target_normal := Vector3.ZERO
 ## True while an overlay is open, which hides the "click to play" hint.
 var hint_blocked := false
+## Dev menu fly mode: no gravity, no collision, Space up and Ctrl down, three times the speed.
+var flying := false:
+	set(on):
+		flying = on
+		$Shape.disabled = on
+		velocity = Vector3.ZERO
 
 var _move_speed: float
 var _jump_velocity: float
@@ -91,17 +97,20 @@ func set_controls(on: bool) -> void:
 
 func _physics_process(delta: float) -> void:
 	world.update_around(global_position)
-	velocity.y -= _gravity * delta
+	if not flying:
+		velocity.y -= _gravity * delta
 	var wish := Vector2.ZERO
 	var drilling := false
 	if controls_enabled:
 		wish = Vector2(
 			float(Input.is_physical_key_pressed(KEY_D)) - float(Input.is_physical_key_pressed(KEY_A)),
 			float(Input.is_physical_key_pressed(KEY_S)) - float(Input.is_physical_key_pressed(KEY_W)))
-		if Input.is_physical_key_pressed(KEY_SPACE) and is_on_floor():
+		if flying:
+			velocity.y = (float(Input.is_physical_key_pressed(KEY_SPACE)) - float(Input.is_physical_key_pressed(KEY_CTRL))) * _move_speed * 3.0
+		elif Input.is_physical_key_pressed(KEY_SPACE) and is_on_floor():
 			velocity.y = _jump_velocity
 		drilling = Input.is_mouse_button_pressed(MOUSE_BUTTON_LEFT)
-	var move := (transform.basis * Vector3(wish.x, 0.0, wish.y)).normalized() * _move_speed
+	var move := (transform.basis * Vector3(wish.x, 0.0, wish.y)).normalized() * _move_speed * (3.0 if flying else 1.0)
 	velocity.x = move.x
 	velocity.z = move.z
 	move_and_slide()
