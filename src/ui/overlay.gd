@@ -1,5 +1,6 @@
-## The Drills/Heart slider, opened from the power console (story 017). While it is open
-## the player has no control and the mouse is free; Esc, E or Tab closes it.
+## The Drills/Heart slider and the upgrade shop, opened from the power console (stories
+## 017, 025). While it is open the player has no control and the mouse is free; Esc, E or
+## Tab closes it.
 class_name Overlay
 extends CanvasLayer
 

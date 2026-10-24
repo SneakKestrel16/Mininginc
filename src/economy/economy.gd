@@ -9,6 +9,7 @@ signal stage_reached(index: int)
 
 const CONFIG_PATH := "res://data/economy.json"
 const STAGES_PATH := "res://data/heart_stages.json"
+const UPGRADES_PATH := "res://data/upgrades.json"
 
 ## The mine the drills dig and the furnace's coal comes from.
 @export var mine: Mine
@@ -40,6 +41,9 @@ var reactor_cost: int
 ## The Heart, which stores the Heart share and grants each stage's bonus.
 var heart: Heart
 
+## Upgrade levels bought with ore at the power console.
+var upgrades: Upgrades
+
 ## Power produced per second by all generators over the last tick.
 var power_per_second: float = 0.0
 ## The furnace's part of [member power_per_second], bonus included.
@@ -69,12 +73,14 @@ func _ready() -> void:
 			"reactor_heat_limit", "reactor_heat_restart", "reactor_cooling_per_second", "reactor_heat_per_ice",
 			"reactor_waste_per_uranium"])
 	var stage_config := _load_json(STAGES_PATH, ["stages"])
-	if config.is_empty() or stage_config.is_empty() or not _valid_stages(stage_config["stages"]):
+	var upgrade_config := _load_json(UPGRADES_PATH, ["upgrades"])
+	if config.is_empty() or stage_config.is_empty() or upgrade_config.is_empty() or not _valid_stages(stage_config["stages"]):
 		set_process(false)
 		return
 	_tick_seconds = config["tick_seconds"]
 	split = PowerSplit.new(config["heart_share_default"])
 	heart = Heart.new(stage_config["stages"])
+	upgrades = Upgrades.new(upgrade_config["upgrades"])
 	furnace = Furnace.new(
 		config["furnace_fuel_capacity"],
 		config["furnace_burn_seconds_per_coal"],
@@ -120,9 +126,21 @@ func advance(seconds: float, step: float) -> void:
 		left -= step
 
 
-## Applies every stage bonus that does not wait for a tick, after a save is loaded.
+## Applies every stage bonus and upgrade that does not wait for a tick, after a save is
+## loaded or an upgrade bought.
 func apply_heart() -> void:
 	mine.thaw_to(int(heart.effect_total("thaw_to_depth")))
+	if mine.world:
+		mine.world.bite_bonus = upgrades.effect("scoop_radius")
+
+
+## Buys the next level of upgrade [param id] with the mine's ore. Returns false when it
+## cannot be bought.
+func buy_upgrade(id: String) -> bool:
+	if not upgrades.buy(id, mine):
+		return false
+	apply_heart()
+	return true
 
 
 # Bonuses are read from the Heart's stage every tick, never stored in the systems they
@@ -136,7 +154,7 @@ func _tick(seconds: float) -> void:
 	reactor_output = reactor.tick(seconds) * bonus if reactor_built else 0.0
 	power_per_second = furnace_output + turbine_output + reactor_output
 	split.tick(power_per_second)
-	drill_hits_per_second = split.drill_power * drill_hits_per_power * (1.0 + heart.effect_total("drill_bonus"))
+	drill_hits_per_second = split.drill_power * drill_hits_per_power * (1.0 + heart.effect_total("drill_bonus")) 			* (1.0 + upgrades.effect("drill_speed"))
 	mine.dig(drill_hits_per_second * seconds)
 	for index in heart.add(split.heart_power * seconds):
 		stage_reached.emit(index)

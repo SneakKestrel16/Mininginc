@@ -97,8 +97,10 @@ func _unhandled_input(event: InputEvent) -> void:
 
 ## Hits per second the hand tool lands: its own rate plus its share of drill power.
 func hand_rate() -> float:
-	var bonus := mine.hand_share(economy.drill_hits_per_second) * _power_bonus if economy else 0.0
-	return _drill_rate + bonus
+	if economy == null:
+		return _drill_rate
+	var bonus := mine.hand_share(economy.drill_hits_per_second) * _power_bonus
+	return (_drill_rate + bonus) * (1.0 + economy.upgrades.effect("hand_speed"))
 
 
 ## Hands control (and the mouse) to the player, or takes it away.
@@ -139,7 +141,8 @@ func _physics_process(delta: float) -> void:
 ## Finds the ground under the crosshair within reach.
 func _aim() -> void:
 	var from := _camera.global_position
-	var query := PhysicsRayQueryParameters3D.create(from, from - _camera.global_basis.z * _reach)
+	var reach := _reach + (economy.upgrades.effect("reach") if economy else 0.0)
+	var query := PhysicsRayQueryParameters3D.create(from, from - _camera.global_basis.z * reach)
 	query.exclude = [get_rid()]
 	var hit := get_world_3d().direct_space_state.intersect_ray(query)
 	target = null

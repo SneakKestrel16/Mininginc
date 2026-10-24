@@ -35,6 +35,7 @@ func _initialize() -> void:
 	a.economy.reactor.heat = 80.0
 	a.economy.reactor.scrammed = true
 	a.economy.reactor.waste = 3.5
+	a.economy.upgrades.levels["long_arm"] = 2
 	var data := SaveGame.capture(a.economy, a.mine, 1000.0, a.player)
 	failures += _check(a.mine.drills[0].depth_y < 0 and data["world"]["edits"].size() == 4 * a.mine.world.edits.size(),
 			"the world is saved as its changed samples only")

@@ -97,6 +97,7 @@ static func capture(economy: Economy, mine: Mine, now: float, player: Player = n
 		"drills": drills,
 		"heart_share": economy.split.heart_share,
 		"heart": { "stage": economy.heart.stage, "progress": economy.heart.progress },
+		"upgrades": economy.upgrades.levels.duplicate(),
 		"furnace": { "fuel": economy.furnace.fuel, "burn_left": economy.furnace.burn_left },
 		"turbine": {
 			"built": economy.turbine_built,
@@ -165,6 +166,8 @@ static func apply(data: Dictionary, economy: Economy, mine: Mine, player: Player
 	economy.split.heart_share = data["heart_share"]
 	economy.heart.stage = int(data["heart"]["stage"])
 	economy.heart.progress = data["heart"]["progress"]
+	# Optional within format 4: saves from before the shop load with nothing bought.
+	economy.upgrades.load_levels(data.get("upgrades", {}))
 	economy.furnace.fuel = int(data["furnace"]["fuel"])
 	economy.furnace.burn_left = data["furnace"]["burn_left"]
 	economy.turbine_built = data["turbine"]["built"]

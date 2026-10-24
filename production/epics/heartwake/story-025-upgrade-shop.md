@@ -1,7 +1,7 @@
 # Story 025: Upgrade shop
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Estimate**: M
@@ -28,11 +28,11 @@
 
 *From `design/game-brief.md` (Milestone 5 item 28–29), scoped to this story:*
 
-- [ ] The power console's panel lists each upgrade with its level, cap, effect and the ore the next level costs.
-- [ ] Buying takes the ore and raises the level; it is refused when ore is short or the cap is reached.
-- [ ] Each level costs more than the last.
-- [ ] Tool motor speeds hand digging; wider scoop carves bigger chunks; longer arm adds reach; drill gearing speeds drill power.
-- [ ] Upgrade levels are saved and loaded, and take effect at once; older saves load with none bought.
+- [x] The power console's panel lists each upgrade with its level, cap, effect and the ore the next level costs.
+- [x] Buying takes the ore and raises the level; it is refused when ore is short or the cap is reached.
+- [x] Each level costs more than the last.
+- [x] Tool motor speeds hand digging; wider scoop carves bigger chunks; longer arm adds reach; drill gearing speeds drill power.
+- [x] Upgrade levels are saved and loaded, and take effect at once; older saves load with none bought.
 
 ---
 

@@ -36,6 +36,8 @@ var wall_height: int
 var view_radius: int
 ## Radius of one scoop, in metres.
 var bite_radius: float
+## Metres the Wider scoop upgrade adds to [member bite_radius].
+var bite_bonus := 0.0
 ## Centre of the Heart's cavern: a sealed ball of air deep under the base.
 var heart_center: Vector3
 ## Radius of the Heart's cavern, in metres.
@@ -191,7 +193,7 @@ func dig(point: Vector3, hits: float) -> Dictionary:
 	if damage[cell] < needed - 0.0001:
 		return {}
 	damage.erase(cell)
-	return carve(point, bite_radius)
+	return carve(point, bite_radius + bite_bonus)
 
 
 ## Carves a ball of [param radius] at [param center] out of the ground, sparing bedrock and

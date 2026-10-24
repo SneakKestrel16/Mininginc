@@ -1,5 +1,5 @@
-## The power console at the base (brief: Milestone 3D item 20). E opens the Drills/Heart
-## slider; the player looks at it like any machine.
+## The power console at the base (brief: Milestone 3D item 20, Milestone 5 item 28). E opens
+## the Drills/Heart slider and the upgrade shop; the player looks at it like any machine.
 class_name PowerConsole
 extends Node3D
 
@@ -30,7 +30,7 @@ func _ready() -> void:
 
 ## What the player sees while looking at the console.
 func prompt() -> String:
-	return "Power console: %.0f%% to the Heart\n[E] Set the Drills/Heart split" % (economy.split.heart_share * 100.0)
+	return "Power console: %.0f%% to the Heart\n[E] Power split and upgrades" % (economy.split.heart_share * 100.0)
 
 
 ## E: open the slider.
