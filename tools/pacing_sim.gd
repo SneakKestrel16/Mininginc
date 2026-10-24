@@ -5,7 +5,7 @@
 ## Each strategy is an attentive player in the 3D game: hand-drills one column down from
 ## the base, refuels and cools everything whenever there is room, builds the turbine and the
 ## reactor as soon as copper allows, then places auto-drills with the copper left. It runs
-## live play's simulation (Economy.advance) and digs the real voxel world.
+## live play's simulation (Economy.advance) and scoops the real smooth world.
 extends SceneTree
 
 const STEP := 0.5
@@ -48,7 +48,7 @@ func _run(strategy: Dictionary, tuning: Dictionary) -> void:
 	world.world_seed = 1234
 	_apply(tuning, economy, mine, world)
 	var hand_rate: float = JSON.parse_string(FileAccess.get_file_as_string("res://data/world.json"))["hand_drill_hits_per_second"]
-	# The player's own column, dug like a drill so hits carry from block to block; ore seen
+	# The player's own column, dug like a drill so hits carry from scoop to scoop; ore seen
 	# in its walls is mined out first.
 	var hand := AutoDrill.new()
 	hand.setup(world, mine, Vector3i(10, 0, 10))
@@ -112,23 +112,24 @@ func _hand_dig(world: VoxelWorld, hand: AutoDrill, veins: Array[Vector3i], hits:
 				_see_ore(world, Vector3i(hand.column.x, before, hand.column.y), veins)
 			continue
 		var pos: Vector3i = veins[0]
-		var remaining: float = world.hardness(pos) - world.damage.get(pos, 0.0)
-		if world.block_at(pos) <= Blocks.ROCK or is_inf(remaining):
+		var remaining: float = world.hardness_at(pos) - world.damage.get(pos, 0.0)
+		if not world.is_solid(pos) or world.material_at(pos) <= Blocks.ROCK or is_inf(remaining):
 			veins.pop_front()
 			continue
 		var used := minf(left, remaining)
 		left -= used
-		if world.hit(pos, used) != "":
+		world.dig(Vector3(pos), used)
+		if not world.damage.has(pos):
 			veins.pop_front()
 			_see_ore(world, pos, veins)
 
 
-# Queues the ore around [param pos] that has just come into view (a vein is followed, but
-# never more than 30 blocks at once).
+# Queues the ore just past the wall of the scoop at [param pos] that has come into view (a
+# deposit is followed, but never more than 30 scoops at once).
 func _see_ore(world: VoxelWorld, pos: Vector3i, veins: Array[Vector3i]) -> void:
 	for side in [Vector3i.LEFT, Vector3i.RIGHT, Vector3i.FORWARD, Vector3i.BACK, Vector3i.UP]:
-		var next: Vector3i = pos + side
-		if world.block_at(next) > Blocks.ROCK and not next in veins and veins.size() < 30:
+		var next: Vector3i = pos + side * 2
+		if world.is_solid(next) and world.material_at(next) > Blocks.ROCK and not next in veins and veins.size() < 30:
 			veins.append(next)
 
 
@@ -139,6 +140,7 @@ func _apply(tuning: Dictionary, economy: Economy, mine: Mine, world: VoxelWorld)
 	if tuning.has("ore_scale"):
 		for ore in world._ores:
 			ore["chance"] *= tuning["ore_scale"]
+		world._seed_noise()  # the deposit cutoffs follow the chances
 	if tuning.has("drill_rate"):
 		economy.drill_hits_per_power = tuning["drill_rate"]
 	if tuning.has("thresholds"):

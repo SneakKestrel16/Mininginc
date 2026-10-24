@@ -1,7 +1,7 @@
 # Story 024: Saves and pacing for smooth ground
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Estimate**: M
@@ -28,10 +28,10 @@
 
 *From `design/game-brief.md` (Milestone 4 item 27), scoped to this story:*
 
-- [ ] Saves keep every carved change to the ground, and loading rebuilds the same holes.
-- [ ] A save from v0.2.x loads its economy and inventory onto a fresh smooth world.
-- [ ] The pacing simulator digs by scooping, and the shipped tuning keeps a drills-heavy split ahead of 100% to the Heart, with no strategy stuck.
-- [ ] Every self-check passes.
+- [x] Saves keep every carved change to the ground, and loading rebuilds the same holes.
+- [x] A save from v0.2.x loads its economy and inventory onto a fresh smooth world.
+- [x] The pacing simulator digs by scooping, and the shipped tuning keeps a drills-heavy split ahead of 100% to the Heart, with no strategy stuck.
+- [x] Every self-check passes.
 
 ---
 
@@ -73,3 +73,15 @@
 
 - Depends on: `production/epics/heartwake/story-023-buried-heart.md`
 - Unlocks: none
+
+## Results (shipped tuning, seed 1234, tools/pacing_sim.gd)
+
+| Strategy | Breath | Sight | Awake |
+|---|---|---|---|
+| hand only, 50% Heart | 11:12 | 31:59 | 68:14 |
+| 6 drills, 50% Heart | 11:12 | 38:21 | 56:08 |
+| 6 drills, 100% Heart | 11:12 | 31:59 | 68:14 |
+| 6 drills, 25% Heart | 11:12 | 38:34 | 74:08 |
+
+The simulated hand column stops near 61 m in every run: it keeps following the large
+mid-depth deposits (frequency 0.08) rather than going deeper. One seed, one player model.
