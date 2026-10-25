@@ -9,7 +9,8 @@ const CRUST := 2
 const ROCK := 3
 
 ## Index is the block id. Ores follow the fixed types, in this order.
-const NAMES: Array[String] = ["air", "bedrock", "crust", "rock", "coal", "ice", "copper", "uranium"]
+const NAMES: Array[String] = ["air", "bedrock", "crust", "rock", "coal", "ice", "copper", "uranium", "iron", "quartz",
+		"gold"]
 
 const COLORS: Array[Color] = [
 	Color(0, 0, 0, 0),
@@ -20,6 +21,9 @@ const COLORS: Array[Color] = [
 	Color(0.55, 0.85, 1.0),
 	Color(0.85, 0.45, 0.2),
 	Color(0.35, 0.95, 0.35),
+	Color(0.55, 0.25, 0.18),
+	Color(0.95, 0.88, 0.98),
+	Color(1.0, 0.8, 0.15),
 ]
 
 

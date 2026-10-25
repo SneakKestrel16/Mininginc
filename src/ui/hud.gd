@@ -46,8 +46,9 @@ func _process(delta: float) -> void:
 	var ores := economy.mine.ores
 	var counts := PackedStringArray()
 	for id in ores:
-		counts.append("%s %d" % [id.capitalize(), ores[id]])
-	_inventory.text = "   ".join(counts)
+		if ores[id] > 0:
+			counts.append("%s %d" % [id.capitalize(), ores[id]])
+	_inventory.text = "   ".join(counts) if not counts.is_empty() else "Inventory empty"
 	_power.text = "Power %.1f/s   Hand tool %.1f hits/s" % [economy.power_per_second, player.hand_rate()]
 	if economy.resonance > 0:
 		_power.text += "   Resonance %d (+%d%% power)" % [economy.resonance,

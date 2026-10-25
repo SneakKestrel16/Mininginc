@@ -1,7 +1,7 @@
 # Story 031: New ores: iron, quartz, gold
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Logic
 > **Estimate**: S
@@ -28,9 +28,9 @@
 
 *From `design/game-brief.md` (Milestone 8 item 36), scoped to this story:*
 
-- [ ] Iron lies from the crust to 80 m, quartz from 40 to 140 m, gold from 100 m down and rarer than uranium.
-- [ ] Each comes in deposits, has its own colour, and glows under Sight.
-- [ ] Digging them adds them to the inventory; the HUD lists only what the player holds.
+- [x] Iron lies from the crust to 80 m, quartz from 40 to 140 m, gold from 100 m down and rarer than uranium.
+- [x] Each comes in deposits, has its own colour, and glows under Sight.
+- [x] Digging them adds them to the inventory; the HUD lists only what the player holds.
 
 ---
 

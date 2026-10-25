@@ -46,6 +46,9 @@ func _initialize() -> void:
 			"coal near the top, no ice or copper there")
 	failures += _check(counts.has("ice@mid") and counts.has("copper@mid") and not counts.has("uranium@mid"), "ice and copper below 50 m")
 	failures += _check(counts.has("uranium@deep") and not counts.has("uranium@shallow"), "uranium from 100 m")
+	failures += _check(counts.has("iron@shallow") and counts.has("quartz@mid") and counts.has("gold@deep")
+			and not counts.has("gold@mid") and counts.get("gold@deep", 0) < counts.get("uranium@deep", 0),
+			"iron near the top, quartz in the middle, gold deep and rarer than uranium")
 	var coal_share: float = counts.get("coal@shallow", 0) / float(counts.get("coal@shallow", 0) + counts.get("rock@shallow", 0))
 	failures += _check(coal_share > 0.04 and coal_share < 0.13, "coal is about 8%% of shallow rock (%.3f)" % coal_share)
 	failures += _check(lumpy > total / 2, "ore comes in deposits: most ore has the same ore beside it (%d of %d)" % [lumpy, total])
