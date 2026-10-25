@@ -141,9 +141,12 @@ func _physics_process(delta: float) -> void:
 			scooped.emit(got)
 	_show_target()
 	_hint.visible = not controls_enabled and not hint_blocked
-	_prompt.visible = machine != null and controls_enabled
+	var guarded := target != null and world.is_protected(Vector3i(target.floor()))
+	_prompt.visible = (machine != null or guarded) and controls_enabled
 	if machine:
 		_prompt.text = machine.prompt()
+	elif guarded:
+		_prompt.text = "The machines stand on this ground: dig further out"
 
 
 ## Finds the ground under the crosshair within reach.

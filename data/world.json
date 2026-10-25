@@ -20,5 +20,7 @@
 	"bite_radius": 1.2,
 	"bite_cost": 2.0,
 	"base_min": [56, -4, 55],
-	"base_max": [74, 6, 68]
+	"base_max": [74, 6, 68],
+	"machines_min": [57, -4, 55],
+	"machines_max": [73, 6, 63]
 }

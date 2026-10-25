@@ -42,7 +42,7 @@ var bite_bonus := 0.0
 var heart_center: Vector3
 ## Radius of the Heart's cavern, in metres.
 var heart_radius: float
-# Where the machines stand: flat and never carved, so nothing floats.
+# The base: flat ground around the machines.
 var _base := AABB()
 
 var _ores: Array
@@ -70,7 +70,7 @@ var _ready_done := false
 func _ready() -> void:
 	var world := _load_json(WORLD_PATH, ["chunk_size", "world_size", "max_depth", "crust_depth", "wall_height",
 			"view_radius_chunks", "heart_cavern_center", "heart_cavern_radius", "surface_bumps", "ore_noise_frequency",
-			"bite_radius", "bite_cost", "base_min", "base_max"])
+			"bite_radius", "bite_cost", "base_min", "base_max", "machines_min", "machines_max"])
 	var ores := _load_json(ORES_PATH, ["hardness_base", "hardness_per_block", "frozen_from_depth",
 			"frozen_hardness_multiplier", "ores"])
 	if world.is_empty() or ores.is_empty():
@@ -90,7 +90,11 @@ func _ready() -> void:
 	var base_low := Vector3(world["base_min"][0], world["base_min"][1], world["base_min"][2])
 	var base_high := Vector3(world["base_max"][0], world["base_max"][1], world["base_max"][2])
 	_base = AABB(base_low, base_high - base_low)
-	_protected.append(_base)
+	# Only the row the machines and console stand on is never carved, so nothing floats; the
+	# rest of the base, where the player starts, digs like anywhere else.
+	var machines_low := Vector3(world["machines_min"][0], world["machines_min"][1], world["machines_min"][2])
+	var machines_high := Vector3(world["machines_max"][0], world["machines_max"][1], world["machines_max"][2])
+	_protected.append(AABB(machines_low, machines_high - machines_low))
 	_ores = ores["ores"]
 	for ore in _ores:
 		var id := Blocks.id_of(ore["id"])
@@ -186,7 +190,7 @@ func thaw_to(depth: int) -> void:
 func dig(point: Vector3, hits: float) -> Dictionary:
 	var cell := Vector3i(point.floor())
 	var needed := hardness_at(cell)
-	if hits <= 0.0 or is_inf(needed):
+	if hits <= 0.0 or is_inf(needed) or _is_protected(cell):
 		return {}
 	damage[cell] = damage.get(cell, 0.0) + hits
 	# A hair under counts: hits are summed in floats, which can stop just short.
@@ -290,6 +294,11 @@ func chunk_node(key: Vector3i) -> Node3D:
 
 func _is_wall(pos: Vector3i) -> bool:
 	return pos.x == 0 or pos.z == 0 or pos.x == world_size - 1 or pos.z == world_size - 1
+
+
+## True when no scoop may touch [param pos]: ground under the machines.
+func is_protected(pos: Vector3i) -> bool:
+	return _is_protected(pos)
 
 
 func _is_protected(pos: Vector3i) -> bool:

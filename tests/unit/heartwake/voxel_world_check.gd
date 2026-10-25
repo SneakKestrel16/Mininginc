@@ -66,7 +66,9 @@ func _initialize() -> void:
 	world.carve(Vector3(1, 0, 5), 3.0)
 	failures += _check(world.is_solid(Vector3i(0, 0, 5)) and not world.is_solid(Vector3i(2, 0, 5)), "a scoop spares bedrock")
 	world.carve(Vector3(64, 0, 60), 3.0)
-	failures += _check(world.is_solid(Vector3i(64, 0, 60)), "a scoop spares the base")
+	failures += _check(world.is_solid(Vector3i(64, 0, 60)) and world.dig(Vector3(64.5, 0.5, 60.5), 1e6).is_empty() \
+			and not world.damage.has(Vector3i(64, 0, 60)), "the machines' ground is never carved, and digging it wastes no hits")
+	failures += _check(not world.dig(Vector3(64.5, 0.5, 66.5), 1e6).is_empty(), "the rest of the base, where the player starts, digs")
 
 	# The Heart's cavern: open air deep down, sealed by rock all the way up.
 	var top := Vector3i(world.heart_center.floor())
