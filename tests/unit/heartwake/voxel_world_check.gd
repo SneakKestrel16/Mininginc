@@ -47,7 +47,7 @@ func _initialize() -> void:
 	failures += _check(counts.has("ice@mid") and counts.has("copper@mid") and not counts.has("uranium@mid"), "ice and copper below 50 m")
 	failures += _check(counts.has("uranium@deep") and not counts.has("uranium@shallow"), "uranium from 100 m")
 	var coal_share: float = counts.get("coal@shallow", 0) / float(counts.get("coal@shallow", 0) + counts.get("rock@shallow", 0))
-	failures += _check(coal_share > 0.1 and coal_share < 0.25, "coal is about 17.5%% of shallow rock (%.3f)" % coal_share)
+	failures += _check(coal_share > 0.04 and coal_share < 0.13, "coal is about 8%% of shallow rock (%.3f)" % coal_share)
 	failures += _check(lumpy > total / 2, "ore comes in deposits: most ore has the same ore beside it (%d of %d)" % [lumpy, total])
 
 	var shallow := Vector3i(5, -10, 5)

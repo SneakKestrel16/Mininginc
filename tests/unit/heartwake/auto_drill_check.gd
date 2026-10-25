@@ -45,6 +45,17 @@ func _initialize() -> void:
 	failures += _check(b.ores["copper"] == copper_before + b.drill_cost and b.drills.is_empty()
 			and not b.world.is_solid(Vector3i(40, -10, 40)), "picking a drill up returns its copper; the column stays dug")
 
+	# Thawing under a half-dug frozen cell must not hang the drill: damage then exceeds the
+	# new hardness (this once looped forever in the pacing simulator).
+	var d := await _mine(6)
+	d.ores["copper"] = 10
+	var deep := d.place_drill(Vector3i(50, -60, 50))
+	var cell := Vector3i(50, -60, 50)
+	d.world.damage[cell] = d.world.hardness_at(cell) * 0.9
+	d.world.thaw_to(100)
+	d.dig(2.0)
+	failures += _check(deep.depth_y < -60 and not d.world.damage.has(cell), "thawing under a half-dug cell finishes it, no hang")
+
 	print("auto_drill_check: %s" % ("PASS" if failures == 0 else "%d FAILED" % failures))
 	quit(1 if failures else 0)
 

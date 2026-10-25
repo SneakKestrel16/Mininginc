@@ -67,7 +67,8 @@ func dig(hits: float) -> void:
 		if is_inf(needed):
 			stopped = true
 			break
-		var remaining: float = needed - world.damage.get(pos, 0.0)
+		# Never below zero: thawing lowers hardness under damage already landed.
+		var remaining: float = maxf(needed - world.damage.get(pos, 0.0), 0.0)
 		var used := minf(left, remaining)
 		world.dig(Vector3(pos) + Vector3(0.5, 0.5, 0.5), used)
 		left -= used

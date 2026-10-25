@@ -15,7 +15,7 @@ func _initialize() -> void:
 	a.mine.ores["copper"] = a.mine.drill_cost
 	a.mine.place_drill(Vector3i(20, 0, 20))
 	a.mine.dig(30.0)
-	a.mine.ores["coal"] = 6
+	a.mine.ores["coal"] = 40
 	a.player.global_position = Vector3(30.5, 1.0, 40.25)
 	a.player.rotation.y = 1.25
 	a.player.get_node("Head").rotation.x = -0.5
@@ -69,7 +69,7 @@ func _initialize() -> void:
 	SaveGame.apply(JSON.parse_string(JSON.stringify(base)), hand.economy, hand.mine)
 	hand.economy.heart.stage = 0
 	hand.economy.advance(600.0, 5.0)
-	failures += _check(not hand.economy.furnace.is_burning() and hand.mine.ores["coal"] >= 6, "offline without drones: the furnace burns out, no coal fed in")
+	failures += _check(not hand.economy.furnace.is_burning() and hand.mine.ores["coal"] >= 40, "offline without drones: the furnace burns out, no coal fed in")
 	failures += _check(offline.economy.furnace.is_burning(), "offline with drones: coal is fed in, so the furnace still burns")
 
 	failures += _check(SaveGame.validate("x") != "" and SaveGame.validate({}) != "" and SaveGame.validate({ "version": 99 }) != "", "bad saves are refused")
@@ -83,7 +83,7 @@ func _initialize() -> void:
 	var v1_start: Vector3 = v1.player.global_position
 	failures += _check(SaveGame.validate(old) == "", "a format 1 save is accepted")
 	SaveGame.apply(old, v1.economy, v1.mine)
-	failures += _check(v1.mine.ores["coal"] == 6 and v1.economy.turbine_built and not v1.economy.reactor_built,
+	failures += _check(v1.mine.ores["coal"] == 40 and v1.economy.turbine_built and not v1.economy.reactor_built,
 			"a format 1 save loads, with no reactor")
 	failures += _check(v1.mine.world.edits.is_empty() and v1.mine.drills.is_empty() and v1.player.global_position == v1_start,
 			"a pre-3D save starts a fresh world, with the player at the base")

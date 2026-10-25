@@ -16,7 +16,7 @@
 	"heart_cavern_radius": 7.0,
 	"drill_build_copper": 3,
 	"surface_bumps": 1.5,
-	"ore_noise_frequency": 0.08,
+	"ore_noise_frequency": 0.12,
 	"bite_radius": 1.2,
 	"bite_cost": 2.0,
 	"base_min": [56, -4, 55],

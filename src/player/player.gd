@@ -44,6 +44,13 @@ var _drill_rate: float
 var _sensitivity: float
 var _power_bonus: float
 var _effects := DigEffects.new()
+## Hits the tool has built up toward its next scoop. Kept in the tool, not in the ground, so
+## small aim shifts while holding the button never lose progress.
+var _progress := 0.0
+var _drilling := false
+## The drill held in view; built on first use, so a live reload adds it to a running game.
+var _tool: Node3D = null
+var _bit: Node3D = null
 
 @onready var _head: Node3D = $Head
 @onready var _camera: Camera3D = $Head/Camera
@@ -134,11 +141,20 @@ func _physics_process(delta: float) -> void:
 	velocity.z = move.z
 	move_and_slide()
 	_aim()
-	if drilling and target != null:
-		var got := world.dig(target, hand_rate() * delta)
-		if not got.is_empty():
-			_effects.play(target, got)
-			scooped.emit(got)
+	_drilling = drilling and target != null and not world.is_protected(Vector3i(target.floor()))
+	if not drilling:
+		_progress = 0.0
+	if _drilling:
+		var needed := world.hardness_at(Vector3i(target.floor()))
+		if not is_inf(needed):
+			_progress += hand_rate() * delta
+			# A hair under counts: hits are summed in floats, which can stop just short.
+			if _progress >= needed - 0.0001:
+				_progress = 0.0
+				var got := world.carve(target, world.scoop_radius())
+				_effects.play(target, got)
+				scooped.emit(got)
+	_animate_tool(delta)
 	_show_target()
 	_hint.visible = not controls_enabled and not hint_blocked
 	var guarded := target != null and world.is_protected(Vector3i(target.floor()))
@@ -165,17 +181,82 @@ func _aim() -> void:
 		machine = owner_node
 		return
 	_target_normal = hit["normal"]
-	# A little into the ground, so the point's cell is the rock being dug, not the air.
-	target = hit["position"] - hit["normal"] * 0.25
+	# Half a metre into the ground: each scoop bites in, not just skims the surface.
+	target = hit["position"] - hit["normal"] * 0.5
 
 
-## Marks the spot being dug, redder and more solid the closer the next scoop is.
+## Shows the scoop the tool will cut as a glowing dome over the ground: the part above the
+## surface shows, the ground hides the rest. It fills in as the scoop nears, and goes grey
+## where nothing can be dug.
 func _show_target() -> void:
 	_marker.visible = target != null
 	if target == null:
 		return
+	if not _marker.mesh is SphereMesh or (_marker.mesh as SphereMesh).radius != 1.0:
+		var dome := SphereMesh.new()
+		dome.radius = 1.0
+		dome.height = 2.0
+		_marker.mesh = dome
+		_marker_material.cull_mode = BaseMaterial3D.CULL_DISABLED
+		_marker_material.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+		_marker_material.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	_marker.global_position = target
+	_marker.scale = Vector3.ONE * world.scoop_radius()
 	var cell := Vector3i(target.floor())
 	var needed: float = world.hardness_at(cell)
-	var done: float = world.damage.get(cell, 0.0) / needed if needed > 0.0 and not is_inf(needed) else 0.0
-	_marker_material.albedo_color = Color(1.0, 0.55 - 0.4 * done, 0.15, 0.35 + 0.6 * done)
+	if is_inf(needed) or world.is_protected(cell):
+		_marker_material.albedo_color = Color(0.6, 0.6, 0.65, 0.12)
+		return
+	var done := clampf(_progress / needed, 0.0, 1.0) if needed > 0.0 else 0.0
+	_marker_material.albedo_color = Color(1.0, 0.6 - 0.4 * done, 0.15, 0.12 + 0.33 * done)
+
+
+# The drill in view: spins and shakes while digging, pushes toward the ground on each scoop
+# and eases back when idle.
+func _animate_tool(delta: float) -> void:
+	if _tool == null:
+		_tool = Node3D.new()
+		_tool.position = Vector3(0.32, -0.28, -0.55)
+		_tool.scale = Vector3.ONE * 0.55
+		_camera.add_child(_tool)
+		var metal := StandardMaterial3D.new()
+		metal.albedo_color = Color(0.35, 0.36, 0.4)
+		metal.metallic = 0.7
+		metal.roughness = 0.35
+		var accent := StandardMaterial3D.new()
+		accent.albedo_color = Color(0.85, 0.55, 0.15)
+		var body := MeshInstance3D.new()
+		body.mesh = CylinderMesh.new()
+		body.mesh.top_radius = 0.07
+		body.mesh.bottom_radius = 0.09
+		body.mesh.height = 0.36
+		body.rotation.x = PI / 2.0
+		body.material_override = accent
+		_tool.add_child(body)
+		_bit = Node3D.new()
+		_bit.position = Vector3(0, 0, -0.26)
+		_tool.add_child(_bit)
+		var cone := MeshInstance3D.new()
+		cone.mesh = CylinderMesh.new()
+		cone.mesh.top_radius = 0.0
+		cone.mesh.bottom_radius = 0.06
+		cone.mesh.height = 0.2
+		cone.rotation.x = -PI / 2.0
+		cone.material_override = metal
+		_bit.add_child(cone)
+		for i in 3:  # flutes, so the spin shows
+			var flute := MeshInstance3D.new()
+			flute.mesh = BoxMesh.new()
+			flute.mesh.size = Vector3(0.012, 0.09, 0.16)
+			flute.rotation.z = i * TAU / 3.0
+			flute.material_override = metal
+			_bit.add_child(flute)
+	var rest := Vector3(0.32, -0.28, -0.55)
+	if _drilling:
+		_bit.rotate_z(delta * 40.0)
+		var push := 0.04 + 0.03 * sin(Time.get_ticks_msec() / 25.0)
+		var shake := Vector3(randf_range(-1, 1), randf_range(-1, 1), 0) * 0.008
+		_tool.position = rest + Vector3(0, 0, -push) + shake
+	else:
+		_bit.rotate_z(delta * 3.0)
+		_tool.position = _tool.position.lerp(rest + Vector3(0, sin(Time.get_ticks_msec() / 600.0) * 0.006, 0), delta * 8.0)

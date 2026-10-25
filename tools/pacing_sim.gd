@@ -124,7 +124,7 @@ func _hand_dig(world: VoxelWorld, hand: AutoDrill, veins: Array[Vector3i], hits:
 				_see_ore(world, Vector3i(hand.column.x, before, hand.column.y), veins)
 			continue
 		var pos: Vector3i = veins[0]
-		var remaining: float = world.hardness_at(pos) - world.damage.get(pos, 0.0)
+		var remaining: float = maxf(world.hardness_at(pos) - world.damage.get(pos, 0.0), 0.0)
 		if not world.is_solid(pos) or world.material_at(pos) <= Blocks.ROCK or is_inf(remaining):
 			veins.pop_front()
 			continue

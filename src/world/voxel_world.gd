@@ -184,20 +184,27 @@ func thaw_to(depth: int) -> void:
 	frozen_from = maxi(_base_frozen_from, depth)
 
 
+## Radius of a scoop now, upgrades included.
+func scoop_radius() -> float:
+	return bite_radius + bite_bonus
+
+
 ## Lands [param hits] of digging at [param point]. When they reach a scoop's hardness the
 ## scoop is carved there and what it removed is returned (material name to samples);
 ## else returns an empty Dictionary and the hits wait for the next call at that spot.
 func dig(point: Vector3, hits: float) -> Dictionary:
 	var cell := Vector3i(point.floor())
 	var needed := hardness_at(cell)
-	if hits <= 0.0 or is_inf(needed) or _is_protected(cell):
+	# Zero hits still finish a scoop whose damage already covers it: after Breath thaws
+	# rock, damage landed while it was frozen can exceed the new, lower hardness.
+	if hits < 0.0 or is_inf(needed) or _is_protected(cell):
 		return {}
 	damage[cell] = damage.get(cell, 0.0) + hits
 	# A hair under counts: hits are summed in floats, which can stop just short.
 	if damage[cell] < needed - 0.0001:
 		return {}
 	damage.erase(cell)
-	return carve(point, bite_radius + bite_bonus)
+	return carve(point, scoop_radius())
 
 
 ## Carves a ball of [param radius] at [param center] out of the ground, sparing bedrock and
