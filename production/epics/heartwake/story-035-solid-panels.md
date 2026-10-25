@@ -1,7 +1,7 @@
 # Story 035: Solid console panels
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: UI
 > **Estimate**: S
@@ -28,8 +28,8 @@
 
 *From `design/game-brief.md` (Milestone 9 item 40), scoped to this story:*
 
-- [ ] The console's power, upgrade and crafting panels are opaque, with a clear border.
-- [ ] Nothing of the game, the hint text or the drill shows through them.
+- [x] The console's power, upgrade and crafting panels are opaque, with a clear border.
+- [x] Nothing of the game, the hint text or the drill shows through them.
 
 ---
 
@@ -48,7 +48,7 @@
 
 ## Files
 
-- src/ui/overlay_theme.tres
+- src/ui/overlay.gd (theme built in code, not a .tres)
 - src/main.tscn
 - src/player/player.gd
 

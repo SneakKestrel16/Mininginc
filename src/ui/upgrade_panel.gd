@@ -56,9 +56,5 @@ func _refresh() -> void:
 		if upgrades.is_maxed(id):
 			buy.text = "Maxed"
 		else:
-			var price := upgrades.cost(id)
-			var parts := PackedStringArray()
-			for ore in price:
-				parts.append("%d %s" % [price[ore], ore])
-			buy.text = "Buy: " + ", ".join(parts)
+			buy.text = "Buy: " + Mine.cost_text(upgrades.cost(id))
 		buy.disabled = not upgrades.can_buy(id, economy.mine.ores)

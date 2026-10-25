@@ -1,7 +1,7 @@
 # Story 034: Ore flecks on the ground
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Visual/Feel
 > **Estimate**: M
@@ -28,9 +28,9 @@
 
 *From `design/game-brief.md` (Milestone 9 item 39), scoped to this story:*
 
-- [ ] Rock and crust show a fine grain instead of flat colour.
-- [ ] Every ore surface is flecked with specks in its own colour that catch the light; coal's specks glint against its black.
-- [ ] A deposit stands out from plain rock in a probe screenshot, lit by the headlamp only.
+- [x] Rock and crust show a fine grain instead of flat colour.
+- [x] Every ore surface is flecked with specks in its own colour that catch the light; coal's specks glint against its black.
+- [x] A deposit stands out from plain rock in a probe screenshot, lit by the headlamp only.
 
 ---
 

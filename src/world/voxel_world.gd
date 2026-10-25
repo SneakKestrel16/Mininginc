@@ -68,7 +68,7 @@ var _protected: Array[AABB] = []
 var _open_chunks: Dictionary = {}
 # Chunk key to its drawn node.
 var _built: Dictionary = {}
-var _material := StandardMaterial3D.new()
+var _material := ShaderMaterial.new()
 var _ready_done := false
 
 
@@ -113,8 +113,7 @@ func _ready() -> void:
 	_frozen_multiplier = ores["frozen_hardness_multiplier"]
 	_base_frozen_from = ores["frozen_from_depth"]
 	frozen_from = _base_frozen_from
-	_material.vertex_color_use_as_albedo = true
-	_material.roughness = 0.95
+	_material.shader = load("res://src/world/terrain.gdshader")
 	var chunks := ceili(world_size / float(chunk_size))
 	for cx in chunks:
 		for cz in chunks:
@@ -513,7 +512,10 @@ func _build(key: Vector3i) -> void:
 					if corner[c] > corner[best]:
 						best = c
 				var at := low + Vector3i(best & 1, (best >> 1) & 1, (best >> 2) & 1)
-				colors.append(Blocks.COLORS[material_at(at)] * (0.92 + 0.12 * _shade(at)))
+				var what := material_at(at)
+				var color: Color = Blocks.COLORS[what] * (0.92 + 0.12 * _shade(at))
+				color.a = 1.0 if what > Blocks.ROCK else 0.0  # the shader flecks ore
+				colors.append(color)
 	var indices := PackedInt32Array()
 	# Edges from samples this chunk owns (origin .. origin+n-1) along +x, +y, +z.
 	for axis in 3:

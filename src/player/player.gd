@@ -257,6 +257,7 @@ func _animate_tool(delta: float) -> void:
 			flute.rotation.z = i * TAU / 3.0
 			flute.material_override = metal
 			_bit.add_child(flute)
+	_tool.visible = controls_enabled  # put away while an overlay or menu has the mouse
 	var rest := Vector3(0.32, -0.28, -0.55)
 	if _drilling:
 		_bit.rotate_z(delta * 40.0)
