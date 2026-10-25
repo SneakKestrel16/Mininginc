@@ -85,6 +85,15 @@ Chosen 2026-10-24 by the user after v0.4.0 and story 027: the run needs an endin
 
 Build order: 32 + 33 → 34 → 35.
 
+## Milestone 8 — crafting
+Chosen 2026-10-24 by the user during the v0.5.0 playtest ("we should add crafting to it to craft different items and with that add more ores that are used for crafting"). The same playtest asked for coal to look clearly different from plain ground; that waits for a graphics pass.
+
+36. New ores: iron (shallow to mid), quartz (mid) and gold (deep, rare), in deposits like the others, coloured and shown by Sight.
+37. Crafting at the power console: recipes turn ore into parts — iron plate, copper wire, glass, circuit — each taking a moment's worth of ore, made one at a time or five at a time.
+38. Parts are what things cost: auto-drills take plates and wire, the reactor takes circuits, and upgrade levels take parts as well as ore. The pacing simulator crafts what it needs.
+
+Build order: 36 → 37 → 38.
+
 ## Out of scope — not building this
 - Deeper tiers (Deep, Abyss, Core) and their twists: waste that later becomes fuel, the crystal placement grid, transmission loss.
 - The star map, and Resonance spent on anything but generator strength.
