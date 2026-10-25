@@ -36,14 +36,18 @@ func _init() -> void:
 	shaft.frozen_from = 100
 	failures += _check(shaft.hardness(3) == 1 and shaft.dig(1.0).size() == 1, "thawed rock digs at normal hardness")
 
-	# The shipped stages: Voice is the fifth and last, speaks, and doubles the drills.
+	# The shipped stages: Voice is the fifth, speaks, and doubles the drills; Wake is the last.
 	var shipped: Array = JSON.parse_string(FileAccess.get_file_as_string("res://data/heart_stages.json"))["stages"]
 	var voice := Heart.new(shipped)
 	voice.stage = 4
 	failures += _check(shipped[4]["name"] == "Voice" and voice.effect_total("drill_bonus") == 0.0 and not voice.is_awake(), "Voice comes after Sight")
 	voice.stage = 5
-	failures += _check(voice.effect_total("drill_bonus") == 1.0 and voice.is_awake() and shipped[4]["lines"].size() >= 3,
-			"Voice speaks, doubles the drills, and is the last stage in this build")
+	failures += _check(voice.effect_total("drill_bonus") == 1.0 and not voice.is_awake() and shipped[4]["lines"].size() >= 3,
+			"Voice speaks and doubles the drills")
+	voice.stage = 6
+	failures += _check(shipped.size() == 6 and shipped[5]["name"] == "Wake" and voice.is_awake()
+			and shipped[5]["threshold"] > shipped[4]["threshold"] and shipped[5]["lines"].size() >= 2,
+			"Wake is the sixth and last stage, the largest, and speaks")
 
 	print("heart_stages_check: %s" % ("PASS" if failures == 0 else "%d FAILED" % failures))
 	quit(1 if failures else 0)

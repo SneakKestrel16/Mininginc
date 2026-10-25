@@ -19,6 +19,8 @@ const CONFIG_PATH := "res://data/save.json"
 var save_path := "user://savegame.json"
 
 var _offline_cap: float
+# True once the Heart has launched: the finished run must never be saved again.
+var _launched := false
 var _offline_step: float
 
 
@@ -29,6 +31,7 @@ func _ready() -> void:
 		push_error("Cannot read %s; saving is off this session" % CONFIG_PATH)
 		OS.alert("Cannot read %s. The game will run, but nothing will be saved." % CONFIG_PATH, "Heartwake")
 		return
+	economy.resonance = load_resonance()
 	_offline_cap = config["offline_cap_seconds"]
 	_offline_step = config["offline_step_seconds"]
 	load_game()
@@ -47,6 +50,8 @@ func _notification(what: int) -> void:
 ## Writes the current state to [member save_path], through a temporary file so a crash
 ## mid-write never leaves a half-written save.
 func save_game() -> void:
+	if _launched:
+		return
 	var temp := save_path + ".tmp"
 	var file := FileAccess.open(temp, FileAccess.WRITE)
 	if file == null:
@@ -55,6 +60,32 @@ func save_game() -> void:
 	file.store_string(JSON.stringify(capture(economy, mine, Time.get_unix_time_from_system(), player), "\t"))
 	file.close()
 	DirAccess.rename_absolute(temp, save_path)
+
+
+## Where Resonance is kept: beside the run save, never inside it, so a new moon keeps it.
+func resonance_path() -> String:
+	return save_path.get_basename() + ".resonance.json"
+
+
+## Resonance earned on earlier moons; 0 when there is no file or it cannot be read.
+func load_resonance() -> int:
+	var data = JSON.parse_string(FileAccess.get_file_as_string(resonance_path())) 			if FileAccess.file_exists(resonance_path()) else null
+	return maxi(int(data.get("resonance", 0)), 0) if data is Dictionary else 0
+
+
+## Ends the run after a launch (brief: Milestone 7 item 34): banks one point of Resonance,
+## deletes the run save, and starts a new moon on a fresh seed. The save goes before the
+## reload, so a crash mid-reset cannot bring the finished run back.
+func new_moon() -> void:
+	_launched = true
+	var file := FileAccess.open(resonance_path(), FileAccess.WRITE)
+	if file == null:
+		push_error("Cannot write %s (error %d)" % [resonance_path(), FileAccess.get_open_error()])
+		return
+	file.store_string(JSON.stringify({ "resonance": economy.resonance + 1 }))
+	file.close()
+	DirAccess.remove_absolute(save_path)
+	get_tree().reload_current_scene()
 
 
 ## Loads [member save_path] if there is one, then plays the time since it was saved.

@@ -44,6 +44,11 @@ var heart: Heart
 ## Upgrade levels bought with ore at the power console.
 var upgrades: Upgrades
 
+## Points earned by launching the Heart off earlier moons; kept across resets by SaveGame.
+var resonance: int = 0
+## Share of output each point of [member resonance] adds to every generator.
+var resonance_power_bonus: float
+
 ## Power produced per second by all generators over the last tick.
 var power_per_second: float = 0.0
 ## The furnace's part of [member power_per_second], bonus included.
@@ -71,7 +76,7 @@ func _ready() -> void:
 			"turbine_water_per_second", "water_per_ice", "reactor_build_copper", "reactor_fuel_capacity",
 			"reactor_burn_seconds_per_uranium", "reactor_power_per_second", "reactor_heat_per_second",
 			"reactor_heat_limit", "reactor_heat_restart", "reactor_cooling_per_second", "reactor_heat_per_ice",
-			"reactor_waste_per_uranium"])
+			"reactor_waste_per_uranium", "resonance_power_bonus"])
 	var stage_config := _load_json(STAGES_PATH, ["stages"])
 	var upgrade_config := _load_json(UPGRADES_PATH, ["upgrades"])
 	if config.is_empty() or stage_config.is_empty() or upgrade_config.is_empty() or not _valid_stages(stage_config["stages"]):
@@ -87,6 +92,7 @@ func _ready() -> void:
 		config["furnace_power_per_second"],
 	)
 	drill_hits_per_power = config["drill_hits_per_power_second"]
+	resonance_power_bonus = config["resonance_power_bonus"]
 	turbine = SteamTurbine.new(
 		config["turbine_fuel_capacity"],
 		config["turbine_burn_seconds_per_coal"],
@@ -148,7 +154,7 @@ func buy_upgrade(id: String) -> bool:
 func _tick(seconds: float) -> void:
 	if heart.has_effect("drones"):
 		feed_furnace()
-	var bonus := 1.0 + heart.effect_total("output_bonus") + upgrades.effect("power_bonus")
+	var bonus := 1.0 + heart.effect_total("output_bonus") + upgrades.effect("power_bonus") 			+ resonance * resonance_power_bonus
 	furnace_output = furnace.tick(seconds) * bonus
 	turbine_output = turbine.tick(seconds) * bonus if turbine_built else 0.0
 	reactor_output = reactor.tick(seconds) * bonus if reactor_built else 0.0

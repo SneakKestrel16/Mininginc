@@ -1,7 +1,7 @@
 # Story 028: Wake and launch
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Estimate**: M
@@ -28,10 +28,10 @@
 
 *From `design/game-brief.md` (Milestone 7 item 32–33), scoped to this story:*
 
-- [ ] Heart stage 6, Wake, follows Voice with a much larger threshold; the HUD counts six stages.
-- [ ] When Wake is reached the Heart rises in its cavern, glows at full strength, and says its last lines.
-- [ ] Looking at the awake Heart offers [E] Launch; before Wake it only shows its stage.
-- [ ] Launching plays a short ending: fade out, the moon falling away below, the Heart's closing words, and the Resonance the run earned.
+- [x] Heart stage 6, Wake, follows Voice with a much larger threshold; the HUD counts six stages.
+- [x] When Wake is reached the Heart rises in its cavern, glows at full strength, and says its last lines.
+- [x] Looking at the awake Heart offers [E] Launch; before Wake it only shows its stage.
+- [x] Launching plays a short ending: fade out, the moon falling away below, the Heart's closing words, and the Resonance the run earned.
 
 ---
 

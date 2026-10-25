@@ -40,6 +40,23 @@
 				"The others never came. You came.",
 				"Wake me fully, and I will remember where we were going."
 			]
+		},
+		{
+			"name": "Wake",
+			"threshold": 200000.0,
+			"effect": "wake",
+			"value": 0,
+			"line": "The Heart wakes. It rises in its cavern, burning like a small sun.",
+			"lines": [
+				"I remember now. We were going home.",
+				"This moon was only a place to wait.",
+				"Come to me, and we will leave together."
+			],
+			"launch_lines": [
+				"The ice splits. The Heart rises through it, and you with it.",
+				"Below, the moon falls away: a pale stone with one bright scar.",
+				"Thank you. There are other moons, and others like me, still asleep."
+			]
 		}
 	]
 }

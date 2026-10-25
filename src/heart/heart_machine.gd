@@ -2,7 +2,7 @@
 ## (brief: Milestone 3D item 18, Milestone 4 item 26). It glows and pulses brighter and
 ## faster at each stage, read from the stage index every frame, so a loaded save looks
 ## right at once. Its light and a low hum reach up through the rock, so the player can
-## dig toward it.
+## dig toward it. Awake (stage Wake), it rises and offers to launch (Milestone 7 item 33).
 class_name HeartMachine
 extends Node3D
 
@@ -14,16 +14,22 @@ extends Node3D
 @export var radius := 3.0
 ## Pitch of the hum, in hertz.
 @export var hum_hz := 55.0
+## Plays the launch; the awake Heart's E starts it.
+@export var ending: Ending
+## Metres the awake Heart rises above its resting place.
+@export var rise := 2.5
 
 var _core_material := StandardMaterial3D.new()
 var _light := OmniLight3D.new()
 var _hum := AudioStreamPlayer3D.new()
 var _hum_phase := 0.0
+var _rest: Vector3
 
 
 func _ready() -> void:
 	if world:
 		global_position = world.heart_center
+	_rest = global_position
 	var core := MeshInstance3D.new()
 	core.mesh = SphereMesh.new()
 	core.mesh.radius = radius
@@ -65,7 +71,29 @@ func _ready() -> void:
 	_hum.play()
 
 
-func _process(_delta: float) -> void:
+## What the player sees while looking at the Heart.
+func prompt() -> String:
+	var heart := economy.heart
+	if heart.is_awake():
+		return "The Heart is awake.
+[E] Launch"
+	return "The Heart: %s (%d/%d)" % ["asleep" if heart.stage == 0 else heart.current()["name"], heart.stage,
+			heart.stages.size()]
+
+
+## E: launch, once the Heart is awake.
+func use_primary() -> void:
+	if economy.heart.is_awake() and ending:
+		ending.play()
+
+
+func use_secondary() -> void:
+	pass
+
+
+func _process(delta: float) -> void:
+	var target_y := _rest.y + (rise if economy.heart.is_awake() else 0.0)
+	global_position.y = move_toward(global_position.y, target_y, delta * 0.5)
 	var stage := economy.heart.stage
 	var count := maxi(economy.heart.stages.size(), 1)
 	var awake := float(stage) / count

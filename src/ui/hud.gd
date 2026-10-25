@@ -49,6 +49,9 @@ func _process(delta: float) -> void:
 		counts.append("%s %d" % [id.capitalize(), ores[id]])
 	_inventory.text = "   ".join(counts)
 	_power.text = "Power %.1f/s   Hand tool %.1f hits/s" % [economy.power_per_second, player.hand_rate()]
+	if economy.resonance > 0:
+		_power.text += "   Resonance %d (+%d%% power)" % [economy.resonance,
+				roundi(economy.resonance * economy.resonance_power_bonus * 100.0)]
 	if heart:
 		var to_heart := heart.global_position - player.global_position
 		# Rounded to 5 m: a sense of direction, not a map.

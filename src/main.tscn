@@ -1,4 +1,4 @@
-[gd_scene load_steps=16 format=3]
+[gd_scene load_steps=17 format=3]
 
 [ext_resource type="Script" path="res://src/economy/economy.gd" id="1_economy"]
 [ext_resource type="PackedScene" path="res://src/ui/power_panel.tscn" id="2_panel"]
@@ -15,6 +15,7 @@
 [ext_resource type="Script" path="res://src/heart/ore_sight.gd" id="17_sight"]
 [ext_resource type="Script" path="res://src/ui/dev_menu.gd" id="18_dev"]
 [ext_resource type="Script" path="res://src/ui/upgrade_panel.gd" id="19_upgrades"]
+[ext_resource type="Script" path="res://src/ui/ending.gd" id="20_ending"]
 
 [sub_resource type="Environment" id="Env"]
 background_mode = 1
@@ -77,11 +78,12 @@ kind = "reactor"
 size = Vector3(3, 3.5, 3)
 color = Color(0.32, 0.4, 0.3, 1)
 
-[node name="Heart" type="Node3D" parent="." node_paths=PackedStringArray("economy", "world")]
+[node name="Heart" type="Node3D" parent="." node_paths=PackedStringArray("economy", "world", "ending")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64.5, -40.5, 49.5)
 script = ExtResource("14_heart")
 economy = NodePath("../Economy")
 world = NodePath("../World")
+ending = NodePath("../Ending")
 
 [node name="OreSight" type="MultiMeshInstance3D" parent="." node_paths=PackedStringArray("economy", "world", "player")]
 script = ExtResource("17_sight")
@@ -150,6 +152,12 @@ script = ExtResource("18_dev")
 economy = NodePath("../Economy")
 player = NodePath("../Player")
 heart = NodePath("../Heart")
+
+[node name="Ending" type="CanvasLayer" parent="." node_paths=PackedStringArray("economy", "player", "save_game")]
+script = ExtResource("20_ending")
+economy = NodePath("../Economy")
+player = NodePath("../Player")
+save_game = NodePath("../SaveGame")
 
 [node name="AwayDialog" type="AcceptDialog" parent="."]
 title = "Heartwake"

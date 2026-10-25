@@ -1,7 +1,7 @@
 # Story 029: Resonance reset
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Estimate**: M
@@ -28,10 +28,10 @@
 
 *From `design/game-brief.md` (Milestone 7 item 34), scoped to this story:*
 
-- [ ] Each launch earns one point of Resonance.
-- [ ] After the ending, a new moon starts: new seed, no ore, machines, drills, upgrades or Heart progress, player at the base.
-- [ ] Every point of Resonance adds a fixed share of output to every generator, for good.
-- [ ] Resonance lives in its own file next to the save, survives the reset, and shows on the HUD once above zero.
+- [x] Each launch earns one point of Resonance.
+- [x] After the ending, a new moon starts: new seed, no ore, machines, drills, upgrades or Heart progress, player at the base.
+- [x] Every point of Resonance adds a fixed share of output to every generator, for good.
+- [x] Resonance lives in its own file next to the save, survives the reset, and shows on the HUD once above zero.
 
 ---
 

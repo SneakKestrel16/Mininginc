@@ -121,6 +121,23 @@ func _initialize() -> void:
 	for n in kept:
 		DirAccess.remove_absolute("user://" + n)
 	DirAccess.remove_absolute(path)
+
+	# Resonance lives beside the save, never in it, and raises every generator's output.
+	failures += _check(saver.load_resonance() == 0 and not saver.resonance_path().ends_with("savegame.resonance.json"),
+			"no Resonance before a launch, and a check never reads the real file")
+	var file := FileAccess.open(saver.resonance_path(), FileAccess.WRITE)
+	file.store_string(JSON.stringify({ "resonance": 2 }))
+	file.close()
+	failures += _check(saver.load_resonance() == 2 and not SaveGame.capture(c.economy, c.mine, 0.0).has("resonance"),
+			"Resonance reads back from its own file")
+	DirAccess.remove_absolute(saver.resonance_path())
+	c.economy.furnace.fuel = 5
+	c.economy._tick(1.0)
+	var plain: float = c.economy.power_per_second
+	c.economy.resonance = 2
+	c.economy.furnace.fuel = 5
+	c.economy._tick(1.0)
+	failures += _check(is_equal_approx(c.economy.power_per_second, plain * (1.0 + 2 * c.economy.resonance_power_bonus)), "Resonance makes every generator stronger (%.1f vs %.1f)" % [c.economy.power_per_second, plain])
 	saver.free()
 
 	print("save_offline_check: %s" % ("PASS" if failures == 0 else "%d FAILED" % failures))
