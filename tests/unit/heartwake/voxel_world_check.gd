@@ -95,6 +95,21 @@ func _initialize() -> void:
 	failures += _check(not world.dig(Vector3(30.5, 0.5, 30.5), world.hardness_at(Vector3i(30, 0, 30)) - 0.00001).is_empty(),
 			"a hair short of the hardness still scoops")
 
+	# Ground cut loose falls whole: a lump left hanging in a hole goes with the next scoop.
+	var hole := Vector3(90, -15, 90)
+	world.carve(hole, 4.0)
+	var lump: Array[Vector3i] = []
+	for p in [Vector3i(90, -15, 90), Vector3i(91, -15, 90), Vector3i(90, -14, 90), Vector3i(90, -15, 91)]:
+		world.edits[p] = 1.0
+		lump.append(p)
+	var fell := world.carve(Vector3(88, -15, 90), 1.0)
+	var fallen := 0
+	for what in fell:
+		fallen += fell[what]
+	failures += _check(lump.all(func(p: Vector3i) -> bool: return not world.is_solid(p)) and fallen >= 4,
+			"a lump held up by nothing falls whole, and its ground is collected (%d)" % fallen)
+	failures += _check(world.is_solid(Vector3i(90, -21, 90)), "ground below the hole stays")
+
 	# Drawing: surface nets give a closed surface with collision, built only near the player.
 	world.update_around(Vector3(40, 1, 40))  # the player calls this every frame
 	var inner: Node3D = world.chunk_node(world.chunk_of(Vector3i(40, 0, 40)))

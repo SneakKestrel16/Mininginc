@@ -15,6 +15,11 @@ const ORES_PATH := "res://data/ores.json"
 const SIDES: Array[Vector3i] = [Vector3i.UP, Vector3i.DOWN, Vector3i.LEFT, Vector3i.RIGHT, Vector3i.FORWARD, Vector3i.BACK]
 ## Density outside the world and in bedrock: far inside, so no scoop opens it.
 const SOLID := 100.0
+## Metres past a scoop that a loose piece of ground may reach and still fall: ground that
+## connects to nothing within this distance counts as held up.
+const SUPPORT_REACH := 6
+# Neighbours in the order a support fill pushes them: down last, so it is tried first.
+const FILL_ORDER: Array[Vector3i] = [Vector3i.UP, Vector3i.LEFT, Vector3i.RIGHT, Vector3i.FORWARD, Vector3i.BACK, Vector3i.DOWN]
 
 ## Seed every generated sample follows.
 var world_seed: int = 0:
@@ -95,6 +100,7 @@ func _ready() -> void:
 	var machines_low := Vector3(world["machines_min"][0], world["machines_min"][1], world["machines_min"][2])
 	var machines_high := Vector3(world["machines_max"][0], world["machines_max"][1], world["machines_max"][2])
 	_protected.append(AABB(machines_low, machines_high - machines_low))
+	_add_platform(machines_low, machines_high)
 	_ores = ores["ores"]
 	for ore in _ores:
 		var id := Blocks.id_of(ore["id"])
@@ -228,16 +234,111 @@ func carve(center: Vector3, radius: float) -> Dictionary:
 					collected[what] = collected.get(what, 0) + 1
 				# A sample moves the vertices of the cells around it, and those are used by
 				# quads of edges up to one sample further on each side.
-				for dx in [-1, 0, 1]:
-					for dy in [-1, 0, 1]:
-						for dz in [-1, 0, 1]:
-							touched[chunk_of(pos + Vector3i(dx, dy, dz))] = true
+				_touch(pos, touched)
+	_drop_floating(center, radius, collected, touched)
 	for key in touched:
 		_open_chunks[key] = true
 		if _built.has(key):
 			_build(key)
 	carved.emit(center, collected)
 	return collected
+
+
+# Ground a scoop cut loose falls and breaks whole (playtest: "no floating ground anywhere"):
+# every solid sample beside the scoop is flood-filled; a piece that never reaches
+# SUPPORT_REACH metres from the scoop is held up by nothing and is removed, its ore collected.
+# ponytail: a bounded fill, so a huge piece hanging by a long thin bridge stays up; a global
+# connectivity pass would catch it if that ever shows in play.
+func _drop_floating(center: Vector3, radius: float, collected: Dictionary, touched: Dictionary) -> void:
+	var reach := int(ceil(radius)) + SUPPORT_REACH
+	var middle := Vector3i(center.round())
+	# Sample to its fill's verdict: HELD once that fill found support. Samples of a loose
+	# piece become air, so they never need a verdict.
+	var seen := {}
+	var low := Vector3i((center - Vector3.ONE * (radius + 1.5)).floor())
+	var high := Vector3i((center + Vector3.ONE * (radius + 1.5)).ceil())
+	for x in range(low.x, high.x + 1):
+		for y in range(low.y, high.y + 1):
+			for z in range(low.z, high.z + 1):
+				var start := Vector3i(x, y, z)
+				if seen.has(start) or not is_solid(start):
+					continue
+				# Depth first, down first: solid ground usually finds support straight below
+				# in a few steps.
+				var stack: Array[Vector3i] = [start]
+				var piece: Array[Vector3i] = []
+				var mine := {start: true}
+				var held := false
+				while not stack.is_empty():
+					var pos: Vector3i = stack.pop_back()
+					piece.append(pos)
+					var off := (pos - middle).abs()
+					if maxi(off.x, maxi(off.y, off.z)) >= reach or material_at(pos) == Blocks.BEDROCK or _is_protected(pos):
+						held = true
+						break
+					for side in FILL_ORDER:
+						var next: Vector3i = pos + side
+						if seen.has(next):  # reached a piece already found held
+							held = true
+							break
+						if not mine.has(next) and is_solid(next):
+							mine[next] = true
+							stack.append(next)
+					if held:
+						break
+				if held:
+					for pos in mine:
+						seen[pos] = true
+					continue
+				for pos in piece:
+					var what: String = Blocks.NAMES[material_at(pos)]
+					collected[what] = collected.get(what, 0) + 1
+					edits[pos] = -1.0
+					_touch(pos, touched)
+
+
+# A sample moves the vertices of the cells around it, and those are used by quads of edges up
+# to one sample further on each side: every chunk that can see it must be redrawn.
+func _touch(pos: Vector3i, touched: Dictionary) -> void:
+	for dx in [-1, 0, 1]:
+		for dy in [-1, 0, 1]:
+			for dz in [-1, 0, 1]:
+				touched[chunk_of(pos + Vector3i(dx, dy, dz))] = true
+
+
+# A steel deck over the ground the machines stand on, so it reads as built, not diggable.
+func _add_platform(low: Vector3, high: Vector3) -> void:
+	var deck := MeshInstance3D.new()
+	deck.name = "Platform"
+	var size := Vector3(high.x - low.x, 0.3, high.z - low.z)
+	deck.mesh = BoxMesh.new()
+	deck.mesh.size = size
+	deck.position = Vector3((low.x + high.x) / 2.0, 1.0, (low.z + high.z) / 2.0)
+	var steel := StandardMaterial3D.new()
+	steel.albedo_color = Color(0.22, 0.23, 0.26)
+	steel.metallic = 0.6
+	steel.roughness = 0.5
+	deck.material_override = steel
+	add_child(deck)
+	var trim := StandardMaterial3D.new()
+	trim.albedo_color = Color(0.95, 0.6, 0.1)
+	trim.emission_enabled = true
+	trim.emission = Color(0.95, 0.55, 0.1)
+	trim.emission_energy_multiplier = 0.4
+	for edge in [[Vector3(size.x, 0.05, 0.25), Vector3(0, 0.16, size.z / 2.0)], [Vector3(size.x, 0.05, 0.25), Vector3(0, 0.16, -size.z / 2.0)],
+			[Vector3(0.25, 0.05, size.z), Vector3(size.x / 2.0, 0.16, 0)], [Vector3(0.25, 0.05, size.z), Vector3(-size.x / 2.0, 0.16, 0)]]:
+		var stripe := MeshInstance3D.new()
+		stripe.mesh = BoxMesh.new()
+		stripe.mesh.size = edge[0]
+		stripe.position = edge[1]
+		stripe.material_override = trim
+		deck.add_child(stripe)
+	var body := StaticBody3D.new()
+	var shape := CollisionShape3D.new()
+	shape.shape = BoxShape3D.new()
+	shape.shape.size = size
+	body.add_child(shape)
+	deck.add_child(body)
 
 
 ## Keeps every scoop away from [param box] (a machine's footprint, say), so nothing floats.

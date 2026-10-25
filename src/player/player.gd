@@ -29,12 +29,18 @@ var controls_enabled := false
 var _target_normal := Vector3.ZERO
 ## True while an overlay is open, which hides the "click to play" hint.
 var hint_blocked := false
-## Dev menu fly mode: no gravity, no collision, Space up and Ctrl down, three times the speed.
+## Dev menu fly mode: no gravity, Space up and Ctrl down, three times the speed. It still
+## collides unless [member noclip] is on.
 var flying := false:
 	set(on):
 		flying = on
-		$Shape.disabled = on
+		$Shape.disabled = flying and noclip
 		velocity = Vector3.ZERO
+## Dev menu: while flying, pass through the ground. Off by default.
+var noclip := false:
+	set(on):
+		noclip = on
+		$Shape.disabled = flying and noclip
 
 var _move_speed: float
 var _jump_velocity: float

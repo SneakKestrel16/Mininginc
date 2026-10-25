@@ -48,6 +48,10 @@ func _ready() -> void:
 	_fly.text = "Fly (Space up, Ctrl down)"
 	_fly.toggled.connect(func(on: bool) -> void: player.flying = on)
 	move_row.add_child(_fly)
+	var noclip := CheckButton.new()
+	noclip.text = "Noclip"
+	noclip.toggled.connect(func(on: bool) -> void: player.noclip = on)
+	move_row.add_child(noclip)
 	_button(move_row, "To base", _teleport.bind(Vector3(64.5, 1.5, 64.5)))
 	_button(move_row, "To Heart", func() -> void: _teleport(heart.global_position + Vector3(0, 0, 5)))
 

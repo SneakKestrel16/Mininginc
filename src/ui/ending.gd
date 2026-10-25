@@ -46,6 +46,7 @@ func play() -> void:
 	visible = true
 	player.hint_blocked = true
 	player.set_controls(false)
+	player.noclip = true  # rises up through the rock with the Heart
 	player.flying = true
 	var rise := create_tween().set_parallel()
 	rise.tween_property(player, "global_position:y", player.global_position.y + 120.0, FADE_SECONDS * 2.0) \
