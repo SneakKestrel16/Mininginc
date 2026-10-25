@@ -19,6 +19,7 @@ const UPGRADE_ORDER := ["generator_tuning", "drill_gearing", "tool_motor", "wide
 const RESERVE := { "coal": 10, "ice": 10 }
 const TUNINGS := [
 	{ "name": "shipped" },
+	{ "name": "second moon, Resonance 1", "resonance": 1 },
 ]
 const STRATEGIES := [
 	{ "name": "hand only, 50% Heart", "share": 0.5, "drills": 0 },
@@ -87,7 +88,9 @@ func _run(strategy: Dictionary, tuning: Dictionary) -> void:
 				if _can_spare(economy, id) and economy.buy_upgrade(id):
 					events.append("%s %d %s" % [id, economy.upgrades.levels[id], _clock(_t)])
 		# Drill power does nothing until a drill stands: until then everything goes to the Heart.
-		economy.split.heart_share = strategy["share"] if mine.drills else 1.0
+		# ...and once every upgrade is bought, ore has no use left: everything goes to the Heart.
+		var maxed := economy.upgrades.defs.all(func(u: Dictionary) -> bool: return economy.upgrades.is_maxed(u["id"]))
+		economy.split.heart_share = strategy["share"] if mine.drills and not maxed else 1.0
 		_hand_dig(world, hand, veins, hand_rate * (1.0 + economy.upgrades.effect("hand_speed")) * HAND_ATTENTION * STEP)
 		economy.advance(STEP, STEP)
 		if economy.power_per_second == 0.0 and mine.ores["coal"] == 0 and hand.stopped:
@@ -152,7 +155,7 @@ func _can_spare(economy: Economy, id: String) -> bool:
 
 ## Lays [param tuning] over the loaded data. Keys: ore_scale (multiplies every ore
 ## chance), drill_rate (hits per power-second), thresholds (one per stage), drill_cost,
-## reactor_cost.
+## reactor_cost, resonance (points carried from earlier moons).
 func _apply(tuning: Dictionary, economy: Economy, mine: Mine, world: VoxelWorld) -> void:
 	if tuning.has("ore_scale"):
 		for ore in world._ores:
@@ -167,6 +170,8 @@ func _apply(tuning: Dictionary, economy: Economy, mine: Mine, world: VoxelWorld)
 		mine.drill_cost = tuning["drill_cost"]
 	if tuning.has("reactor_cost"):
 		economy.reactor_cost = tuning["reactor_cost"]
+	if tuning.has("resonance"):
+		economy.resonance = tuning["resonance"]
 
 
 func _clock(seconds: float) -> String:

@@ -154,7 +154,8 @@ func buy_upgrade(id: String) -> bool:
 func _tick(seconds: float) -> void:
 	if heart.has_effect("drones"):
 		feed_furnace()
-	var bonus := 1.0 + heart.effect_total("output_bonus") + upgrades.effect("power_bonus") 			+ resonance * resonance_power_bonus
+	# Resonance multiplies the rest, so it stays worth as much late in a run as early.
+	var bonus := (1.0 + heart.effect_total("output_bonus") + upgrades.effect("power_bonus")) 			* (1.0 + resonance * resonance_power_bonus)
 	furnace_output = furnace.tick(seconds) * bonus
 	turbine_output = turbine.tick(seconds) * bonus if turbine_built else 0.0
 	reactor_output = reactor.tick(seconds) * bonus if reactor_built else 0.0

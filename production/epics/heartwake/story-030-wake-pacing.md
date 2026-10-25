@@ -1,7 +1,7 @@
 # Story 030: Pacing through Wake
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Logic
 > **Estimate**: S
@@ -28,9 +28,9 @@
 
 *From `design/game-brief.md` (Milestone 7 item 35), scoped to this story:*
 
-- [ ] The pacing simulator plays until Wake and reports when it was reached.
-- [ ] A second pass with one point of Resonance reaches Wake clearly faster than the first.
-- [ ] No strategy gets stuck; every self-check passes.
+- [x] The pacing simulator plays until Wake and reports when it was reached.
+- [x] A second pass with one point of Resonance reaches Wake clearly faster than the first.
+- [x] No strategy gets stuck; every self-check passes.
 
 ---
 
@@ -72,3 +72,18 @@
 
 - Depends on: `production/epics/heartwake/story-029-resonance.md`
 - Unlocks: none
+
+## Results (shipped tuning, seed 1234, tools/pacing_sim.gd)
+
+The simulated player moves the slider to 100% Heart once every upgrade is maxed.
+
+| Strategy | Voice | Wake | Wake, Resonance 1 |
+|---|---|---|---|
+| hand only, 50% Heart | 47:07 | 64:25 | 54:35 |
+| 6 drills, 50% Heart | 44:23 | 55:22 | 44:40 |
+| 6 drills, 100% Heart | 47:43 | 65:01 | 55:09 |
+| 6 drills, 25% Heart | 41:09 | 52:07 | 42:17 |
+
+Resonance was first added to the other output bonuses, which gave only +23% power late in a
+run (Wake 64:26 to 56:28). It now multiplies them: +50% power per point. The second moon is
+about 18% faster. One seed, one player model.
