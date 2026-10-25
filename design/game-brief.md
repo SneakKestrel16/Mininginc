@@ -75,9 +75,19 @@ Chosen 2026-10-24 after v0.4.0, by Claude on the user's "just keep going": the d
 
 Build order: 31.
 
+## Milestone 7 — Wake, launch and Resonance
+Chosen 2026-10-24 by the user after v0.4.0 and story 027: the run needs an ending, and a reason to play again.
+
+32. Heart stage 6, Wake: a last, much larger threshold after Voice. When it is reached the Heart rises in its cavern and says its last lines.
+33. Launch: the awake Heart offers to launch. Launching plays a short ending (fade, the moon falling away, the Heart's closing words) and shows what the run earned.
+34. Resonance, the first prestige: each launch earns Resonance. A new moon starts from scratch (new seed, no ore, machines, upgrades or Heart progress), but every point of Resonance makes every generator stronger for good. Resonance is kept apart from the run's save.
+35. The pacing simulator plays through Wake, and a second run with the first launch's Resonance wakes the Heart clearly faster.
+
+Build order: 32 + 33 → 34 → 35.
+
 ## Out of scope — not building this
 - Deeper tiers (Deep, Abyss, Core) and their twists: waste that later becomes fuel, the crystal placement grid, transmission loss.
-- Heart stage 6 (Wake), launch, the star map and Resonance prestige.
+- The star map, and Resonance spent on anything but generator strength.
 - Overload events, new-moon rule changes, story logs beyond one line per stage.
 
 ## Build order
