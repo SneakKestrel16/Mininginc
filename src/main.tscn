@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://src/economy/economy.gd" id="1_economy"]
 [ext_resource type="PackedScene" path="res://src/ui/power_panel.tscn" id="2_panel"]
@@ -16,6 +16,7 @@
 [ext_resource type="Script" path="res://src/ui/dev_menu.gd" id="18_dev"]
 [ext_resource type="Script" path="res://src/ui/upgrade_panel.gd" id="19_upgrades"]
 [ext_resource type="Script" path="res://src/ui/ending.gd" id="20_ending"]
+[ext_resource type="Script" path="res://src/dev/live_reload.gd" id="21_reload"]
 
 [sub_resource type="Environment" id="Env"]
 background_mode = 1
@@ -158,6 +159,9 @@ script = ExtResource("20_ending")
 economy = NodePath("../Economy")
 player = NodePath("../Player")
 save_game = NodePath("../SaveGame")
+
+[node name="LiveReload" type="Node" parent="."]
+script = ExtResource("21_reload")
 
 [node name="AwayDialog" type="AcceptDialog" parent="."]
 title = "Heartwake"
