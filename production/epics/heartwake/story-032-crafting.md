@@ -1,7 +1,7 @@
 # Story 032: Crafting at the console
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Integration
 > **Estimate**: M
@@ -28,10 +28,10 @@
 
 *From `design/game-brief.md` (Milestone 8 item 37), scoped to this story:*
 
-- [ ] The console overlay has a Crafting panel listing each recipe, what it takes and what it makes.
-- [ ] Craft 1 and Craft 5 take the inputs and add the outputs; they are disabled when inputs are short.
-- [ ] Recipes: iron plate (2 iron), copper wire (1 copper makes 2), glass (2 quartz), circuit (2 wire, 1 glass, 1 gold).
-- [ ] Parts are saved with the inventory.
+- [x] The console overlay has a Crafting panel listing each recipe, what it takes and what it makes.
+- [x] Craft 1 and Craft 5 take the inputs and add the outputs; they are disabled when inputs are short.
+- [x] Recipes: iron plate (2 iron), copper wire (1 copper makes 2), glass (2 quartz), circuit (2 wire, 1 glass, 1 gold).
+- [x] Parts are saved with the inventory.
 
 ---
 

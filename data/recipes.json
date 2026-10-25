@@ -1,0 +1,8 @@
+{
+	"recipes": [
+		{ "id": "iron_plate", "name": "Iron plate", "inputs": { "iron": 2 }, "output": 1 },
+		{ "id": "wire", "name": "Copper wire", "inputs": { "copper": 1 }, "output": 2 },
+		{ "id": "glass", "name": "Glass", "inputs": { "quartz": 2 }, "output": 1 },
+		{ "id": "circuit", "name": "Circuit", "inputs": { "wire": 2, "glass": 1, "gold": 1 }, "output": 1 }
+	]
+}

@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3]
+[gd_scene load_steps=19 format=3]
 
 [ext_resource type="Script" path="res://src/economy/economy.gd" id="1_economy"]
 [ext_resource type="PackedScene" path="res://src/ui/power_panel.tscn" id="2_panel"]
@@ -17,6 +17,7 @@
 [ext_resource type="Script" path="res://src/ui/upgrade_panel.gd" id="19_upgrades"]
 [ext_resource type="Script" path="res://src/ui/ending.gd" id="20_ending"]
 [ext_resource type="Script" path="res://src/dev/live_reload.gd" id="21_reload"]
+[ext_resource type="Script" path="res://src/ui/crafting_panel.gd" id="22_crafting"]
 
 [sub_resource type="Environment" id="Env"]
 background_mode = 1
@@ -147,6 +148,12 @@ economy = NodePath("../../../../../Economy")
 layout_mode = 2
 script = ExtResource("19_upgrades")
 economy = NodePath("../../../../../Economy")
+
+[node name="CraftingPanel" type="PanelContainer" parent="Overlay/Center/Columns" node_paths=PackedStringArray("economy")]
+layout_mode = 2
+size_flags_vertical = 4
+script = ExtResource("22_crafting")
+economy = NodePath("../../../../Economy")
 
 [node name="DevMenu" type="CanvasLayer" parent="." node_paths=PackedStringArray("economy", "player", "heart")]
 script = ExtResource("18_dev")

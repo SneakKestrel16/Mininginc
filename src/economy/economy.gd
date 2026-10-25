@@ -10,6 +10,7 @@ signal stage_reached(index: int)
 const CONFIG_PATH := "res://data/economy.json"
 const STAGES_PATH := "res://data/heart_stages.json"
 const UPGRADES_PATH := "res://data/upgrades.json"
+const RECIPES_PATH := "res://data/recipes.json"
 
 ## The mine the drills dig and the furnace's coal comes from.
 @export var mine: Mine
@@ -43,6 +44,9 @@ var heart: Heart
 
 ## Upgrade levels bought with ore at the power console.
 var upgrades: Upgrades
+
+## Recipes that turn ore into parts at the power console.
+var crafting: Crafting
 
 ## Points earned by launching the Heart off earlier moons; kept across resets by SaveGame.
 var resonance: int = 0
@@ -79,13 +83,19 @@ func _ready() -> void:
 			"reactor_waste_per_uranium", "resonance_power_bonus"])
 	var stage_config := _load_json(STAGES_PATH, ["stages"])
 	var upgrade_config := _load_json(UPGRADES_PATH, ["upgrades"])
-	if config.is_empty() or stage_config.is_empty() or upgrade_config.is_empty() or not _valid_stages(stage_config["stages"]):
+	var recipe_config := _load_json(RECIPES_PATH, ["recipes"])
+	if config.is_empty() or stage_config.is_empty() or upgrade_config.is_empty() or recipe_config.is_empty() 			or not _valid_stages(stage_config["stages"]):
 		set_process(false)
 		return
 	_tick_seconds = config["tick_seconds"]
 	split = PowerSplit.new(config["heart_share_default"])
 	heart = Heart.new(stage_config["stages"])
 	upgrades = Upgrades.new(upgrade_config["upgrades"])
+	crafting = Crafting.new(recipe_config["recipes"])
+	# Parts share the inventory with ore, so saves, costs and the HUD treat them alike.
+	for recipe in crafting.recipes:
+		if not mine.ores.has(recipe["id"]):
+			mine.ores[recipe["id"]] = 0
 	furnace = Furnace.new(
 		config["furnace_fuel_capacity"],
 		config["furnace_burn_seconds_per_coal"],

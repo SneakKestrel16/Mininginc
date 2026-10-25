@@ -30,7 +30,7 @@ func _ready() -> void:
 
 ## What the player sees while looking at the console.
 func prompt() -> String:
-	return "Power console: %.0f%% to the Heart\n[E] Power split and upgrades" % (economy.split.heart_share * 100.0)
+	return "Power console: %.0f%% to the Heart\n[E] Power, upgrades and crafting" % (economy.split.heart_share * 100.0)
 
 
 ## E: open the slider.
