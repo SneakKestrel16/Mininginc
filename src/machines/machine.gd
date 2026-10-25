@@ -65,7 +65,7 @@ func prompt() -> String:
 				ores.get("coal", 0), ores.get("ice", 0)]
 		_:
 			if not economy.reactor_built:
-				return "Fission reactor: not built\n[E] Build (%d / %d copper)" % [ores.get("copper", 0), economy.reactor_cost]
+				return "Fission reactor: not built\n[E] Build (%s)" % Mine.cost_text(economy.reactor_cost)
 			var reactor := economy.reactor
 			var state := "SCRAM, overheated: restarts at heat %.0f" % reactor.restart_heat if reactor.scrammed \
 					else "running, %.1f/s" % economy.reactor_output if reactor.is_running() else "out of uranium"

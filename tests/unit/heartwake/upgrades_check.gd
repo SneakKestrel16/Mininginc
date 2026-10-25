@@ -23,6 +23,8 @@ func _initialize() -> void:
 	var first: Dictionary = upgrades.cost("tool_motor")
 	failures += _check(not economy.buy_upgrade("tool_motor") and upgrades.levels["tool_motor"] == 0, "refused without the ore")
 	mine.ores["coal"] = 5000
+	for part in ["iron_plate", "wire", "circuit"]:
+		mine.ores[part] = 1000
 	failures += _check(economy.buy_upgrade("tool_motor") and mine.ores["coal"] == 5000 - first["coal"]
 			and upgrades.levels["tool_motor"] == 1, "buying takes the ore and raises the level")
 	failures += _check(upgrades.cost("tool_motor")["coal"] > first["coal"], "each level costs more than the last")

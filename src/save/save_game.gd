@@ -193,7 +193,7 @@ static func apply(data: Dictionary, economy: Economy, mine: Mine, player: Player
 	for id in data["mine"]["ores"]:
 		mine.ores[id] = int(data["mine"]["ores"][id])
 	if int(data["version"]) == 3:
-		mine.ores["copper"] = mine.ores.get("copper", 0) + data["drills"].size() * mine.drill_cost
+		mine.refund(mine.drill_cost, data["drills"].size())
 	economy.split.heart_share = data["heart_share"]
 	economy.heart.stage = int(data["heart"]["stage"])
 	economy.heart.progress = data["heart"]["progress"]

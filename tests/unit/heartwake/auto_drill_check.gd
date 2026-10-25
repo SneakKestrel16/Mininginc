@@ -10,13 +10,13 @@ func _initialize() -> void:
 	a.dig(100.0)
 	failures += _check(a.ores.values().all(func(n: int) -> bool: return n == 0) and a.shaft.depth == 0,
 			"no drills: drill power does nothing, and the old shaft is not dug")
-	failures += _check(a.place_drill(Vector3i(20, 0, 20)) == null, "a drill needs copper")
+	failures += _check(a.place_drill(Vector3i(20, 0, 20)) == null, "a drill needs its parts")
 	failures += _check(a.hand_share(6.0) == 6.0, "no drills: all drill power goes to the hand tool")
 
-	a.ores["copper"] = a.drill_cost * 2
+	a.refund(a.drill_cost, 2)
 	var first := a.place_drill(Vector3i(20, 0, 20))
-	failures += _check(first != null and a.ores["copper"] == a.drill_cost and a.place_drill(Vector3i(20, 0, 20)) == null,
-			"placing costs copper; one drill per column")
+	failures += _check(first != null and a.ores["iron_plate"] == a.drill_cost["iron_plate"] and a.place_drill(Vector3i(20, 0, 20)) == null,
+			"placing costs its parts; one drill per column")
 	var second := a.place_drill(Vector3i(30, 0, 30))
 	failures += _check(a.hand_share(6.0) == 2.0, "two drills: the hand tool takes one share of three")
 	a.dig(40.0)
@@ -28,8 +28,8 @@ func _initialize() -> void:
 	# Hits carry from scoop to scoop: one big dig reaches as deep as many small ones.
 	var b := await _mine(5)
 	var c := await _mine(5)
-	b.ores["copper"] = 10
-	c.ores["copper"] = 10
+	b.refund(b.drill_cost, 5)
+	c.refund(c.drill_cost, 5)
 	var big := b.place_drill(Vector3i(40, 0, 40))
 	var small := c.place_drill(Vector3i(40, 0, 40))
 	b.dig(300.0)
@@ -40,15 +40,15 @@ func _initialize() -> void:
 	b.dig(1e9)
 	failures += _check(big.stopped and big.depth_y == -b.world.max_depth, "stops at bedrock")
 
-	var copper_before: int = b.ores["copper"]
+	var plates_before: int = b.ores["iron_plate"]
 	b.remove_drill(big)
-	failures += _check(b.ores["copper"] == copper_before + b.drill_cost and b.drills.is_empty()
-			and not b.world.is_solid(Vector3i(40, -10, 40)), "picking a drill up returns its copper; the column stays dug")
+	failures += _check(b.ores["iron_plate"] == plates_before + b.drill_cost["iron_plate"] and b.drills.is_empty()
+			and not b.world.is_solid(Vector3i(40, -10, 40)), "picking a drill up returns its parts; the column stays dug")
 
 	# Thawing under a half-dug frozen cell must not hang the drill: damage then exceeds the
 	# new hardness (this once looped forever in the pacing simulator).
 	var d := await _mine(6)
-	d.ores["copper"] = 10
+	d.refund(d.drill_cost, 5)
 	var deep := d.place_drill(Vector3i(50, -60, 50))
 	var cell := Vector3i(50, -60, 50)
 	d.world.damage[cell] = d.world.hardness_at(cell) * 0.9

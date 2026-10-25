@@ -1,14 +1,14 @@
 {
 	"upgrades": [
 		{ "id": "tool_motor", "name": "Tool motor", "effect": "hand_speed", "per_level": 0.25, "max_level": 8,
-			"cost": { "coal": 25 }, "cost_growth": 1.8, "describe": "+%d%% hand digging speed", "shown_scale": 100 },
+			"cost": { "coal": 25, "iron_plate": 1 }, "cost_growth": 1.8, "describe": "+%d%% hand digging speed", "shown_scale": 100 },
 		{ "id": "wide_scoop", "name": "Wider scoop", "effect": "scoop_radius", "per_level": 0.25, "max_level": 5,
-			"cost": { "ice": 6, "copper": 3 }, "cost_growth": 1.7, "describe": "+%.2f m scoop radius", "shown_scale": 1 },
+			"cost": { "ice": 6, "iron_plate": 2 }, "cost_growth": 1.7, "describe": "+%.2f m scoop radius", "shown_scale": 1 },
 		{ "id": "long_arm", "name": "Long arm", "effect": "reach", "per_level": 1.0, "max_level": 4,
-			"cost": { "coal": 8, "ice": 4 }, "cost_growth": 1.5, "describe": "+%d m reach", "shown_scale": 1 },
+			"cost": { "coal": 8, "wire": 2 }, "cost_growth": 1.5, "describe": "+%d m reach", "shown_scale": 1 },
 		{ "id": "drill_gearing", "name": "Drill gearing", "effect": "drill_speed", "per_level": 0.25, "max_level": 8,
-			"cost": { "copper": 5, "uranium": 1 }, "cost_growth": 1.6, "describe": "+%d%% drill power speed", "shown_scale": 100 },
+			"cost": { "iron_plate": 2, "uranium": 1 }, "cost_growth": 1.6, "describe": "+%d%% drill power speed", "shown_scale": 100 },
 		{ "id": "generator_tuning", "name": "Generator tuning", "effect": "power_bonus", "per_level": 0.1, "max_level": 10,
-			"cost": { "copper": 8, "uranium": 2 }, "cost_growth": 1.5, "describe": "+%d%% power from every generator", "shown_scale": 100 }
+			"cost": { "copper": 8, "uranium": 2, "circuit": 1 }, "cost_growth": 1.5, "describe": "+%d%% power from every generator", "shown_scale": 100 }
 	]
 }

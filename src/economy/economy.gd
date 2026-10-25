@@ -33,11 +33,11 @@ var turbine_cost: int
 ## The fission reactor; it produces nothing until [member reactor_built].
 var reactor: FissionReactor
 
-## True once the reactor has been built with copper.
+## True once the reactor has been built from [member reactor_cost].
 var reactor_built: bool = false
 
-## Copper the reactor costs to build.
-var reactor_cost: int
+## Copper, plates and glass the reactor costs to build: item id to amount.
+var reactor_cost: Dictionary
 
 ## The Heart, which stores the Heart share and grants each stage's bonus.
 var heart: Heart
@@ -77,7 +77,7 @@ func _ready() -> void:
 			"furnace_fuel_capacity", "furnace_burn_seconds_per_coal", "furnace_power_per_second",
 			"drill_hits_per_power_second", "turbine_build_copper", "turbine_fuel_capacity",
 			"turbine_burn_seconds_per_coal", "turbine_power_per_second", "turbine_water_capacity",
-			"turbine_water_per_second", "water_per_ice", "reactor_build_copper", "reactor_fuel_capacity",
+			"turbine_water_per_second", "water_per_ice", "reactor_cost", "reactor_fuel_capacity",
 			"reactor_burn_seconds_per_uranium", "reactor_power_per_second", "reactor_heat_per_second",
 			"reactor_heat_limit", "reactor_heat_restart", "reactor_cooling_per_second", "reactor_heat_per_ice",
 			"reactor_waste_per_uranium", "resonance_power_bonus"])
@@ -123,7 +123,7 @@ func _ready() -> void:
 		config["reactor_heat_per_ice"],
 		config["reactor_waste_per_uranium"],
 	)
-	reactor_cost = config["reactor_build_copper"]
+	reactor_cost = config["reactor_cost"]
 
 
 func _process(delta: float) -> void:
@@ -208,13 +208,13 @@ func melt_ice() -> int:
 
 ## True when the reactor is not built yet and the mine holds enough copper for it.
 func can_build_reactor() -> bool:
-	return not reactor_built and mine.ores.get("copper", 0) >= reactor_cost
+	return not reactor_built and mine.can_afford(reactor_cost)
 
 
-## Spends the copper and builds the reactor. Does nothing when [method can_build_reactor] is false.
+## Pays [member reactor_cost] and builds the reactor. Does nothing when [method can_build_reactor] is false.
 func build_reactor() -> void:
 	if can_build_reactor():
-		mine.take("copper", reactor_cost)
+		mine.pay(reactor_cost)
 		reactor_built = true
 
 

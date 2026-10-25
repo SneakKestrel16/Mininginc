@@ -20,7 +20,7 @@ var shaft: DigShaft
 var drills: Array[AutoDrill] = []
 
 ## Copper one auto-drill costs.
-var drill_cost: int = 0
+var drill_cost: Dictionary = {}
 
 ## Ore id to amount found so far. Rock is not counted.
 var ores: Dictionary = {}
@@ -39,10 +39,10 @@ func _ready() -> void:
 			config["frozen_from_depth"], config["frozen_hardness_multiplier"])
 	_base_frozen_from = config["frozen_from_depth"]
 	var world_config = JSON.parse_string(FileAccess.get_file_as_string("res://data/world.json"))
-	if not world_config is Dictionary or not world_config.has("drill_build_copper"):
-		_fail("res://data/world.json is missing \"drill_build_copper\"")
+	if not world_config is Dictionary or not world_config.has("drill_cost"):
+		_fail("res://data/world.json is missing \"drill_cost\"")
 		return
-	drill_cost = world_config["drill_build_copper"]
+	drill_cost = world_config["drill_cost"]
 	if world:
 		world.world_seed = shaft.shaft_seed
 		world.carved.connect(_collect)
@@ -71,15 +71,44 @@ func hand_share(drill_hits_per_second: float) -> float:
 	return drill_hits_per_second / (working_drills().size() + 1)
 
 
-## Spends copper and places an auto-drill at cell [param at]. Returns the drill,
-## or null when there is not enough copper, no world, or a drill already stands there.
+## True when the inventory covers [param cost]: item id to amount.
+func can_afford(cost: Dictionary) -> bool:
+	for id in cost:
+		if ores.get(id, 0) < cost[id]:
+			return false
+	return true
+
+
+## Takes [param cost] from the inventory; check [method can_afford] first.
+func pay(cost: Dictionary) -> void:
+	for id in cost:
+		take(id, int(cost[id]))
+
+
+## Gives [param cost] back, [param times] over.
+func refund(cost: Dictionary, times: int = 1) -> void:
+	for id in cost:
+		ores[id] = ores.get(id, 0) + int(cost[id]) * times  # JSON numbers are floats
+	changed.emit()
+
+
+## [param cost] as text for prompts: "2 iron plate, 2 wire".
+static func cost_text(cost: Dictionary) -> String:
+	var parts := PackedStringArray()
+	for id in cost:
+		parts.append("%d %s" % [int(cost[id]), id.replace("_", " ")])
+	return ", ".join(parts)
+
+
+## Pays [member drill_cost] and places an auto-drill at cell [param at]. Returns the drill,
+## or null when the inventory falls short, there is no world, or a drill already stands there.
 func place_drill(at: Vector3i) -> AutoDrill:
-	if world == null or ores.get("copper", 0) < drill_cost:
+	if world == null or not can_afford(drill_cost):
 		return null
 	for drill in drills:
 		if drill.column == Vector2i(at.x, at.z):
 			return null
-	take("copper", drill_cost)
+	pay(drill_cost)
 	return restore_drill(at, at.y, false)
 
 
@@ -96,12 +125,11 @@ func restore_drill(at: Vector3i, depth_y: int, stopped: bool) -> AutoDrill:
 	return drill
 
 
-## Picks [param drill] up and gives back its copper. Its column stays dug.
+## Picks [param drill] up and gives back what it cost. Its column stays dug.
 func remove_drill(drill: AutoDrill) -> void:
 	drills.erase(drill)
 	drill.queue_free()
-	ores["copper"] = ores.get("copper", 0) + drill_cost
-	changed.emit()
+	refund(drill_cost)
 
 
 ## Thaws the shaft down to [param depth], so rock above it digs at normal hardness; never

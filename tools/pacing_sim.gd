@@ -4,8 +4,9 @@
 ## TUNINGS lists candidate changes laid over the shipped data; "shipped" changes nothing.
 ## Each strategy is an attentive player in the 3D game: hand-drills one column down from
 ## the base, refuels and cools everything whenever there is room, builds the turbine and the
-## reactor as soon as copper allows, places auto-drills, then spends spare ore on upgrades
-## (keeping coal and ice for the machines). It runs
+## reactor as soon as its parts can be crafted, places auto-drills, then spends spare ore on
+## upgrades (keeping coal and ice for the machines). Parts are crafted when a purchase needs
+## them. It runs
 ## live play's simulation (Economy.advance) and scoops the real smooth world.
 extends SceneTree
 
@@ -29,6 +30,11 @@ const STRATEGIES := [
 ]
 
 var _t := 0.0
+# Deposit scoops since the hand column last went down; a player follows a deposit a while,
+# then gets back to digging down.
+var _followed := 0
+## Deposit scoops a player takes before going on down.
+const FOLLOW_LIMIT := 40
 
 
 func _initialize() -> void:
@@ -72,6 +78,8 @@ func _run(strategy: Dictionary, tuning: Dictionary) -> void:
 		if economy.turbine_built:
 			economy.melt_ice()
 			economy.feed_turbine()
+		if economy.turbine_built and not economy.reactor_built:
+			economy.crafting.make_for(economy.reactor_cost, mine)
 		if economy.turbine_built and economy.can_build_reactor():
 			economy.build_reactor()
 			events.append("reactor %s" % _clock(_t))
@@ -81,10 +89,13 @@ func _run(strategy: Dictionary, tuning: Dictionary) -> void:
 				economy.cool_reactor()
 		var placed := mine.drills.size()
 		var saving := not economy.turbine_built or (not economy.reactor_built and hand.depth_y < -100)
-		if placed < strategy["drills"] and not saving and mine.place_drill(Vector3i(20 + 4 * placed, 0, 20)):
+		if placed < strategy["drills"] and not saving and economy.crafting.make_for(mine.drill_cost, mine) 				and mine.place_drill(Vector3i(20 + 4 * placed, 0, 20)):
 			events.append("drill %d %s" % [placed + 1, _clock(_t)])
 		if economy.reactor_built and placed >= strategy["drills"]:
 			for id in UPGRADE_ORDER:
+				if economy.upgrades.is_maxed(id):
+					continue
+				economy.crafting.make_for(economy.upgrades.cost(id), mine)
 				if _can_spare(economy, id) and economy.buy_upgrade(id):
 					events.append("%s %d %s" % [id, economy.upgrades.levels[id], _clock(_t)])
 		# Drill power does nothing until a drill stands: until then everything goes to the Heart.
@@ -121,6 +132,7 @@ func _hand_dig(world: VoxelWorld, hand: AutoDrill, veins: Array[Vector3i], hits:
 			hand.dig(minf(left, 1.0))
 			left -= 1.0
 			if hand.depth_y != before:
+				_followed = 0
 				_see_ore(world, Vector3i(hand.column.x, before, hand.column.y), veins)
 			continue
 		var pos: Vector3i = veins[0]
@@ -133,6 +145,7 @@ func _hand_dig(world: VoxelWorld, hand: AutoDrill, veins: Array[Vector3i], hits:
 		world.dig(Vector3(pos), used)
 		if not world.damage.has(pos):
 			veins.pop_front()
+			_followed += 1
 			_see_ore(world, pos, veins)
 
 
@@ -141,6 +154,8 @@ func _hand_dig(world: VoxelWorld, hand: AutoDrill, veins: Array[Vector3i], hits:
 func _see_ore(world: VoxelWorld, pos: Vector3i, veins: Array[Vector3i]) -> void:
 	for side in [Vector3i.LEFT, Vector3i.RIGHT, Vector3i.FORWARD, Vector3i.BACK, Vector3i.UP]:
 		var next: Vector3i = pos + side * 2
+		if _followed >= FOLLOW_LIMIT:
+			return
 		if world.is_solid(next) and world.material_at(next) > Blocks.ROCK and not next in veins and veins.size() < 30:
 			veins.append(next)
 
@@ -167,7 +182,7 @@ func _apply(tuning: Dictionary, economy: Economy, mine: Mine, world: VoxelWorld)
 		for i in tuning["thresholds"].size():
 			economy.heart.stages[i]["threshold"] = tuning["thresholds"][i]
 	if tuning.has("drill_cost"):
-		mine.drill_cost = tuning["drill_cost"]
+		mine.drill_cost = tuning["drill_cost"]  # item id to amount
 	if tuning.has("reactor_cost"):
 		economy.reactor_cost = tuning["reactor_cost"]
 	if tuning.has("resonance"):

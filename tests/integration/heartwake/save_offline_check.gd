@@ -12,7 +12,7 @@ func _initialize() -> void:
 	var a := await _game()
 	a.mine.shaft.shaft_seed = 99
 	a.mine.world.world_seed = 99
-	a.mine.ores["copper"] = a.mine.drill_cost
+	a.mine.refund(a.mine.drill_cost)
 	a.mine.place_drill(Vector3i(20, 0, 20))
 	a.mine.dig(30.0)
 	a.mine.ores["coal"] = 40
@@ -96,8 +96,8 @@ func _initialize() -> void:
 	var v3 := await _game()
 	SaveGame.apply(v3_save, v3.economy, v3.mine, v3.player)
 	failures += _check(v3.mine.world.edits.is_empty() and v3.mine.drills.is_empty()
-			and v3.mine.ores["copper"] == int(data["mine"]["ores"]["copper"]) + data["drills"].size() * v3.mine.drill_cost
-			and v3.economy.reactor_built, "a format 3 save keeps its economy on fresh ground, its drills as copper")
+			and v3.mine.ores["iron_plate"] == int(data["mine"]["ores"]["iron_plate"]) + data["drills"].size() * v3.mine.drill_cost["iron_plate"]
+			and v3.economy.reactor_built, "a format 3 save keeps its economy on fresh ground, its drills as their parts")
 
 	# An unreadable file is moved aside, not overwritten, and the game starts new.
 	var path := "user://check_save.json"

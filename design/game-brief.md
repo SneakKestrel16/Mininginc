@@ -90,7 +90,7 @@ Chosen 2026-10-24 by the user during the v0.5.0 playtest ("we should add craftin
 
 36. New ores: iron (shallow to mid), quartz (mid) and gold (deep, rare), in deposits like the others, coloured and shown by Sight.
 37. Crafting at the power console: recipes turn ore into parts — iron plate, copper wire, glass, circuit — each taking a moment's worth of ore, made one at a time or five at a time.
-38. Parts are what things cost: auto-drills take plates and wire, the reactor takes circuits, and upgrade levels take parts as well as ore. The pacing simulator crafts what it needs.
+38. Parts are what things cost: auto-drills take plates and wire, the reactor takes plates and glass, and upgrade levels take parts as well as ore; circuits, which need deep gold, are the late-game cost of generator tuning. The pacing simulator crafts what it needs.
 
 Build order: 36 → 37 → 38.
 
