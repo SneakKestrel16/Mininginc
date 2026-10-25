@@ -94,6 +94,14 @@ Chosen 2026-10-24 by the user during the v0.5.0 playtest ("we should add craftin
 
 Build order: 36 → 37 → 38.
 
+## Milestone 9 — reading the ground
+Chosen 2026-10-24 by Claude when the user said "keep working on your stuff": the v0.5.0 playtest found coal hard to tell from plain ground ("we can work on that later with graphics"), and the console panels let the game show through.
+
+39. Ore reads at a glance: rock and crust have a fine grain, and every ore surface is flecked with glinting specks in its own colour, so a deposit stands out from plain ground even in shadow.
+40. The console's panels are solid and easy to read over the game.
+
+Build order: 39 → 40.
+
 ## Out of scope — not building this
 - Deeper tiers (Deep, Abyss, Core) and their twists: waste that later becomes fuel, the crystal placement grid, transmission loss.
 - The star map, and Resonance spent on anything but generator strength.
