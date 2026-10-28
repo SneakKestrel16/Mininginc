@@ -1,6 +1,8 @@
 ## Pacing simulator: plays Heartwake headless with the shipped data and prints when each
 ## Heart stage is reached, or where the run gets stuck.
-## Run: <godot> --headless --path . -s res://tools/pacing_sim.gd
+## Run: <godot> --headless --path . -s res://tools/pacing_sim.gd [-- seed=N] [-- legacy]
+## Every seed in SEEDS is played unless seed=N picks one; legacy plays the slider rule from
+## before story 036, which reproduces the older tables.
 ## TUNINGS lists candidate changes laid over the shipped data; "shipped" changes nothing.
 ## Each strategy is an attentive player in the 3D game: hand-drills one column down from
 ## the base, refuels and cools everything whenever there is room, builds the turbine and the
@@ -14,8 +16,15 @@ const STEP := 0.5
 const LIMIT_SECONDS := 3.0 * 3600.0
 ## Fraction of the time the player spends hand-drilling rather than walking and feeding.
 const HAND_ATTENTION := 0.5
-## Upgrades bought in this order of preference once machines and drills stand.
+## Upgrades bought first, in this order, once machines and drills stand; every other upgrade
+## in data/upgrades.json follows in file order, so new rows are played without an edit here.
 const UPGRADE_ORDER := ["generator_tuning", "drill_gearing", "tool_motor", "wide_scoop", "long_arm"]
+## World seeds played: three, because one seed's deposits can make a strategy look better than it is.
+const SEEDS := [1234, 7, 99]
+## Changed samples a world may hold at Wake before its save grows too big.
+const EDITS_BUDGET := 150000
+## Depths at which the time the deepest drill passes them is printed.
+const DEPTH_MARKS := [150, 250, 340, 400]
 ## Ore kept back from upgrades for the furnace, turbine and reactor cooling.
 const RESERVE := { "coal": 10, "ice": 10 }
 const TUNINGS := [
@@ -24,9 +33,11 @@ const TUNINGS := [
 ]
 const STRATEGIES := [
 	{ "name": "hand only, 50% Heart", "share": 0.5, "drills": 0 },
-	{ "name": "drills, 50% Heart", "share": 0.5, "drills": 6 },
-	{ "name": "drills, 100% Heart", "share": 1.0, "drills": 6 },
 	{ "name": "drills, 25% Heart", "share": 0.25, "drills": 6 },
+	{ "name": "drills, 35% Heart", "share": 0.35, "drills": 6 },
+	{ "name": "drills, 50% Heart", "share": 0.5, "drills": 6 },
+	{ "name": "drills, 65% Heart", "share": 0.65, "drills": 6 },
+	{ "name": "drills, 100% Heart", "share": 1.0, "drills": 6 },
 ]
 
 var _t := 0.0
@@ -38,14 +49,25 @@ const FOLLOW_LIMIT := 40
 
 
 func _initialize() -> void:
-	for tuning in TUNINGS:
-		print("== %s" % tuning["name"])
-		for strategy in STRATEGIES:
-			await _run(strategy, tuning)
+	var seeds: Array = SEEDS
+	var legacy := false
+	for arg in OS.get_cmdline_user_args():
+		if arg.begins_with("seed="):
+			seeds = [int(arg.trim_prefix("seed="))]
+		elif arg == "legacy":
+			legacy = true
+	for world_seed in seeds:
+		for tuning in TUNINGS:
+			var played: Dictionary = tuning.duplicate()
+			if legacy:
+				played["legacy_slider"] = true
+			print("== seed %d, %s%s" % [world_seed, tuning["name"], ", legacy slider" if legacy else ""])
+			for strategy in STRATEGIES:
+				await _run(strategy, played, world_seed)
 	quit()
 
 
-func _run(strategy: Dictionary, tuning: Dictionary) -> void:
+func _run(strategy: Dictionary, tuning: Dictionary, world_seed: int) -> void:
 	var world := VoxelWorld.new()
 	var mine := Mine.new()
 	var economy := Economy.new()
@@ -56,8 +78,8 @@ func _run(strategy: Dictionary, tuning: Dictionary) -> void:
 	root.add_child(economy)
 	await process_frame
 	economy.set_process(false)
-	mine.shaft.shaft_seed = 1234
-	world.world_seed = 1234
+	mine.shaft.shaft_seed = world_seed
+	world.world_seed = world_seed
 	_apply(tuning, economy, mine, world)
 	var hand_rate: float = JSON.parse_string(FileAccess.get_file_as_string("res://data/world.json"))["hand_drill_hits_per_second"]
 	# The player's own column, dug like a drill so hits carry from scoop to scoop; ore seen
@@ -68,6 +90,8 @@ func _run(strategy: Dictionary, tuning: Dictionary) -> void:
 	var events := PackedStringArray()
 	economy.stage_reached.connect(func(i: int) -> void:
 		events.append("%s %s" % [economy.heart.stages[i]["name"], _clock(_t)]))
+	var order := _upgrade_order(economy.upgrades)
+	var marks := PackedStringArray()
 	_t = 0.0
 	var stuck_since := -1.0
 	while _t < LIMIT_SECONDS and not economy.heart.is_awake():
@@ -92,18 +116,25 @@ func _run(strategy: Dictionary, tuning: Dictionary) -> void:
 		if placed < strategy["drills"] and not saving and economy.crafting.make_for(mine.drill_cost, mine) 				and mine.place_drill(Vector3i(20 + 4 * placed, 0, 20)):
 			events.append("drill %d %s" % [placed + 1, _clock(_t)])
 		if economy.reactor_built and placed >= strategy["drills"]:
-			for id in UPGRADE_ORDER:
+			for id in order:
 				if economy.upgrades.is_maxed(id):
 					continue
 				economy.crafting.make_for(economy.upgrades.cost(id), mine)
 				if _can_spare(economy, id) and economy.buy_upgrade(id):
 					events.append("%s %d %s" % [id, economy.upgrades.levels[id], _clock(_t)])
-		# Drill power does nothing until a drill stands: until then everything goes to the Heart.
-		# ...and once every upgrade is bought, ore has no use left: everything goes to the Heart.
-		var maxed := economy.upgrades.defs.all(func(u: Dictionary) -> bool: return economy.upgrades.is_maxed(u["id"]))
-		economy.split.heart_share = strategy["share"] if mine.drills and not maxed else 1.0
+		# Drill power does nothing until a drill stands, nor once every drill has stopped at
+		# bedrock: then everything goes to the Heart. The legacy rule waited instead for every
+		# upgrade to be bought, which tool_motor never is (its plates need iron above 80 m).
+		var idle := mine.working_drills().is_empty()
+		if tuning.get("legacy_slider", false):
+			idle = economy.upgrades.defs.all(func(u: Dictionary) -> bool: return economy.upgrades.is_maxed(u["id"]))
+		economy.split.heart_share = strategy["share"] if mine.drills and not idle else 1.0
 		_hand_dig(world, hand, veins, hand_rate * (1.0 + economy.upgrades.effect("hand_speed")) * HAND_ATTENTION * STEP)
 		economy.advance(STEP, STEP)
+		if marks.size() < DEPTH_MARKS.size() and mine.drills:
+			var deepest: int = mine.drills.map(func(d: AutoDrill) -> int: return -d.depth_y).max()
+			while marks.size() < DEPTH_MARKS.size() and deepest >= DEPTH_MARKS[marks.size()]:
+				marks.append("%d m %s" % [DEPTH_MARKS[marks.size()], _clock(_t)])
 		if economy.power_per_second == 0.0 and mine.ores["coal"] == 0 and hand.stopped:
 			if stuck_since < 0.0:
 				stuck_since = _t
@@ -117,6 +148,13 @@ func _run(strategy: Dictionary, tuning: Dictionary) -> void:
 	print("%-22s %s | hand %d m, stage %d (%.0f/%.0f), %.0f/s | %s" % [
 		strategy["name"], outcome, -hand.depth_y, economy.heart.stage, economy.heart.progress,
 		economy.heart.threshold(), economy.power_per_second, ", ".join(events)])
+	var left := PackedStringArray()
+	for id in mine.ores:
+		if mine.ores[id] > 0:
+			left.append("%s %d" % [id, mine.ores[id]])
+	print("%-22s   depth: %s | edits %d%s | left: %s" % ["", ", ".join(marks) if marks else "-",
+		world.edits.size(), " FAIL over %d" % EDITS_BUDGET if world.edits.size() > EDITS_BUDGET else "",
+		", ".join(left)])
 	hand.free()
 	for node in [world, mine, economy]:
 		node.free()
@@ -160,6 +198,15 @@ func _see_ore(world: VoxelWorld, pos: Vector3i, veins: Array[Vector3i]) -> void:
 			veins.append(next)
 
 
+# UPGRADE_ORDER's upgrades that the data has, then every other upgrade in file order.
+func _upgrade_order(upgrades: Upgrades) -> Array:
+	var order := UPGRADE_ORDER.filter(func(id: String) -> bool: return not upgrades.find(id).is_empty())
+	for def in upgrades.defs:
+		if not def["id"] in order:
+			order.append(def["id"])
+	return order
+
+
 # True when upgrade [param id]'s next level leaves the reserve untouched.
 func _can_spare(economy: Economy, id: String) -> bool:
 	var spare := economy.mine.ores.duplicate()
@@ -170,7 +217,8 @@ func _can_spare(economy: Economy, id: String) -> bool:
 
 ## Lays [param tuning] over the loaded data. Keys: ore_scale (multiplies every ore
 ## chance), drill_rate (hits per power-second), thresholds (one per stage), drill_cost,
-## reactor_cost, resonance (points carried from earlier moons).
+## reactor_cost, resonance (points carried from earlier moons), legacy_slider (the slider
+## rule from before story 036, read in _run).
 func _apply(tuning: Dictionary, economy: Economy, mine: Mine, world: VoxelWorld) -> void:
 	if tuning.has("ore_scale"):
 		for ore in world._ores:

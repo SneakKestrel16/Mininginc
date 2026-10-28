@@ -1,7 +1,7 @@
 # Story 036: An honest pacing simulator
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Foundation
 > **Type**: Config/Data
 > **Estimate**: S
@@ -28,11 +28,11 @@
 
 *From `design/game-brief.md` (Milestone 10 item 41), scoped to this story:*
 
-- [ ] With every placed drill stopped at bedrock, the simulator sends all power to the Heart. The old rule (only once every upgrade is maxed) stays as tuning key `legacy_slider`, and with it the simulator prints the story 033 table to the second: hand 96:42, 6 drills 50% 60:04, 100% 98:36, 25% 90:59; Resonance 1: 76:01 / 42:33 / 78:00 / 62:57.
-- [ ] Seeds 1234, 7 and 99 run by default (`-- seed=N` runs one); strategies add 35% and 65% Heart.
-- [ ] Each drill run prints when the deepest drill passes 150, 250, 340 and 400 m, the world's edits at Wake (FAIL above 150,000), and the ore left over at Wake.
-- [ ] Upgrades are bought from a short preferred list, then every other upgrade in `data/upgrades.json` order; an id the data lacks is skipped without error.
-- [ ] Every strategy prints a finish time or a reason; none is STUCK. The three-seed table is in Results below.
+- [x] With every placed drill stopped at bedrock, the simulator sends all power to the Heart. The old rule (only once every upgrade is maxed) stays as tuning key `legacy_slider`, and with it the simulator prints the story 033 table to the second: hand 96:42, 6 drills 50% 60:04, 100% 98:36, 25% 90:59; Resonance 1: 76:01 / 42:33 / 78:00 / 62:57.
+- [x] Seeds 1234, 7 and 99 run by default (`-- seed=N` runs one); strategies add 35% and 65% Heart.
+- [x] Each drill run prints when the deepest drill passes 150, 250, 340 and 400 m, the world's edits at Wake (FAIL above 150,000), and the ore left over at Wake.
+- [x] Upgrades are bought from a short preferred list, then every other upgrade in `data/upgrades.json` order; an id the data lacks is skipped without error.
+- [x] Every strategy prints a finish time or a reason; none is STUCK. The three-seed table is in Results below.
 
 ---
 
@@ -64,13 +64,30 @@
 **Story Type**: Config/Data
 **Required evidence**: the simulator's output, kept in Results below.
 
-**Status**: [ ] Not yet created
+**Status**: [x] Results below (2026-10-27)
 
 ---
 
 ## Results
 
-*Filled in when the story is built.*
+Wake times from `tools/pacing_sim.gd`, 2026-10-27. Every run ends awake; none STUCK. Edits at Wake: 11,539–75,261, all under the 150,000 budget.
+
+**Legacy slider, seed 1234** (run with `no_such_upgrade` injected at the head of the upgrade list; it was skipped): hand 96:42, drills 25% 90:59, 50% 60:04, 100% 98:36; Resonance 1: 76:01 / 62:57 / 42:33 / 78:00. The story 033 table, to the second.
+
+**New baseline (idle drills send all power to the Heart):**
+
+| Seed | Tuning | Hand only | 25% | 35% | 50% | 65% | 100% |
+|---|---|---|---|---|---|---|---|
+| 1234 | shipped | 96:42 | 46:05 | 47:14 | 49:28 | 55:24 | 98:36 |
+| 1234 | Resonance 1 | 76:01 | 33:25 | 34:09 | 35:33 | 37:43 | 78:00 |
+| 7 | shipped | 82:05 | 54:55 | 55:58 | 57:24 | 60:22 | 94:13 |
+| 7 | Resonance 1 | 66:50 | 44:11 | 44:53 | 45:42 | 47:47 | 76:13 |
+| 99 | shipped | 75:39 | 59:15 | 60:17 | 61:15 | 62:37 | 73:07 |
+| 99 | Resonance 1 | 59:07 | 48:33 | 49:14 | 49:51 | 51:46 | 58:54 |
+
+**Deepest drill passes 150 / 250 / 340 / 400 m (shipped, 50% Heart):** seed 1234 27:43 / 31:32 / 35:58 / 38:50; seed 7 36:41 / 40:29 / 45:13 / 47:19; seed 99 41:12 / 44:43 / 49:04 / 51:03.
+
+The drill rows drop by about 11 minutes against the legacy rule (60:04 to 49:28 at 50%): the old model left half the power on drills parked at bedrock. That is the simulator, not the game; later stories compare against this table.
 
 ---
 
