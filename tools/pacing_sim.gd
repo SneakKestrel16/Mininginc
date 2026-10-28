@@ -30,6 +30,7 @@ const RESERVE := { "coal": 10, "ice": 10 }
 const TUNINGS := [
 	{ "name": "shipped" },
 	{ "name": "second moon, Resonance 1", "resonance": 1 },
+	{ "name": "no vaults", "no_vaults": true },
 ]
 const STRATEGIES := [
 	{ "name": "hand only, 50% Heart", "share": 0.5, "drills": 0 },
@@ -91,6 +92,8 @@ func _run(strategy: Dictionary, tuning: Dictionary, world_seed: int) -> void:
 	economy.stage_reached.connect(func(i: int) -> void:
 		events.append("%s %s" % [economy.heart.stages[i]["name"], _clock(_t)]))
 	var order := _upgrade_order(economy.upgrades)
+	var opened := [0]  # an array: a lambda captures locals by value
+	world.vault_opened.connect(func(_i: int, _ore: String) -> void: opened[0] += 1)
 	var marks := PackedStringArray()
 	_t = 0.0
 	var stuck_since := -1.0
@@ -152,9 +155,9 @@ func _run(strategy: Dictionary, tuning: Dictionary, world_seed: int) -> void:
 	for id in mine.ores:
 		if mine.ores[id] > 0:
 			left.append("%s %d" % [id, mine.ores[id]])
-	print("%-22s   depth: %s | edits %d%s | left: %s" % ["", ", ".join(marks) if marks else "-",
+	print("%-22s   depth: %s | edits %d%s | vaults opened %d | left: %s" % ["", ", ".join(marks) if marks else "-",
 		world.edits.size(), " FAIL over %d" % EDITS_BUDGET if world.edits.size() > EDITS_BUDGET else "",
-		", ".join(left)])
+		opened[0], ", ".join(left)])
 	hand.free()
 	for node in [world, mine, economy]:
 		node.free()
@@ -218,7 +221,7 @@ func _can_spare(economy: Economy, id: String) -> bool:
 ## Lays [param tuning] over the loaded data. Keys: ore_scale (multiplies every ore
 ## chance), drill_rate (hits per power-second), thresholds (one per stage), drill_cost,
 ## reactor_cost, resonance (points carried from earlier moons), legacy_slider (the slider
-## rule from before story 036, read in _run).
+## rule from before story 036, read in _run), no_vaults (a moon without vaults).
 func _apply(tuning: Dictionary, economy: Economy, mine: Mine, world: VoxelWorld) -> void:
 	if tuning.has("ore_scale"):
 		for ore in world._ores:
@@ -235,6 +238,10 @@ func _apply(tuning: Dictionary, economy: Economy, mine: Mine, world: VoxelWorld)
 		economy.reactor_cost = tuning["reactor_cost"]
 	if tuning.has("resonance"):
 		economy.resonance = tuning["resonance"]
+	if tuning.get("no_vaults", false):
+		for stratum in world.strata:
+			stratum.erase("vaults")
+		world._seed_noise()
 
 
 func _clock(seconds: float) -> String:

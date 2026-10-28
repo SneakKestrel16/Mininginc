@@ -8,6 +8,9 @@ extends Node3D
 
 ## Emitted after each scoop with what it removed: material name to samples removed.
 signal carved(center: Vector3, collected: Dictionary)
+## Emitted the first time a scoop breaks into vault [param index] of [member vaults];
+## [param ore] is what its walls hold. Not saved: a reload may tell it once more.
+signal vault_opened(index: int, ore: String)
 
 const WORLD_PATH := "res://data/world.json"
 const ORES_PATH := "res://data/ores.json"
@@ -22,6 +25,16 @@ const SOLID := 100.0
 ## Metres past a scoop that a loose piece of ground may reach and still fall: ground that
 ## connects to nothing within this distance counts as held up.
 const SUPPORT_REACH := 6
+## Metres per side of the cells vaults are looked up by.
+const VAULT_CELL := 16.0
+## A vault is this many times wider than it is tall.
+const VAULT_SQUASH := 1.4
+## Metres a vault's wall wanders in and out of its round shape.
+const VAULT_LUMPS := 0.8
+## Metres of plain rock kept between a vault's shell and a wall, a stratum's edge or another vault.
+const VAULT_CLEAR := 2.0
+## Places tried for each vault before it is left out.
+const VAULT_TRIES := 20
 # Neighbours in the order a support fill pushes them: down last, so it is tried first.
 const FILL_ORDER: Array[Vector3i] = [Vector3i.UP, Vector3i.LEFT, Vector3i.RIGHT, Vector3i.FORWARD, Vector3i.BACK, Vector3i.DOWN]
 
@@ -52,8 +65,15 @@ var heart_center: Vector3
 ## Radius of the Heart's cavern, in metres.
 var heart_radius: float
 ## Bands of rock by depth, shallowest first, as data/strata.json lists them: each has a name,
-## from_depth, hardness, a rock tint, ambient light, ore glow and a banner line.
+## from_depth, hardness, a rock tint, ambient light, ore glow and a banner line, and the deep
+## ones a vaults block.
 var strata: Array = []
+## Sealed hollows in the deep strata (brief: Milestone 10 item 45), placed from the seed so
+## nothing about them is saved. Each has center, radius, shell, ore (block id), cutoff (of
+## the patch noise, from the stratum's cover), stratum, glow, glow_range and glow_energy.
+var vaults: Array[Dictionary] = []
+## Metres within which the HUD names the nearest vault once the Heart has Sight.
+var vault_sight_range: float
 # The base: flat ground around the machines.
 var _base := AABB()
 
@@ -77,12 +97,24 @@ var _open_chunks: Dictionary = {}
 var _built: Dictionary = {}
 var _material := ShaderMaterial.new()
 var _ready_done := false
+# Vault lookup cell to the indices of the vaults reaching into it.
+var _vault_cells: Dictionary = {}
+# Highest y any vault reaches; samples above it never look vaults up.
+var _vault_top := -INF
+# Chunks opened only because a vault is in them: closed again on a reseed.
+var _vault_chunks: Array[Vector3i] = []
+var _vault_noise := FastNoiseLite.new()
+var _patch_noise := FastNoiseLite.new()
+# Vault index to the light glowing inside it, for vaults near the player.
+var _vault_lights: Dictionary = {}
+# Vault indices a scoop has broken into this session.
+var _opened: Dictionary = {}
 
 
 func _ready() -> void:
 	var world := _load_json(WORLD_PATH, ["chunk_size", "world_size", "max_depth", "crust_depth", "wall_height",
 			"view_radius_chunks", "heart_cavern_center", "heart_cavern_radius", "surface_bumps", "ore_noise_frequency",
-			"bite_radius", "bite_cost", "base_min", "base_max", "machines_min", "machines_max"])
+			"bite_radius", "bite_cost", "base_min", "base_max", "machines_min", "machines_max", "vault_sight_range"])
 	var ores := _load_json(ORES_PATH, ["hardness_base", "hardness_per_block", "frozen_from_depth",
 			"frozen_hardness_multiplier", "ores"])
 	var strata_data := _load_json(STRATA_PATH, ["strata"])
@@ -105,6 +137,7 @@ func _ready() -> void:
 	_bite_cost = world["bite_cost"]
 	heart_center = Vector3(world["heart_cavern_center"][0], world["heart_cavern_center"][1], world["heart_cavern_center"][2])
 	heart_radius = world["heart_cavern_radius"]
+	vault_sight_range = world["vault_sight_range"]
 	var base_low := Vector3(world["base_min"][0], world["base_min"][1], world["base_min"][2])
 	var base_high := Vector3(world["base_max"][0], world["base_max"][1], world["base_max"][2])
 	_base = AABB(base_low, base_high - base_low)
@@ -158,7 +191,16 @@ func generated_density(pos: Vector3i) -> float:
 	var bumps := 0.0 if _base.has_point(Vector3(pos.x, _base.position.y, pos.z)) else _bumps
 	var ground := 1.0 - pos.y + bumps * _ground_noise.get_noise_2d(pos.x, pos.z)
 	# The cavern: a smooth ball of air, cut the way a scoop cuts.
-	return minf(ground, Vector3(pos).distance_to(heart_center) - heart_radius)
+	var density := minf(ground, Vector3(pos).distance_to(heart_center) - heart_radius)
+	if pos.y <= _vault_top:
+		var near = _vault_cells.get(_vault_cell(pos))
+		if near:
+			for i in near:
+				# Only the vault's own ground changes: past its shell the rock keeps its density.
+				var cavity := _cavity(vaults[i], Vector3(pos))
+				if cavity <= vaults[i]["shell"] + 1.0:
+					density = minf(density, cavity)
+	return density
 
 
 ## True when the sample at [param pos] is solid ground.
@@ -173,6 +215,15 @@ func material_at(pos: Vector3i) -> int:
 	var depth := -pos.y
 	if depth < crust_depth:
 		return Blocks.CRUST
+	# A vault's wall: patches of its stratum's ore in the shell around the hollow.
+	if pos.y <= _vault_top:
+		var near = _vault_cells.get(_vault_cell(pos))
+		if near:
+			for i in near:
+				var vault: Dictionary = vaults[i]
+				var cavity := _cavity(vault, Vector3(pos))
+				if cavity > 0.0 and cavity <= vault["shell"] and _patch_noise.get_noise_3d(pos.x, pos.y, pos.z) > vault["cutoff"]:
+					return vault["ore"]
 	for i in _ores.size():
 		var ore: Dictionary = _ores[i]
 		if depth >= ore["min_depth"] and depth <= ore["max_depth"] \
@@ -242,6 +293,13 @@ static func strata_error(list: Array, depth_limit: int) -> String:
 		var lightness := tinted.get_luminance() / rock.get_luminance()
 		if lightness < 0.75 or lightness > 1.1 or tinted.s > 0.3:
 			return "%s's tint changes rock too much" % stratum["name"]
+		if stratum.has("vaults"):
+			var spec: Dictionary = stratum["vaults"]
+			for key in ["count", "radius", "shell", "cover", "ore", "glow", "glow_range", "glow_energy"]:
+				if not spec.has(key):
+					return "%s's vaults are missing \"%s\"" % [stratum["name"], key]
+			if Blocks.id_of(spec["ore"]) <= Blocks.ROCK:
+				return "%s's vaults are walled with \"%s\", which is no ore" % [stratum["name"], spec["ore"]]
 	return ""
 
 
@@ -306,6 +364,10 @@ func carve(center: Vector3, radius: float) -> Dictionary:
 		if _built.has(key):
 			_build(key)
 	carved.emit(center, collected)
+	for i in vaults.size():
+		if not _opened.has(i) and _cavity(vaults[i], center) <= radius:
+			_opened[i] = true
+			vault_opened.emit(i, Blocks.NAMES[vaults[i]["ore"]])
 	return collected
 
 
@@ -431,6 +493,41 @@ func update_around(center: Vector3) -> void:
 		if maxi(reach.x, maxi(reach.y, reach.z)) > view_radius + 1:
 			_built[key].queue_free()
 			_built.erase(key)
+	# A light inside each vault near enough to be drawn: unshadowed, so its glow reaches
+	# through the rock and tints the walls of a tunnel coming toward it.
+	var near := view_radius * chunk_size
+	for i in vaults.size():
+		var away := center.distance_to(vaults[i]["center"])
+		if away <= near and not _vault_lights.has(i):
+			var light := OmniLight3D.new()
+			light.position = vaults[i]["center"]
+			light.light_color = vaults[i]["glow"]
+			light.omni_range = vaults[i]["glow_range"]
+			light.light_energy = vaults[i]["glow_energy"]
+			light.shadow_enabled = false
+			add_child(light)
+			_vault_lights[i] = light
+		elif away > near + chunk_size and _vault_lights.has(i):
+			_vault_lights[i].queue_free()
+			_vault_lights.erase(i)
+
+
+## Vaults within [param reach] metres of [param pos], nearest first: each with index, center,
+## radius, ore (name) and distance.
+func vaults_near(pos: Vector3, reach: float) -> Array:
+	var found := []
+	for i in vaults.size():
+		var away := pos.distance_to(vaults[i]["center"])
+		if away <= reach:
+			found.append({ "index": i, "center": vaults[i]["center"], "radius": vaults[i]["radius"],
+					"ore": Blocks.NAMES[vaults[i]["ore"]], "distance": away })
+	found.sort_custom(func(a: Dictionary, b: Dictionary) -> bool: return a["distance"] < b["distance"])
+	return found
+
+
+## Number of vault lights alive now; checks use it.
+func vault_light_count() -> int:
+	return _vault_lights.size()
 
 
 ## [member edits] as a flat list of x, y, z, density: small in a JSON save.
@@ -504,6 +601,96 @@ func _seed_noise() -> void:
 		values.sort()
 		var chance: float = _ores[i]["chance"]
 		_ore_cutoff.append(values[clampi(int((1.0 - chance) * values.size()), 0, values.size() - 1)])
+	_place_vaults()
+
+
+# Places each deep stratum's vaults from the seed: inside the stratum, clear of the world's
+# walls and of each other, so every one is sealed until dug into. A vault that finds no room
+# in VAULT_TRIES places is left out.
+func _place_vaults() -> void:
+	for key in _vault_chunks:
+		_open_chunks.erase(key)
+	_vault_chunks.clear()
+	for light in _vault_lights.values():
+		light.queue_free()
+	_vault_lights.clear()
+	vaults.clear()
+	_vault_cells.clear()
+	_opened.clear()
+	_vault_top = -INF
+	_vault_noise.seed = world_seed + 104729
+	_vault_noise.frequency = 0.2
+	_patch_noise.seed = world_seed + 130363
+	_patch_noise.frequency = 0.35
+	var patch := PackedFloat32Array()
+	for s in 4096:
+		patch.append(_patch_noise.get_noise_3d(s * 7.13, s * 3.71, s * 5.29))
+	patch.sort()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = world_seed
+	for s in strata.size():
+		if not strata[s].has("vaults"):
+			continue
+		var spec: Dictionary = strata[s]["vaults"]
+		var top: float = strata[s]["from_depth"]
+		var bottom: float = strata[s + 1]["from_depth"] if s + 1 < strata.size() else max_depth
+		var cutoff := patch[clampi(int((1.0 - float(spec["cover"])) * patch.size()), 0, patch.size() - 1)]
+		for n in int(spec["count"]):
+			for attempt in VAULT_TRIES:
+				var radius := rng.randf_range(spec["radius"][0], spec["radius"][1])
+				var outer: float = radius + VAULT_LUMPS + spec["shell"]
+				var side := outer + VAULT_CLEAR
+				var half := outer / VAULT_SQUASH + VAULT_CLEAR
+				var center := Vector3(rng.randf_range(side, world_size - side), -rng.randf_range(top + half, bottom - half),
+						rng.randf_range(side, world_size - side))
+				if bottom - top < 2.0 * half or vaults.any(func(v: Dictionary) -> bool:
+						return center.distance_to(v["center"]) < outer + v["radius"] + VAULT_LUMPS + v["shell"] + 2.0 * VAULT_CLEAR):
+					continue
+				vaults.append({ "center": center, "radius": radius, "shell": float(spec["shell"]),
+						"ore": Blocks.id_of(spec["ore"]), "cutoff": cutoff, "stratum": s, "glow": _color(spec["glow"]),
+						"glow_range": float(spec["glow_range"]), "glow_energy": float(spec["glow_energy"]) })
+				_register_vault(vaults.size() - 1)
+				break
+
+
+# Files vault [param i] under every lookup cell and chunk its shell reaches, one sample past.
+func _register_vault(i: int) -> void:
+	var vault: Dictionary = vaults[i]
+	var outer: float = vault["radius"] + VAULT_LUMPS + vault["shell"] + 1.0
+	var reach := Vector3(outer, outer / VAULT_SQUASH, outer)
+	var low := Vector3i((vault["center"] - reach).floor())
+	var high := Vector3i((vault["center"] + reach).ceil())
+	_vault_top = maxf(_vault_top, high.y)
+	var cell_low := _vault_cell(low)
+	var cell_high := _vault_cell(high)
+	for x in range(cell_low.x, cell_high.x + 1):
+		for y in range(cell_low.y, cell_high.y + 1):
+			for z in range(cell_low.z, cell_high.z + 1):
+				var key := Vector3i(x, y, z)
+				if not _vault_cells.has(key):
+					_vault_cells[key] = []
+				_vault_cells[key].append(i)
+	var chunk_low := chunk_of(low - Vector3i.ONE)
+	var chunk_high := chunk_of(high + Vector3i.ONE)
+	for x in range(chunk_low.x, chunk_high.x + 1):
+		for y in range(chunk_low.y, chunk_high.y + 1):
+			for z in range(chunk_low.z, chunk_high.z + 1):
+				var key := Vector3i(x, y, z)
+				if not _open_chunks.has(key):
+					_open_chunks[key] = true
+					_vault_chunks.append(key)
+
+
+# How far [param pos] is outside vault [param vault]'s hollow, in squashed metres: below 0 is
+# inside, in the air.
+func _cavity(vault: Dictionary, pos: Vector3) -> float:
+	var offset: Vector3 = pos - vault["center"]
+	offset.y *= VAULT_SQUASH
+	return offset.length() - vault["radius"] - VAULT_LUMPS * _vault_noise.get_noise_3dv(pos)
+
+
+func _vault_cell(pos: Vector3i) -> Vector3i:
+	return Vector3i(floori(pos.x / VAULT_CELL), floori(pos.y / VAULT_CELL), floori(pos.z / VAULT_CELL))
 
 
 # Surface nets: one vertex per cell the surface crosses, at the average of its edge crossings;

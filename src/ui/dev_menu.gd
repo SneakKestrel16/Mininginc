@@ -68,6 +68,7 @@ func _ready() -> void:
 		player.recall_home()
 		_status.text = "Back at the base")
 	_button(move_row, "To Heart", func() -> void: _teleport(heart.global_position + Vector3(0, 0, 5)))
+	_button(move_row, "To vault", _to_vault)
 
 	var depth_row := _row(rows, "Depth")
 	for stratum in economy.mine.world.strata.slice(1):
@@ -126,6 +127,20 @@ func _drop_to(depth: int) -> void:
 	world.carve(center, CHAMBER_RADIUS)
 	world.update_around(center)
 	_teleport(center - Vector3(0, CHAMBER_RADIUS - 0.2, 0))
+
+
+# Stands the player on the floor of the nearest vault, its chunks drawn first.
+func _to_vault() -> void:
+	var world := economy.mine.world
+	var near := world.vaults_near(player.global_position, INF)
+	if near.is_empty():
+		_status.text = "This moon has no vaults"
+		return
+	var floor_at := Vector3i(near[0]["center"].floor())
+	while not world.is_solid(floor_at + Vector3i.DOWN):
+		floor_at += Vector3i.DOWN
+	world.update_around(Vector3(floor_at))
+	_teleport(Vector3(floor_at) + Vector3(0.5, 0.05, 0.5))
 
 
 func _teleport(to: Vector3) -> void:

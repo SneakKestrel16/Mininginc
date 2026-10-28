@@ -8,6 +8,8 @@ const LINE_SECONDS := 8.0
 const SPOKEN_SECONDS := 5.0
 ## Seconds a stratum's banner stays on screen.
 const STRATUM_SECONDS := 4.0
+## Seconds the banner for a vault broken into stays on screen.
+const VAULT_SECONDS := 3.0
 
 ## The economy this HUD reports.
 @export var economy: Economy
@@ -46,6 +48,7 @@ func _ready() -> void:
 	player.scooped.connect(_on_scooped)
 	if depth_sense:
 		depth_sense.stratum_entered.connect(_on_stratum_entered)
+	economy.mine.world.vault_opened.connect(_on_vault_opened)
 
 
 func _process(delta: float) -> void:
@@ -70,6 +73,11 @@ Heart: about %d m %s, %d m across" % [snappedi(absf(to_heart.y), 5),
 		var depth := maxi(-floori(player.global_position.y), 0)
 		_power.text += "
 Depth %d m — %s" % [depth, world.strata[world.stratum_at(depth)]["name"]]
+	# Once the Heart has Sight it senses the nearest vault: how far, never what or which way.
+	if economy.heart.has_effect("ore_sight"):
+		var near := world.vaults_near(player.global_position, world.vault_sight_range)
+		if not near.is_empty():
+			_power.text += "\n" + vault_line(player.global_position, near[0]["center"])
 	var heart := economy.heart
 	var count := heart.stages.size()
 	var stage_name: String = "asleep" if heart.stage == 0 else heart.current()["name"]
@@ -108,6 +116,19 @@ func _on_scooped(collected: Dictionary) -> void:
 	if not parts.is_empty():
 		_gain.text = "  ".join(parts)
 		_gain_left = 1.5
+
+
+## The HUD line for the nearest vault, seen from [param from]: its distance and how far below
+## or above, rounded to 5 m like the Heart's.
+static func vault_line(from: Vector3, vault: Vector3) -> String:
+	var offset := vault - from
+	var height := snappedi(absf(offset.y), 5)
+	return "Vault: about %d m away, %s" % [snappedi(offset.length(), 5),
+			"level with you" if height == 0 else "%d m %s" % [height, "down" if offset.y < 0.0 else "up"]]
+
+
+func _on_vault_opened(_index: int, ore: String) -> void:
+	_show("A vault breaks open\nIts walls are %s" % ore, VAULT_SECONDS)
 
 
 func _on_stratum_entered(index: int) -> void:
