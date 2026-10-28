@@ -52,3 +52,7 @@
 | 038 | Deep ores and the second shop | Logic | Ready | N/A (minimal) |
 | 039 | Recall | Logic | Ready | N/A (minimal) |
 | 040 | Vaults | Integration | Ready | N/A (minimal) |
+| 041 | Drills bore harder; idle power goes to the drills | Logic | Ready | N/A (minimal) |
+| 042 | The pacing simulator plays people and guards the promise | Config/Data | Ready | N/A (minimal) |
+| 043 | Set the drill bonus and record the new baseline | Config/Data | Ready | N/A (minimal) |
+| 044 | The console and the away report say what the drills do | UI | Ready | N/A (minimal) |

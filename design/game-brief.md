@@ -113,6 +113,17 @@ Chosen 2026-10-27 by Claude when the user said "keep going until i tell you to s
 
 Build order: 41 → 42 → 43 → 44 → 45.
 
+## Milestone 11 — drills pay
+Chosen 2026-10-28 by Claude from the Milestone 10 review's balance finding (story 036): once the pacing simulator gave the hand column its share of drill power, as live play does, "hand only, 50% Heart" woke the Heart before every drill split on all three seeds. That breaks the pitch ("then with power-hungry auto-drills") and item 14's precedent that investing in drills must pay off. Designed by a three-way panel (economy, player experience, implementation) and a judge. The judge took the economy design as the spine. An auto-drill bores twice the rock per share of drill power that the hand cuts. This was the only proposal whose scratch runs reproduced the story 036 baseline and then put every tested drill split ahead of hand only on all three seeds, without touching the hand tool or item 23. Grafted on from the experience design: the hand borrows its share only while it cuts, the console and away-report wording, and a simulator that plays people (attention, fleet sizes, time away). From the implementation design: a simulator verdict that fails the run, proven able to fail before the fix lands. Rejected: halving `hand_power_bonus` (breaks item 23, slows every route), cheaper drills (cost is not what binds), and raising the Wake threshold or lowering the offline cap (no run covers either).
+
+46. Auto-drills bore twice as much rock as the hand tool from the same share of drill power, at the base and while you are away. With no drills standing the hand tool still takes all of the drill power, so none of it is wasted (item 23 stands).
+47. The hand tool borrows its share of drill power only while it is cutting. The rest of the time, and while the game is closed, the drills get it all.
+48. The power console and the auto-drill prompt say what the drills are doing. When every drill is at bedrock the console says so and points to the slider, so power does not go nowhere unnoticed.
+49. The away report says how far the drills got ("Drills dug on from 120 m to 241 m") instead of a count of broken blocks.
+50. The pacing simulator plays people. The hand cuts part of the time (50%, 35% or 25%). Fleets of 2, 3 and 6 drills sit beside hand only at 50% and 35% Heart. Sittings with time away run through the offline path. The simulator fails when the best 6-drill split does not wake the Heart at least 2% sooner than the best hand-only row, at 50% attention.
+
+Build order: 46 and 47 (the rules, with the drill bonus left at 1.0) → 50 (on unchanged data it must fail, proving the gate can) → 46's value set to 2.0 and re-tuned → 48 and 49 (so the screenshots show the shipped value).
+
 ## Out of scope — not building this
 - Waste that later becomes fuel, the crystal placement grid, transmission loss.
 - The star map, and Resonance spent on anything but generator strength.
