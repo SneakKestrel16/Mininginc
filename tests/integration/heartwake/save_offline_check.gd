@@ -74,6 +74,13 @@ func _initialize() -> void:
 			# A stage reached inside a 5 s step starts its bonus at the step's end: within one step of power.
 			and absf(live.economy.heart.progress - offline.economy.heart.progress) < 20.0,
 			"5 s offline steps match 0.1 s live ticks over 5 minutes")
+	# Away, drills bore at their efficiency too: the same 5 minutes go deeper at 2.0 (story 041).
+	var doubled := await _game()
+	SaveGame.apply(JSON.parse_string(JSON.stringify(base)), doubled.economy, doubled.mine)
+	doubled.mine.drill_efficiency = 2.0
+	doubled.economy.advance(300.0, 5.0)
+	failures += _check(doubled.mine.drills[0].depth_y < offline.mine.drills[0].depth_y,
+			"away, a drill at twice the efficiency bores deeper (%d vs %d)" % [doubled.mine.drills[0].depth_y, offline.mine.drills[0].depth_y])
 
 	# Drones keep a fed furnace burning while coal lasts; without them it burns out.
 	var hand := await _game()

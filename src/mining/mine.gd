@@ -22,6 +22,13 @@ var drills: Array[AutoDrill] = []
 ## Copper one auto-drill costs.
 var drill_cost: Dictionary = {}
 
+## Rock an auto-drill bores per hit of its share of drill power, against the hand tool's 1
+## (data/world.json drill_efficiency, 1.0 when absent).
+var drill_efficiency := 1.0
+
+## True while the hand tool is cutting; it takes its share of drill power only then.
+var hand_cutting := false
+
 ## Ore id to amount found so far. Rock is not counted.
 var ores: Dictionary = {}
 
@@ -43,20 +50,23 @@ func _ready() -> void:
 		_fail("res://data/world.json is missing \"drill_cost\"")
 		return
 	drill_cost = world_config["drill_cost"]
+	drill_efficiency = world_config.get("drill_efficiency", 1.0)
 	if world:
 		world.world_seed = shaft.shaft_seed
 		world.carved.connect(_collect)
 
 
 ## Shares [param hits] of drill power between the drills still digging and the hand tool,
-## which always takes one share: with no drills placed it gets all of it. Ore the drills
-## break is collected through the world's signal.
+## which takes one share only while it cuts; with no drills placed the hand tool gets all
+## of it ([method hand_share]). Each drill bores [member drill_efficiency] times its share.
+## Ore the drills break is collected through the world's signal.
 func dig(hits: float = 1.0) -> void:
 	var working := working_drills()
 	if hits <= 0.0 or working.is_empty():
 		return
+	var shares := working.size() + (1 if hand_cutting else 0)
 	for drill in working:
-		drill.dig(hits / (working.size() + 1))
+		drill.dig(hits / shares * drill_efficiency)
 	changed.emit()
 
 

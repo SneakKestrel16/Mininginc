@@ -166,9 +166,12 @@ func _physics_process(delta: float) -> void:
 	_drilling = drilling and target != null and not world.is_protected(Vector3i(target.floor()))
 	if not drilling:
 		_progress = 0.0
+	# The hand tool takes its share of drill power only on frames it cuts rock (story 041).
+	var cutting := false
 	if _drilling:
 		var needed := world.hardness_at(Vector3i(target.floor()))
 		if not is_inf(needed):
+			cutting = true
 			_progress += hand_rate() * delta
 			# A hair under counts: hits are summed in floats, which can stop just short.
 			if _progress >= needed - 0.0001:
@@ -176,6 +179,8 @@ func _physics_process(delta: float) -> void:
 				var got := world.carve(target, world.scoop_radius())
 				_effects.play(target, got)
 				scooped.emit(got)
+	if mine:
+		mine.hand_cutting = cutting
 	_animate_tool(delta)
 	_show_target()
 	_hint.visible = not controls_enabled and not hint_blocked

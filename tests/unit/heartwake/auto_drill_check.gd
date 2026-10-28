@@ -39,6 +39,34 @@ func _initialize() -> void:
 		c.dig(0.1)
 	failures += _check(big.depth_y == small.depth_y and b.ores == c.ores, "one big dig matches many small ones (%d vs %d)" % [big.depth_y, small.depth_y])
 
+	# A drill bores drill_efficiency times the rock per hit of its share; the hand tool takes
+	# a share only while it cuts (story 041).
+	var single := await _mine(5)
+	var doubled := await _mine(5)
+	var cutting := await _mine(5)
+	var cutting_half := await _mine(5)
+	var lone := {}
+	for m in [single, doubled, cutting, cutting_half]:
+		m.refund(m.drill_cost)
+		lone[m] = m.place_drill(Vector3i(40, 0, 40))
+	doubled.drill_efficiency = 2.0
+	single.dig(80.0)
+	doubled.dig(40.0)
+	failures += _check(lone[doubled].depth_y == lone[single].depth_y and doubled.world.damage == single.world.damage,
+			"a drill at twice the efficiency digs from 40 hits what one at 1.0 digs from 80 (%d vs %d)" % [lone[doubled].depth_y, lone[single].depth_y])
+	cutting.hand_cutting = true
+	cutting_half.hand_cutting = true
+	cutting.dig(80.0)
+	cutting_half.dig(40.0)
+	var idle := await _mine(5)
+	idle.refund(idle.drill_cost)
+	var idle_drill := idle.place_drill(Vector3i(40, 0, 40))
+	idle.dig(40.0)
+	failures += _check(idle_drill.depth_y == lone[cutting].depth_y and idle_drill.depth_y < lone[cutting_half].depth_y,
+			"with the hand idle a lone drill takes all the power: 40 hits dig what 80 do while it cuts (%d, %d, %d)"
+			% [idle_drill.depth_y, lone[cutting].depth_y, lone[cutting_half].depth_y])
+	failures += _check(cutting.hand_share(6.0) == 3.0 and idle.hand_share(6.0) == 3.0, "the hand's share does not depend on whether it cuts")
+
 	b.dig(1e9)
 	failures += _check(big.stopped and big.depth_y == -b.world.max_depth, "stops at bedrock")
 
