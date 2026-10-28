@@ -36,6 +36,8 @@ var flying := false:
 		flying = on
 		$Shape.disabled = flying and noclip
 		velocity = Vector3.ZERO
+## Where Recall (hold R) and the dev menu's To base put the player: flat base ground.
+var recall_point: Vector3
 ## Dev menu: while flying, pass through the ground. Off by default.
 var noclip := false:
 	set(on):
@@ -49,6 +51,7 @@ var _reach: float
 var _drill_rate: float
 var _sensitivity: float
 var _power_bonus: float
+var _recall: Recall
 var _effects := DigEffects.new()
 ## Hits the tool has built up toward its next scoop. Kept in the tool, not in the ground, so
 ## small aim shifts while holding the button never lose progress.
@@ -69,7 +72,7 @@ var _bit: Node3D = null
 func _ready() -> void:
 	var config = JSON.parse_string(FileAccess.get_file_as_string(CONFIG_PATH))
 	var keys := ["move_speed", "jump_velocity", "gravity", "reach", "hand_drill_hits_per_second", "mouse_sensitivity",
-			"hand_power_bonus"]
+			"hand_power_bonus", "recall_seconds", "recall_point"]
 	if not config is Dictionary or not config.has_all(keys):
 		var message := "%s is missing one of %s" % [CONFIG_PATH, ", ".join(keys)]
 		push_error(message)
@@ -83,6 +86,8 @@ func _ready() -> void:
 	_drill_rate = config["hand_drill_hits_per_second"]
 	_sensitivity = config["mouse_sensitivity"]
 	_power_bonus = config["hand_power_bonus"]
+	_recall = Recall.new(config["recall_seconds"])
+	recall_point = Vector3(config["recall_point"][0], config["recall_point"][1], config["recall_point"][2])
 	_marker.top_level = true
 	add_child(_effects)
 
@@ -127,7 +132,17 @@ func set_controls(on: bool) -> void:
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED if on else Input.MOUSE_MODE_VISIBLE
 
 
+## Puts the player at [member recall_point], standing still, with the ground there drawn first
+## so there is something to land on.
+func recall_home() -> void:
+	world.update_around(recall_point)
+	global_position = recall_point
+	velocity = Vector3.ZERO
+
+
 func _physics_process(delta: float) -> void:
+	if _recall.tick(delta, controls_enabled and Input.is_physical_key_pressed(KEY_R)):
+		recall_home()
 	world.update_around(global_position)
 	if not flying:
 		velocity.y -= _gravity * delta
@@ -164,8 +179,10 @@ func _physics_process(delta: float) -> void:
 	_show_target()
 	_hint.visible = not controls_enabled and not hint_blocked
 	var guarded := target != null and world.is_protected(Vector3i(target.floor()))
-	_prompt.visible = (machine != null or guarded) and controls_enabled
-	if machine:
+	_prompt.visible = (machine != null or guarded or _recall.is_holding()) and controls_enabled
+	if _recall.is_holding():
+		_prompt.text = "Recalling to the base: %.1f s" % (_recall.seconds - _recall.held)
+	elif machine:
 		_prompt.text = machine.prompt()
 	elif guarded:
 		_prompt.text = "The machines stand on this ground: dig further out"

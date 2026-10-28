@@ -64,7 +64,9 @@ func _ready() -> void:
 	noclip.text = "Noclip"
 	noclip.toggled.connect(func(on: bool) -> void: player.noclip = on)
 	move_row.add_child(noclip)
-	_button(move_row, "To base", _teleport.bind(Vector3(64.5, 1.5, 64.5)))
+	_button(move_row, "To base", func() -> void:
+		player.recall_home()
+		_status.text = "Back at the base")
 	_button(move_row, "To Heart", func() -> void: _teleport(heart.global_position + Vector3(0, 0, 5)))
 
 	var depth_row := _row(rows, "Depth")

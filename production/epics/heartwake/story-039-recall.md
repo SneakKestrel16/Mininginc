@@ -1,7 +1,7 @@
 # Story 039: Recall
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Logic
 > **Estimate**: S
@@ -28,12 +28,12 @@
 
 *From `design/game-brief.md` (Milestone 10 item 44), scoped to this story:*
 
-- [ ] Holding R for 3 s pulls the player back to the base; letting go early cancels, and holding on does not fire twice.
-- [ ] The crosshair prompt counts down ("Recalling 1.8 s").
-- [ ] The player lands standing on the base ground, with chunks built before the move, and does not fall.
-- [ ] R does nothing while the console or dev menu has control.
-- [ ] Hold time and the base point are data; the dev menu's To base uses the same point.
-- [ ] Retained screenshot of the recall prompt.
+- [x] Holding R for 3 s pulls the player back to the base; letting go early cancels, and holding on does not fire twice.
+- [x] The crosshair prompt counts down ("Recalling to the base: 1.8 s").
+- [x] The player lands standing on the base ground, with chunks built before the move, and does not fall.
+- [x] R does nothing while the console or dev menu has control.
+- [x] Hold time and the base point are data; the dev menu's To base uses the same point.
+- [x] Retained screenshot of the recall prompt.
 
 ---
 
@@ -69,7 +69,7 @@
 **Story Type**: Logic
 **Required evidence**: headless check passes; prompt screenshot in `production/qa/evidence/story-039-*`.
 
-**Status**: [ ] Not yet created
+**Status**: [x] `production/qa/evidence/story-039-recall/` (2026-10-27): R held at 263 m with the countdown, and the player standing at the base after it. `tests/unit/heartwake/recall_check.gd` passes: the hold timing, R ignored without control, the player brought home onto solid ground from 300 m down. It was seen failing with the control gate and the repeat guard removed.
 
 ---
 
