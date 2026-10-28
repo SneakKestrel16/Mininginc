@@ -1,4 +1,4 @@
-[gd_scene load_steps=19 format=3]
+[gd_scene load_steps=20 format=3]
 
 [ext_resource type="Script" path="res://src/economy/economy.gd" id="1_economy"]
 [ext_resource type="PackedScene" path="res://src/ui/power_panel.tscn" id="2_panel"]
@@ -18,6 +18,7 @@
 [ext_resource type="Script" path="res://src/ui/ending.gd" id="20_ending"]
 [ext_resource type="Script" path="res://src/dev/live_reload.gd" id="21_reload"]
 [ext_resource type="Script" path="res://src/ui/crafting_panel.gd" id="22_crafting"]
+[ext_resource type="Script" path="res://src/world/depth_sense.gd" id="23_depth"]
 
 [sub_resource type="Environment" id="Env"]
 background_mode = 1
@@ -52,8 +53,11 @@ light_color = Color(0.9, 0.93, 1, 1)
 light_energy = 0.8
 shadow_enabled = true
 
-[node name="Environment" type="WorldEnvironment" parent="."]
+[node name="Environment" type="WorldEnvironment" parent="." node_paths=PackedStringArray("player", "world")]
 environment = SubResource("Env")
+script = ExtResource("23_depth")
+player = NodePath("../Player")
+world = NodePath("../World")
 
 [node name="Machines" type="Node3D" parent="."]
 
@@ -93,10 +97,11 @@ economy = NodePath("../Economy")
 world = NodePath("../World")
 player = NodePath("../Player")
 
-[node name="Hud" parent="." node_paths=PackedStringArray("economy", "player", "heart") instance=ExtResource("15_hud")]
+[node name="Hud" parent="." node_paths=PackedStringArray("economy", "player", "heart", "depth_sense") instance=ExtResource("15_hud")]
 economy = NodePath("../Economy")
 player = NodePath("../Player")
 heart = NodePath("../Heart")
+depth_sense = NodePath("../Environment")
 
 [node name="Console" type="Node3D" parent="Machines" node_paths=PackedStringArray("economy", "overlay")]
 transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 64.5, 1, 61.5)

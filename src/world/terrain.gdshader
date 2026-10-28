@@ -8,6 +8,8 @@ varying vec3 world_pos;
 // Specks per metre, and the share of speck cells lit on solid ore.
 uniform float fleck_scale = 9.0;
 uniform float fleck_share = 0.4;
+// How brightly ore specks glow; deeper strata turn it up (data/strata.json).
+uniform float ore_glow = 0.35;
 
 void vertex() {
 	world_pos = (MODEL_MATRIX * vec4(VERTEX, 1.0)).xyz;
@@ -44,5 +46,5 @@ void fragment() {
 	ALBEDO = mix(base, fleck, spot);
 	ROUGHNESS = mix(0.92, 0.2, spot);
 	METALLIC = spot * 0.5;
-	EMISSION = fleck * spot * 0.35;
+	EMISSION = fleck * spot * ore_glow;
 }

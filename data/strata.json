@@ -1,0 +1,29 @@
+{
+	"strata": [
+		{
+			"id": "shallow", "name": "Shallow", "from_depth": 0, "hardness": 1.0,
+			"tint": [1.0, 1.0, 1.0], "ambient_color": [0.45, 0.5, 0.65], "ambient_energy": 0.6, "ore_glow": 0.35,
+			"line": "Back in the shallow rock: coal, ice and iron."
+		},
+		{
+			"id": "mid", "name": "Mid", "from_depth": 100, "hardness": 1.0,
+			"tint": [0.92, 0.96, 1.04], "ambient_color": [0.42, 0.5, 0.66], "ambient_energy": 0.5, "ore_glow": 0.45,
+			"line": "The rock turns cold and blue. Uranium and gold lie this deep."
+		},
+		{
+			"id": "deep", "name": "Deep", "from_depth": 150, "hardness": 1.0,
+			"tint": [0.84, 0.9, 0.8], "ambient_color": [0.42, 0.46, 0.58], "ambient_energy": 0.34, "ore_glow": 0.65,
+			"line": "The light thins. The stone here is old and green-grey."
+		},
+		{
+			"id": "abyss", "name": "Abyss", "from_depth": 250, "hardness": 1.0,
+			"tint": [1.0, 0.88, 0.7], "ambient_color": [0.38, 0.44, 0.56], "ambient_energy": 0.24, "ore_glow": 0.85,
+			"line": "Umber rock, and almost no light. Ore burns bright in the dark."
+		},
+		{
+			"id": "core", "name": "Core", "from_depth": 340, "hardness": 1.0,
+			"tint": [0.72, 0.86, 0.9], "ambient_color": [0.62, 0.48, 0.42], "ambient_energy": 0.15, "ore_glow": 1.0,
+			"line": "The Core. Bedrock lies at 400 m."
+		}
+	]
+}

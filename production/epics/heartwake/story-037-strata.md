@@ -1,7 +1,7 @@
 # Story 037: Strata you can read
 
 > **Epic**: Heartwake
-> **Status**: Ready
+> **Status**: Complete
 > **Layer**: Feature
 > **Type**: Visual/Feel
 > **Estimate**: M
@@ -28,13 +28,13 @@
 
 *From `design/game-brief.md` (Milestone 10 item 42), scoped to this story:*
 
-- [ ] `data/strata.json` lists Shallow from 0 m, Mid from 100, Deep from 150, Abyss from 250 and Core from 340, each with a rock tint, ambient light, ore glow, hardness (1.0 for all in this story) and a one-line banner. A bad file is refused with a reason.
-- [ ] Rock and crust take their stratum's tint; ore keeps its own colour and flecks.
-- [ ] Underground, the ambient light eases toward the stratum's, and ore flecks glow harder the deeper the player is.
-- [ ] The HUD shows the depth and stratum name, and a banner when the player enters a new stratum (3 m hysteresis, none on load).
-- [ ] The dev menu can drop the player into a chamber at 100, 150, 250 and 340 m.
-- [ ] Digging costs exactly what it did (hardness 1.0); a `legacy_slider` simulator run matches story 036's.
-- [ ] Retained screenshots of each stratum, headlamp-lit, with ore in frame.
+- [x] `data/strata.json` lists Shallow from 0 m, Mid from 100, Deep from 150, Abyss from 250 and Core from 340, each with a rock tint, ambient light, ore glow, hardness (1.0 for all in this story) and a one-line banner. A bad file is refused with a reason.
+- [x] Rock and crust take their stratum's tint; ore keeps its own colour and flecks.
+- [x] Underground, the ambient light eases toward the stratum's, and ore flecks glow harder the deeper the player is.
+- [x] The HUD shows the depth and stratum name, and a banner when the player enters a new stratum (3 m hysteresis, none on load).
+- [x] The dev menu can drop the player into a chamber 10 m inside each stratum below the first (110, 160, 260, 350 m).
+- [x] Digging costs exactly what it did (hardness 1.0); a `legacy_slider` simulator run matches story 036's.
+- [x] Retained screenshots of each stratum, headlamp-lit, with ore in frame.
 
 ---
 
@@ -45,6 +45,7 @@
 - Guards in a pure `strata_error()`: first from 0, strictly increasing, last below max_depth, ambient energy at least 0.12, tint channels 0.5–1.5.
 - Tint is keyed on depth, never on the frozen line, so Breath never forces a rebuild.
 - The shader's fixed fleck emission becomes a uniform `ore_glow`.
+- Built with the HUD's Heart line saying "up" when the Heart is above the player (it said "0 m down" all through the deep).
 
 ---
 
@@ -77,7 +78,7 @@
 **Story Type**: Visual/Feel
 **Required evidence**: retained screenshots in `production/qa/evidence/story-037-*`.
 
-**Status**: [ ] Not yet created
+**Status**: [x] `production/qa/evidence/story-037-strata/` (2026-10-27): the surface, a tunnel at 110, 160, 260 and 350 m looking at a deposit, and 160 m with Sight. `tests/unit/heartwake/strata_check.gd` passes, and was seen failing with the tint, the hysteresis or the hardness broken. A `legacy_slider` simulator run on seed 1234 prints the same 28 lines as before the story.
 
 ---
 

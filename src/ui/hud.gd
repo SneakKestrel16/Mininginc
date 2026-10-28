@@ -6,6 +6,8 @@ extends CanvasLayer
 const LINE_SECONDS := 8.0
 ## Seconds each of a speaking stage's lines stays on screen.
 const SPOKEN_SECONDS := 5.0
+## Seconds a stratum's banner stays on screen.
+const STRATUM_SECONDS := 4.0
 
 ## The economy this HUD reports.
 @export var economy: Economy
@@ -13,6 +15,8 @@ const SPOKEN_SECONDS := 5.0
 @export var player: Player
 ## The buried Heart: the HUD says roughly how far it is.
 @export var heart: Node3D
+## Tells when the player enters a new stratum.
+@export var depth_sense: DepthSense
 
 var _line_left := 0.0
 # Ore gained from the last scoops, shown under the crosshair, and seconds it has left.
@@ -40,6 +44,8 @@ func _ready() -> void:
 	_gain.add_theme_color_override("font_outline_color", Color.BLACK)
 	add_child(_gain)
 	player.scooped.connect(_on_scooped)
+	if depth_sense:
+		depth_sense.stratum_entered.connect(_on_stratum_entered)
 
 
 func _process(delta: float) -> void:
@@ -57,8 +63,13 @@ func _process(delta: float) -> void:
 		var to_heart := heart.global_position - player.global_position
 		# Rounded to 5 m: a sense of direction, not a map.
 		_power.text += "
-Heart: about %d m down, %d m across" % [snappedi(maxf(-to_heart.y, 0.0), 5),
-				snappedi(Vector2(to_heart.x, to_heart.z).length(), 5)]
+Heart: about %d m %s, %d m across" % [snappedi(absf(to_heart.y), 5),
+				"down" if to_heart.y <= 0.0 else "up", snappedi(Vector2(to_heart.x, to_heart.z).length(), 5)]
+	var world := economy.mine.world
+	if not world.strata.is_empty():
+		var depth := maxi(-floori(player.global_position.y), 0)
+		_power.text += "
+Depth %d m — %s" % [depth, world.strata[world.stratum_at(depth)]["name"]]
 	var heart := economy.heart
 	var count := heart.stages.size()
 	var stage_name: String = "asleep" if heart.stage == 0 else heart.current()["name"]
@@ -97,6 +108,12 @@ func _on_scooped(collected: Dictionary) -> void:
 	if not parts.is_empty():
 		_gain.text = "  ".join(parts)
 		_gain_left = 1.5
+
+
+func _on_stratum_entered(index: int) -> void:
+	var stratum: Dictionary = economy.mine.world.strata[index]
+	_show("%s
+%s" % [stratum["name"], stratum["line"]], STRATUM_SECONDS)
 
 
 func _on_stage_reached(index: int) -> void:

@@ -11,6 +11,10 @@ signal carved(center: Vector3, collected: Dictionary)
 
 const WORLD_PATH := "res://data/world.json"
 const ORES_PATH := "res://data/ores.json"
+const STRATA_PATH := "res://data/strata.json"
+## Darkest ambient a stratum may ask for: below it a tunnel lit by the headlamp alone is
+## too dark to read.
+const MIN_AMBIENT := 0.12
 ## The six neighbours of a sample.
 const SIDES: Array[Vector3i] = [Vector3i.UP, Vector3i.DOWN, Vector3i.LEFT, Vector3i.RIGHT, Vector3i.FORWARD, Vector3i.BACK]
 ## Density outside the world and in bedrock: far inside, so no scoop opens it.
@@ -47,6 +51,9 @@ var bite_bonus := 0.0
 var heart_center: Vector3
 ## Radius of the Heart's cavern, in metres.
 var heart_radius: float
+## Bands of rock by depth, shallowest first, as data/strata.json lists them: each has a name,
+## from_depth, hardness, a rock tint, ambient light, ore glow and a banner line.
+var strata: Array = []
 # The base: flat ground around the machines.
 var _base := AABB()
 
@@ -78,8 +85,14 @@ func _ready() -> void:
 			"bite_radius", "bite_cost", "base_min", "base_max", "machines_min", "machines_max"])
 	var ores := _load_json(ORES_PATH, ["hardness_base", "hardness_per_block", "frozen_from_depth",
 			"frozen_hardness_multiplier", "ores"])
-	if world.is_empty() or ores.is_empty():
+	var strata_data := _load_json(STRATA_PATH, ["strata"])
+	if world.is_empty() or ores.is_empty() or strata_data.is_empty():
 		return
+	var refused := strata_error(strata_data["strata"], world["max_depth"])
+	if refused != "":
+		_fail("%s: %s" % [STRATA_PATH, refused])
+		return
+	strata = strata_data["strata"]
 	chunk_size = world["chunk_size"]
 	world_size = world["world_size"]
 	max_depth = world["max_depth"]
@@ -176,7 +189,60 @@ func hardness_at(pos: Vector3i) -> float:
 	var hits := _hardness_base + _hardness_per_block * depth
 	if depth >= frozen_from:
 		hits *= _frozen_multiplier
-	return hits * _bite_cost
+	return hits * _bite_cost * float(strata[stratum_at(depth)]["hardness"])
+
+
+## Index in [member strata] of the stratum at [param depth] metres; the first above ground.
+func stratum_at(depth: int) -> int:
+	var index := 0
+	for i in strata.size():
+		if depth >= strata[i]["from_depth"]:
+			index = i
+	return index
+
+
+## Colour the ground at [param pos] is drawn in: its material's colour, with rock and crust
+## tinted by their stratum. Alpha is 1 on ore, which the terrain shader flecks.
+func surface_color(pos: Vector3i) -> Color:
+	var what := material_at(pos)
+	var color: Color = Blocks.COLORS[what]
+	if what == Blocks.ROCK or what == Blocks.CRUST:
+		color *= _color(strata[stratum_at(-pos.y)]["tint"])
+	color.a = 1.0 if what > Blocks.ROCK else 0.0
+	return color
+
+
+## Sets how brightly ore flecks glow; the depth the player is at sets it.
+func set_ore_glow(glow: float) -> void:
+	_material.set_shader_parameter("ore_glow", glow)
+
+
+## Why [param list] is not a usable strata list for a world [param depth_limit] metres deep,
+## or "" when it is.
+static func strata_error(list: Array, depth_limit: int) -> String:
+	if list.is_empty() or int(list[0]["from_depth"]) != 0:
+		return "the first stratum must start at 0 m"
+	var rock: Color = Blocks.COLORS[Blocks.ROCK]
+	for i in list.size():
+		var stratum: Dictionary = list[i]
+		for key in ["name", "from_depth", "hardness", "tint", "ambient_color", "ambient_energy", "ore_glow", "line"]:
+			if not stratum.has(key):
+				return "stratum %d is missing \"%s\"" % [i, key]
+		if i > 0 and stratum["from_depth"] <= list[i - 1]["from_depth"]:
+			return "%s must start deeper than %s" % [stratum["name"], list[i - 1]["name"]]
+		if stratum["from_depth"] >= depth_limit:
+			return "%s starts below bedrock" % stratum["name"]
+		if stratum["ambient_energy"] < MIN_AMBIENT:
+			return "%s is darker than %.2f ambient" % [stratum["name"], MIN_AMBIENT]
+		for channel in stratum["tint"]:
+			if channel < 0.5 or channel > 1.5:
+				return "%s's tint must stay within 0.5 to 1.5" % stratum["name"]
+		# Tinted rock stays rock-coloured, so ore keeps standing out against it.
+		var tinted: Color = rock * _color(stratum["tint"])
+		var lightness := tinted.get_luminance() / rock.get_luminance()
+		if lightness < 0.75 or lightness > 1.1 or tinted.s > 0.3:
+			return "%s's tint changes rock too much" % stratum["name"]
+	return ""
 
 
 ## True when [param pos] lies below the frozen floor.
@@ -514,9 +580,10 @@ func _build(key: Vector3i) -> void:
 					if corner[c] > corner[best]:
 						best = c
 				var at := low + Vector3i(best & 1, (best >> 1) & 1, (best >> 2) & 1)
-				var what := material_at(at)
-				var color: Color = Blocks.COLORS[what] * (0.92 + 0.12 * _shade(at))
-				color.a = 1.0 if what > Blocks.ROCK else 0.0  # the shader flecks ore
+				var color := surface_color(at)
+				var ore := color.a  # the shader flecks ore
+				color *= 0.92 + 0.12 * _shade(at)
+				color.a = ore
 				colors.append(color)
 	var indices := PackedInt32Array()
 	# Edges from samples this chunk owns (origin .. origin+n-1) along +x, +y, +z.
@@ -564,6 +631,10 @@ func _build(key: Vector3i) -> void:
 	shape.shape = mesh.create_trimesh_shape()
 	body.add_child(shape)
 	node.add_child(body)
+
+
+static func _color(rgb: Array) -> Color:
+	return Color(rgb[0], rgb[1], rgb[2])
 
 
 # A number in [0, 1) fixed by the seed and the position, for a slight shade per spot.

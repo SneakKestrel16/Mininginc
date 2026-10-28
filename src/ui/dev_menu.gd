@@ -1,11 +1,16 @@
 ## Dev menu (brief: Milestone 4 item 22): F1 opens it. Adds ore, sets the Heart's stage or
-## fills its meter, skips time, toggles fly mode, and teleports. Built in code: it is a
+## fills its meter, skips time, toggles fly mode, teleports, and drops into a chamber at a
+## stratum's depth. Built in code: it is a
 ## testing tool, not part of the game's look.
 class_name DevMenu
 extends CanvasLayer
 
 ## Seconds per step when skipping time; the same step offline progress uses.
 const SKIP_STEP := 5.0
+## Radius of the chamber the Depth buttons carve to stand in.
+const CHAMBER_RADIUS := 3.0
+## Metres below a stratum's top the chamber is carved: past the banner's hysteresis.
+const CHAMBER_INSIDE := 10
 
 @export var economy: Economy
 @export var player: Player
@@ -59,6 +64,11 @@ func _ready() -> void:
 	_button(move_row, "To base", _teleport.bind(Vector3(64.5, 1.5, 64.5)))
 	_button(move_row, "To Heart", func() -> void: _teleport(heart.global_position + Vector3(0, 0, 5)))
 
+	var depth_row := _row(rows, "Depth")
+	for stratum in economy.mine.world.strata.slice(1):
+		var depth := int(stratum["from_depth"]) + CHAMBER_INSIDE
+		_button(depth_row, "%s %d m" % [stratum["name"], depth], _drop_to.bind(depth))
+
 	_status = _label(rows, "")
 
 
@@ -101,6 +111,16 @@ func _fill_meter() -> void:
 func _skip(seconds: float) -> void:
 	economy.advance(seconds, SKIP_STEP)
 	_status.text = "Skipped %d min" % int(seconds / 60.0)
+
+
+# Carves a chamber under the player's column [param depth] metres down and stands the player
+# in it, the chunks around it drawn first so there is ground to land on.
+func _drop_to(depth: int) -> void:
+	var world := economy.mine.world
+	var center := Vector3(floorf(player.global_position.x) + 0.5, -depth, floorf(player.global_position.z) + 0.5)
+	world.carve(center, CHAMBER_RADIUS)
+	world.update_around(center)
+	_teleport(center - Vector3(0, CHAMBER_RADIUS - 0.2, 0))
 
 
 func _teleport(to: Vector3) -> void:
