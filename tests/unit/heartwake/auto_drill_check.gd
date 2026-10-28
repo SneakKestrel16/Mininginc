@@ -49,7 +49,7 @@ func _initialize() -> void:
 	for m in [single, doubled, cutting, cutting_half]:
 		m.refund(m.drill_cost)
 		lone[m] = m.place_drill(Vector3i(40, 0, 40))
-	doubled.drill_efficiency = 2.0
+	doubled.drill_efficiency = 2.0 * single.drill_efficiency
 	single.dig(80.0)
 	doubled.dig(40.0)
 	failures += _check(lone[doubled].depth_y == lone[single].depth_y and doubled.world.damage == single.world.damage,
@@ -85,6 +85,14 @@ func _initialize() -> void:
 	d.world.thaw_to(100)
 	d.dig(2.0)
 	failures += _check(deep.depth_y < -60 and not d.world.damage.has(cell), "thawing under a half-dug cell finishes it, no hang")
+
+	# The console says where drill power goes: drills working, none placed, all at bedrock (story 044).
+	var panel: GDScript = load("res://src/ui/power_panel.gd")
+	failures += _check(panel.drill_line(12.0, 6, 6, 2.0) == "Drill power: 12.00 hits/s, shared by 6 auto-drills (they bore 2x per hit) and your hand tool while you cut"
+			and panel.drill_line(12.0, 1, 1, 2.25).contains("1 auto-drill (they bore 2.25x")
+			and panel.drill_line(12.0, 0, 0, 2.0) == "Drill power: 12.00 hits/s, all to your hand tool while you cut"
+			and panel.drill_line(12.0, 3, 0, 2.0) == "Every auto-drill is at bedrock: move the slider to the Heart",
+			"the console says where drill power goes in each case")
 
 	print("auto_drill_check: %s" % ("PASS" if failures == 0 else "%d FAILED" % failures))
 	quit(1 if failures else 0)

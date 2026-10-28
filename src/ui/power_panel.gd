@@ -29,6 +29,17 @@ func _refresh() -> void:
 		economy.power_per_second * (1.0 - split.heart_share),
 		economy.power_per_second * split.heart_share,
 	]
-	var drills := economy.mine.working_drills().size()
-	_drill_label.text = "Drill power: %.2f hits/s, shared by your hand tool%s" % [economy.drill_hits_per_second,
-			"" if drills == 0 else " and %d auto-drill%s" % [drills, "" if drills == 1 else "s"]]
+	var mine := economy.mine
+	_drill_label.text = drill_line(economy.drill_hits_per_second, mine.drills.size(), mine.working_drills().size(),
+			mine.drill_efficiency)
+
+
+## The console's line on where drill power goes: [param placed] drills, [param working] of
+## them still digging, each boring [param efficiency] times the rock per hit (brief item 48).
+static func drill_line(hits_per_second: float, placed: int, working: int, efficiency: float) -> String:
+	if placed > 0 and working == 0:
+		return "Every auto-drill is at bedrock: move the slider to the Heart"
+	if working == 0:
+		return "Drill power: %.2f hits/s, all to your hand tool while you cut" % hits_per_second
+	return "Drill power: %.2f hits/s, shared by %d auto-drill%s (they bore %sx per hit) and your hand tool while you cut" % [
+			hits_per_second, working, "" if working == 1 else "s", Mine.number_text(efficiency)]

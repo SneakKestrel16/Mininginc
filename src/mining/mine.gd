@@ -110,6 +110,11 @@ static func cost_text(cost: Dictionary) -> String:
 	return ", ".join(parts)
 
 
+## [param value] for text, without trailing zeros: "2" for 2.0, "2.25" for 2.25.
+static func number_text(value: float) -> String:
+	return ("%.2f" % value).rstrip("0").rstrip(".")
+
+
 ## Pays [member drill_cost] and places an auto-drill at cell [param at]. Returns the drill,
 ## or null when the inventory falls short, there is no world, the cell is the machines'
 ## protected ground, or a drill already stands there.

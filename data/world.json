@@ -12,6 +12,7 @@
 	"hand_drill_hits_per_second": 4.0,
 	"mouse_sensitivity": 0.0025,
 	"hand_power_bonus": 1.0,
+	"drill_efficiency": 2.0,
 	"recall_seconds": 3.0,
 	"recall_point": [64.5, 1.5, 62.5],
 	"vault_sight_range": 45,

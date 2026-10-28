@@ -77,10 +77,30 @@ func _initialize() -> void:
 	# Away, drills bore at their efficiency too: the same 5 minutes go deeper at 2.0 (story 041).
 	var doubled := await _game()
 	SaveGame.apply(JSON.parse_string(JSON.stringify(base)), doubled.economy, doubled.mine)
-	doubled.mine.drill_efficiency = 2.0
+	doubled.mine.drill_efficiency = 2.0 * offline.mine.drill_efficiency
 	doubled.economy.advance(300.0, 5.0)
 	failures += _check(doubled.mine.drills[0].depth_y < offline.mine.drills[0].depth_y,
 			"away, a drill at twice the efficiency bores deeper (%d vs %d)" % [doubled.mine.drills[0].depth_y, offline.mine.drills[0].depth_y])
+
+	# The away report says how far the drills got, and nothing when no drill dug (story 044).
+	var report_game := await _game()
+	SaveGame.apply(JSON.parse_string(JSON.stringify(base)), report_game.economy, report_game.mine)
+	var from_depth: int = -report_game.mine.drills[0].depth_y
+	var before := SaveGame.snapshot(report_game.economy, report_game.mine)
+	report_game.economy.advance(300.0, 5.0)
+	var report := SaveGame.summary(before, SaveGame.snapshot(report_game.economy, report_game.mine), 300.0)
+	var dug_line := "Drills dug on from %d m to %d m" % [from_depth, -report_game.mine.drills[0].depth_y]
+	failures += _check(report.contains(dug_line) and not report.contains("blocks"), "the away report says how far the drills got (%s)" % report.replace("\n", " / "))
+	report_game.mine.drills[0].stopped = true
+	before = SaveGame.snapshot(report_game.economy, report_game.mine)
+	report_game.economy.advance(300.0, 5.0)
+	var still := SaveGame.summary(before, SaveGame.snapshot(report_game.economy, report_game.mine), 300.0)
+	var bare_game := await _game()
+	before = SaveGame.snapshot(bare_game.economy, bare_game.mine)
+	bare_game.economy.advance(300.0, 5.0)
+	var no_drills := SaveGame.summary(before, SaveGame.snapshot(bare_game.economy, bare_game.mine), 300.0)
+	failures += _check(not still.contains("Drills") and not no_drills.contains("Drills"),
+			"no drill line when the drills did not dig, or there are none")
 
 	# Drones keep a fed furnace burning while coal lasts; without them it burns out.
 	var hand := await _game()

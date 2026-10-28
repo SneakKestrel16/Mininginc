@@ -86,7 +86,8 @@ func dig(hits: float) -> void:
 
 ## What the player sees while looking at the drill.
 func prompt() -> String:
-	var state := "stopped at bedrock" if stopped else "digging at %d m" % maxi(-depth_y, 0)
+	var state := "stopped at bedrock" if stopped \
+			else "digging at %d m, boring %sx per hit" % [maxi(-depth_y, 0), Mine.number_text(mine.drill_efficiency)]
 	return "Auto-drill: %s\n[E] Pick up (returns %s)" % [state, Mine.cost_text(mine.drill_cost)]
 
 

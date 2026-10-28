@@ -228,7 +228,7 @@ static func apply(data: Dictionary, economy: Economy, mine: Mine, player: Player
 ## The numbers the away summary compares.
 static func snapshot(economy: Economy, mine: Mine) -> Dictionary:
 	return {
-		"dug": mine.world.edits.size() if mine.world else 0,
+		"depth": mine.drills.reduce(func(deepest: int, d: AutoDrill) -> int: return maxi(deepest, -d.depth_y), 0),
 		"ores": mine.ores.duplicate(),
 		"stage": economy.heart.stage,
 		"heart": economy.heart.progress,
@@ -238,8 +238,8 @@ static func snapshot(economy: Economy, mine: Mine) -> Dictionary:
 ## One message saying what changed between [param before] and [param after].
 static func summary(before: Dictionary, after: Dictionary, seconds: float) -> String:
 	var lines := PackedStringArray(["While you were away (%dh %02dm):" % [int(seconds) / 3600, int(seconds) % 3600 / 60]])
-	if after["dug"] > before["dug"]:
-		lines.append("Drills broke %d blocks" % (after["dug"] - before["dug"]))
+	if after["depth"] > before["depth"]:
+		lines.append("Drills dug on from %d m to %d m" % [before["depth"], after["depth"]])
 	for id in after["ores"]:
 		var gained: int = after["ores"][id] - before["ores"].get(id, 0)
 		if gained > 0:
