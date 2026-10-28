@@ -10,14 +10,27 @@
 ## the base, refuels and cools everything whenever there is room, builds the turbine and the
 ## reactor as soon as its parts can be crafted, places auto-drills, then spends spare ore on
 ## upgrades (keeping coal and ice for the machines). Parts are crafted when a purchase needs
-## them. It runs
-## live play's simulation (Economy.advance) and scoops the real smooth world.
+## them. It runs live play's simulation (Economy.advance) and scoops the real smooth world.
+## The hand cuts for the attention share of every CUT_CYCLE and, as in play, takes its share
+## of drill power only while it cuts (story 041). A sittings tuning plays on and away in turns;
+## time away runs the way a save's offline progress does, and the run prints its active time.
+## After each tuning marked "verdict" it prints whether the best 6-drill split woke the Heart
+## at least DRILLS_MUST_WIN_BY sooner than the best hand-only row (brief Milestone 11 item 50),
+## and the process exits 1 if any did not.
 extends SceneTree
 
 const STEP := 0.5
 const LIMIT_SECONDS := 3.0 * 3600.0
-## Fraction of the time the player spends hand-drilling rather than walking and feeding.
-const HAND_ATTENTION := 0.5
+## Fraction of the time the player spends cutting by hand rather than walking and feeding,
+## unless a tuning sets "attention". The verdict is taken at this value, the one most
+## favourable to hand only of those played.
+const ATTENTION := 0.5
+## Seconds of one cutting cycle: the hand cuts for the first attention share of each, then
+## the player walks and feeds the machines while the drills take all the drill power.
+const CUT_CYCLE := 20.0
+## Share by which the best 6-drill split must wake the Heart sooner than the best hand-only
+## row for the verdict to be met.
+const DRILLS_MUST_WIN_BY := 0.02
 ## Upgrades bought first, in this order, once machines and drills stand; every other upgrade
 ## in data/upgrades.json follows in file order, so new rows are played without an edit here.
 const UPGRADE_ORDER := ["generator_tuning", "drill_gearing", "tool_motor", "wide_scoop", "long_arm"]
@@ -30,17 +43,22 @@ const DEPTH_MARKS := [150, 250, 340, 400]
 ## Ore kept back from upgrades for the furnace, turbine and reactor cooling.
 const RESERVE := { "coal": 10, "ice": 10 }
 const TUNINGS := [
-	{ "name": "shipped" },
-	{ "name": "second moon, Resonance 1", "resonance": 1 },
-	{ "name": "no vaults", "no_vaults": true },
+	{ "name": "shipped", "verdict": true },
+	{ "name": "second moon, Resonance 1", "resonance": 1, "verdict": true },
+	{ "name": "attention 0.35", "attention": 0.35 },
+	{ "name": "attention 0.25", "attention": 0.25 },
+	{ "name": "sittings, 10 min on, 30 off", "sittings": [600.0, 1800.0] },
 ]
 const STRATEGIES := [
 	{ "name": "hand only, 50% Heart", "share": 0.5, "drills": 0 },
+	{ "name": "hand only, 35% Heart", "share": 0.35, "drills": 0 },
 	{ "name": "drills, 25% Heart", "share": 0.25, "drills": 6 },
 	{ "name": "drills, 35% Heart", "share": 0.35, "drills": 6 },
 	{ "name": "drills, 50% Heart", "share": 0.5, "drills": 6 },
 	{ "name": "drills, 65% Heart", "share": 0.65, "drills": 6 },
 	{ "name": "drills, 100% Heart", "share": 1.0, "drills": 6 },
+	{ "name": "2 drills, 35% Heart", "share": 0.35, "drills": 2 },
+	{ "name": "3 drills, 35% Heart", "share": 0.35, "drills": 3 },
 ]
 
 var _t := 0.0
@@ -59,18 +77,42 @@ func _initialize() -> void:
 			seeds = [int(arg.trim_prefix("seed="))]
 		elif arg == "legacy":
 			legacy = true
+	var failed := false
 	for world_seed in seeds:
 		for tuning in TUNINGS:
 			var played: Dictionary = tuning.duplicate()
 			if legacy:
 				played["legacy_slider"] = true
 			print("== seed %d, %s%s" % [world_seed, tuning["name"], ", legacy slider" if legacy else ""])
+			var times := []
 			for strategy in STRATEGIES:
-				await _run(strategy, played, world_seed)
-	quit()
+				times.append(await _run(strategy, played, world_seed))
+			if tuning.get("verdict", false) and not _verdict(world_seed, tuning, times):
+				failed = true
+	quit(1 if failed else 0)
 
 
-func _run(strategy: Dictionary, tuning: Dictionary, world_seed: int) -> void:
+## Prints whether the best 6-drill split woke the Heart at least DRILLS_MUST_WIN_BY sooner
+## than the best hand-only row, from [param times] (seconds to Wake, INF when not awake, in
+## STRATEGIES order). Returns true when it did.
+func _verdict(world_seed: int, tuning: Dictionary, times: Array) -> bool:
+	var best := { 0: INF, 6: INF }
+	var names := { 0: "-", 6: "-" }
+	for i in STRATEGIES.size():
+		var drills: int = STRATEGIES[i]["drills"]
+		if best.has(drills) and times[i] < best[drills]:
+			best[drills] = times[i]
+			names[drills] = STRATEGIES[i]["name"]
+	var margin: float = 1.0 if is_inf(best[0]) else (best[0] - best[6]) / best[0]
+	var met: bool = not is_inf(best[6]) and margin >= DRILLS_MUST_WIN_BY
+	print("verdict seed %d, %s: best hand only %s (%s), best 6 drills %s (%s), drills %.1f%% sooner: %s" % [
+		world_seed, tuning["name"], _clock(best[0]), names[0], _clock(best[6]), names[6], margin * 100.0,
+		"met" if met else "FAIL under %d%%" % roundi(DRILLS_MUST_WIN_BY * 100.0)])
+	return met
+
+
+## Plays [param strategy] on [param tuning] and returns the seconds to Wake, or INF.
+func _run(strategy: Dictionary, tuning: Dictionary, world_seed: int) -> float:
 	var world := VoxelWorld.new()
 	var mine := Mine.new()
 	var economy := Economy.new()
@@ -87,6 +129,11 @@ func _run(strategy: Dictionary, tuning: Dictionary, world_seed: int) -> void:
 	var world_data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/world.json"))
 	var hand_rate: float = world_data["hand_drill_hits_per_second"]
 	var hand_power_bonus: float = world_data["hand_power_bonus"]
+	var attention: float = tuning.get("attention", ATTENTION)
+	var sittings: Array = tuning.get("sittings", [])
+	var offline_step: float = JSON.parse_string(FileAccess.get_file_as_string("res://data/save.json"))["offline_step_seconds"]
+	var active := 0.0
+	var sitting_left: float = sittings[0] if sittings else INF
 	# The player's own column, dug like a drill so hits carry from scoop to scoop; ore seen
 	# in its walls is mined out first.
 	var hand := AutoDrill.new()
@@ -139,10 +186,13 @@ func _run(strategy: Dictionary, tuning: Dictionary, world_seed: int) -> void:
 			digging = not mine.drills.is_empty() and not economy.upgrades.defs.all(
 					func(u: Dictionary) -> bool: return economy.upgrades.is_maxed(u["id"]))
 		economy.split.heart_share = strategy["share"] if digging else 1.0
-		# As Player.hand_rate: the tool's own rate plus its share of drill power, used only
-		# while the player drills.
-		var hand_hits := hand_rate + mine.hand_share(economy.drill_hits_per_second) * hand_power_bonus
-		_hand_dig(world, hand, veins, hand_hits * (1.0 + economy.upgrades.effect("hand_speed")) * HAND_ATTENTION * STEP)
+		# The hand cuts for the attention share of each cycle, at Player.hand_rate's rate: the
+		# tool's own rate plus its share of drill power, which it takes only while it cuts.
+		var cutting := not hand.stopped and fmod(active, CUT_CYCLE) < attention * CUT_CYCLE
+		mine.hand_cutting = cutting
+		if cutting:
+			var hand_hits := hand_rate + mine.hand_share(economy.drill_hits_per_second) * hand_power_bonus
+			_hand_dig(world, hand, veins, hand_hits * (1.0 + economy.upgrades.effect("hand_speed")) * STEP)
 		economy.advance(STEP, STEP)
 		if marks.size() < DEPTH_MARKS.size() and mine.drills:
 			var deepest: int = mine.drills.map(func(d: AutoDrill) -> int: return -d.depth_y).max()
@@ -156,8 +206,16 @@ func _run(strategy: Dictionary, tuning: Dictionary, world_seed: int) -> void:
 		if stuck_since >= 0.0 and _t - stuck_since > 60.0:
 			break
 		_t += STEP
-	var outcome: String = "awake %s" % _clock(_t) if economy.heart.is_awake() \
+		active += STEP
+		sitting_left -= STEP
+		if sitting_left <= 0.0:
+			_away(economy, mine, sittings[1], offline_step)
+			sitting_left = sittings[0]
+	var awake := economy.heart.is_awake()
+	var outcome: String = "awake %s" % _clock(_t) if awake \
 			else "STUCK %s" % _clock(stuck_since) if stuck_since >= 0.0 else "not awake after %s" % _clock(_t)
+	if sittings:
+		outcome += " (active %s)" % _clock(active)
 	print("%-22s %s | hand %d m, stage %d (%.0f/%.0f), %.0f/s | %s" % [
 		strategy["name"], outcome, -hand.depth_y, economy.heart.stage, economy.heart.progress,
 		economy.heart.threshold(), economy.power_per_second, ", ".join(events)])
@@ -171,6 +229,18 @@ func _run(strategy: Dictionary, tuning: Dictionary, world_seed: int) -> void:
 	hand.free()
 	for node in [world, mine, economy]:
 		node.free()
+	return _t if awake else INF
+
+
+# Time away between sittings, played as a save plays it on load: Economy.advance in the
+# save's offline steps, with the hand idle and nothing fed, built or bought. Stops at Wake.
+func _away(economy: Economy, mine: Mine, seconds: float, step: float) -> void:
+	mine.hand_cutting = false
+	var left := seconds
+	while left > 0.0 and not economy.heart.is_awake():
+		economy.advance(step, step)
+		_t += step
+		left -= step
 
 
 ## Lands [param hits] the way an attentive player digs: ore showing in the walls of the
@@ -231,7 +301,9 @@ func _can_spare(economy: Economy, id: String) -> bool:
 ## Lays [param tuning] over the loaded data. Keys: ore_scale (multiplies every ore
 ## chance), drill_rate (hits per power-second), thresholds (one per stage), drill_cost,
 ## reactor_cost, resonance (points carried from earlier moons), legacy_slider (the slider
-## rule from before story 036, read in _run), no_vaults (a moon without vaults).
+## rule from before story 036, read in _run), no_vaults (a moon without vaults),
+## drill_efficiency (rock a drill bores per hit of its share). Read in _run: attention (share
+## of the time the hand cuts), sittings ([seconds on, seconds away]), verdict.
 func _apply(tuning: Dictionary, economy: Economy, mine: Mine, world: VoxelWorld) -> void:
 	if tuning.has("ore_scale"):
 		for ore in world._ores:
@@ -248,6 +320,8 @@ func _apply(tuning: Dictionary, economy: Economy, mine: Mine, world: VoxelWorld)
 		economy.reactor_cost = tuning["reactor_cost"]
 	if tuning.has("resonance"):
 		economy.resonance = tuning["resonance"]
+	if tuning.has("drill_efficiency"):
+		mine.drill_efficiency = tuning["drill_efficiency"]
 	if tuning.get("no_vaults", false):
 		for stratum in world.strata:
 			stratum.erase("vaults")
@@ -255,4 +329,6 @@ func _apply(tuning: Dictionary, economy: Economy, mine: Mine, world: VoxelWorld)
 
 
 func _clock(seconds: float) -> String:
+	if is_inf(seconds):
+		return "-"
 	return "%d:%02d" % [int(seconds) / 60, int(seconds) % 60]
