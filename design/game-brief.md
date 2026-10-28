@@ -102,8 +102,19 @@ Chosen 2026-10-24 by Claude when the user said "keep working on your stuff": the
 
 Build order: 39 → 40.
 
+## Milestone 10 — the Deep
+Chosen 2026-10-27 by Claude when the user said "keep going until i tell you to stop": the last big piece of the out-of-scope list, and the one closest to digging to find ores. Designed by a three-way panel (economy, player experience, implementation risk) and a judge; the judge took the implementation design as the spine and grafted the atmosphere and vaults from the experience design.
+
+41. An honest pacing simulator: when every drill has stopped at bedrock, an attentive player sends all power to the Heart. Three seeds, more splits, and depth marks, so every later number compares against a true baseline.
+42. Strata you can read: below 100 m the rock changes tint by stratum (Mid, Deep from 150 m, Abyss from 250 m, Core from 340 m), the light falls, ore flecks glow harder, and the HUD names the depth and stratum.
+43. Deep ores and a second shop: each deep stratum holds one ore found nowhere above it (cobalt, amethyst, heartstone). They craft into alloy, lens and core cells that buy hotter generators, a harder drill bit, a deeper thaw and a fuelless Core tap. Deep rock is harder.
+44. Recall: hold R to be pulled back to the base, so a hand expedition into the deep always has a way home.
+45. Vaults: sealed, lit hollows in the deep strata, walled with the stratum's ore. Their glow leaks through the rock; once the Heart has Sight it tells how far the nearest one is.
+
+Build order: 41 → 42 → 43 → 44 → 45.
+
 ## Out of scope — not building this
-- Deeper tiers (Deep, Abyss, Core) and their twists: waste that later becomes fuel, the crystal placement grid, transmission loss.
+- Waste that later becomes fuel, the crystal placement grid, transmission loss.
 - The star map, and Resonance spent on anything but generator strength.
 - Overload events, new-moon rule changes, story logs beyond one line per stage.
 

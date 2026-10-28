@@ -36,3 +36,19 @@
 | 022 | Carving tool on smooth ground | Integration | Ready | N/A (minimal) |
 | 023 | The Heart buried in the planet | Visual/Feel | Ready | N/A (minimal) |
 | 024 | Saves and pacing for smooth ground | Integration | Ready | N/A (minimal) |
+| 025 | Upgrade shop | Integration | Ready | N/A (minimal) |
+| 026 | Pacing with upgrades | Logic | Ready | N/A (minimal) |
+| 027 | Dig feedback | Visual/Feel | Ready | N/A (minimal) |
+| 028 | Wake and launch | Integration | Ready | N/A (minimal) |
+| 029 | Resonance reset | Integration | Ready | N/A (minimal) |
+| 030 | Pacing through Wake | Logic | Ready | N/A (minimal) |
+| 031 | New ores: iron, quartz, gold | Logic | Ready | N/A (minimal) |
+| 032 | Crafting at the console | Integration | Ready | N/A (minimal) |
+| 033 | Parts as costs | Integration | Ready | N/A (minimal) |
+| 034 | Ore flecks on the ground | Visual/Feel | Ready | N/A (minimal) |
+| 035 | Solid console panels | UI | Ready | N/A (minimal) |
+| 036 | An honest pacing simulator | Config/Data | Ready | N/A (minimal) |
+| 037 | Strata you can read | Visual/Feel | Ready | N/A (minimal) |
+| 038 | Deep ores and the second shop | Logic | Ready | N/A (minimal) |
+| 039 | Recall | Logic | Ready | N/A (minimal) |
+| 040 | Vaults | Integration | Ready | N/A (minimal) |
