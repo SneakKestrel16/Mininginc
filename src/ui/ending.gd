@@ -43,6 +43,7 @@ func _ready() -> void:
 func play() -> void:
 	if visible:
 		return
+	save_game.launch()  # the run is over now: bank Resonance and stop saving
 	visible = true
 	player.hint_blocked = true
 	player.set_controls(false)

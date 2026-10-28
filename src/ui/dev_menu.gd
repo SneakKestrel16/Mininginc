@@ -16,6 +16,10 @@ var _amount: SpinBox
 var _stage: SpinBox
 var _fly: CheckButton
 var _status: Label
+# The player's control state when the menu opened, put back when it closes: the launch or
+# the console overlay may have taken control first.
+var _was_on := false
+var _was_blocked := false
 
 
 func _ready() -> void:
@@ -60,9 +64,12 @@ func _ready() -> void:
 
 func _unhandled_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_F1:
+		if not visible:
+			_was_on = player.controls_enabled
+			_was_blocked = player.hint_blocked
 		visible = not visible
-		player.hint_blocked = visible
-		player.set_controls(not visible)
+		player.hint_blocked = true if visible else _was_blocked
+		player.set_controls(false if visible else _was_on)
 		get_viewport().set_input_as_handled()
 
 

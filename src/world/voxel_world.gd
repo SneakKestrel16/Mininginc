@@ -309,7 +309,9 @@ func _touch(pos: Vector3i, touched: Dictionary) -> void:
 func _add_platform(low: Vector3, high: Vector3) -> void:
 	var deck := MeshInstance3D.new()
 	deck.name = "Platform"
-	var size := Vector3(high.x - low.x, 0.3, high.z - low.z)
+	# 16 cm thick, centred on the ground: an 8 cm lip the player walks up without jumping
+	# (a CharacterBody3D capsule of radius 0.35 takes lips under about 10 cm as floor).
+	var size := Vector3(high.x - low.x, 0.16, high.z - low.z)
 	deck.mesh = BoxMesh.new()
 	deck.mesh.size = size
 	deck.position = Vector3((low.x + high.x) / 2.0, 1.0, (low.z + high.z) / 2.0)
@@ -324,8 +326,8 @@ func _add_platform(low: Vector3, high: Vector3) -> void:
 	trim.emission_enabled = true
 	trim.emission = Color(0.95, 0.55, 0.1)
 	trim.emission_energy_multiplier = 0.4
-	for edge in [[Vector3(size.x, 0.05, 0.25), Vector3(0, 0.16, size.z / 2.0)], [Vector3(size.x, 0.05, 0.25), Vector3(0, 0.16, -size.z / 2.0)],
-			[Vector3(0.25, 0.05, size.z), Vector3(size.x / 2.0, 0.16, 0)], [Vector3(0.25, 0.05, size.z), Vector3(-size.x / 2.0, 0.16, 0)]]:
+	for edge in [[Vector3(size.x, 0.02, 0.25), Vector3(0, 0.09, size.z / 2.0)], [Vector3(size.x, 0.02, 0.25), Vector3(0, 0.09, -size.z / 2.0)],
+			[Vector3(0.25, 0.02, size.z), Vector3(size.x / 2.0, 0.09, 0)], [Vector3(0.25, 0.02, size.z), Vector3(-size.x / 2.0, 0.09, 0)]]:
 		var stripe := MeshInstance3D.new()
 		stripe.mesh = BoxMesh.new()
 		stripe.mesh.size = edge[0]

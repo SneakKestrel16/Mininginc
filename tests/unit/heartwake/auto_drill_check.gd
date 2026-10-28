@@ -17,6 +17,8 @@ func _initialize() -> void:
 	var first := a.place_drill(Vector3i(20, 0, 20))
 	failures += _check(first != null and a.ores["iron_plate"] == a.drill_cost["iron_plate"] and a.place_drill(Vector3i(20, 0, 20)) == null,
 			"placing costs its parts; one drill per column")
+	failures += _check(a.place_drill(Vector3i(64, 0, 60)) == null and a.can_afford(a.drill_cost),
+			"no drill on the machines' protected ground, and nothing is paid")
 	var second := a.place_drill(Vector3i(30, 0, 30))
 	failures += _check(a.hand_share(6.0) == 2.0, "two drills: the hand tool takes one share of three")
 	a.dig(40.0)

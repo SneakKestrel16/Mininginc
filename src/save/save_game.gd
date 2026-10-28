@@ -73,10 +73,13 @@ func load_resonance() -> int:
 	return maxi(int(data.get("resonance", 0)), 0) if data is Dictionary else 0
 
 
-## Ends the run after a launch (brief: Milestone 7 item 34): banks one point of Resonance,
-## deletes the run save, and starts a new moon on a fresh seed. The save goes before the
-## reload, so a crash mid-reset cannot bring the finished run back.
-func new_moon() -> void:
+## Ends the run the moment the Heart launches (brief: Milestone 7 item 34): banks one point
+## of Resonance, deletes the run save, and stops all saving. Called when the ending starts,
+## not when it ends, so closing the game mid-ending can neither bring the finished run back
+## nor lose the point. Safe to call twice.
+func launch() -> void:
+	if _launched:
+		return
 	_launched = true
 	var file := FileAccess.open(resonance_path(), FileAccess.WRITE)
 	if file == null:
@@ -85,6 +88,11 @@ func new_moon() -> void:
 	file.store_string(JSON.stringify({ "resonance": economy.resonance + 1 }))
 	file.close()
 	DirAccess.remove_absolute(save_path)
+
+
+## Starts a new moon on a fresh seed after the ending.
+func new_moon() -> void:
+	launch()
 	get_tree().reload_current_scene()
 
 

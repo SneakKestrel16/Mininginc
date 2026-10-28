@@ -138,6 +138,17 @@ func _initialize() -> void:
 	c.economy.furnace.fuel = 5
 	c.economy._tick(1.0)
 	failures += _check(is_equal_approx(c.economy.power_per_second, plain * (1.0 + 2 * c.economy.resonance_power_bonus)), "Resonance makes every generator stronger (%.1f vs %.1f)" % [c.economy.power_per_second, plain])
+	# Launching ends the run at once: Resonance banked, the run save gone, saving stopped.
+	saver.save_game()
+	saver.launch()
+	var banked = JSON.parse_string(FileAccess.get_file_as_string(saver.resonance_path()))
+	saver.save_game()
+	failures += _check(banked is Dictionary and int(banked["resonance"]) == c.economy.resonance + 1
+			and not FileAccess.file_exists(path), "launching banks Resonance, deletes the run save, and stops saving")
+	saver.launch()
+	banked = JSON.parse_string(FileAccess.get_file_as_string(saver.resonance_path()))
+	failures += _check(int(banked["resonance"]) == c.economy.resonance + 1, "launching twice banks one point, not two")
+	DirAccess.remove_absolute(saver.resonance_path())
 	saver.free()
 
 	print("save_offline_check: %s" % ("PASS" if failures == 0 else "%d FAILED" % failures))

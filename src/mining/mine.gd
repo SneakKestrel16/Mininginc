@@ -101,9 +101,10 @@ static func cost_text(cost: Dictionary) -> String:
 
 
 ## Pays [member drill_cost] and places an auto-drill at cell [param at]. Returns the drill,
-## or null when the inventory falls short, there is no world, or a drill already stands there.
+## or null when the inventory falls short, there is no world, the cell is the machines'
+## protected ground, or a drill already stands there.
 func place_drill(at: Vector3i) -> AutoDrill:
-	if world == null or not can_afford(drill_cost):
+	if world == null or world.is_protected(at) or not can_afford(drill_cost):
 		return null
 	for drill in drills:
 		if drill.column == Vector2i(at.x, at.z):

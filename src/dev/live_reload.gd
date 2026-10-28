@@ -1,7 +1,8 @@
 ## Dev-only live reload: while the game runs from source (a debug build), scripts under
 ## res://src that change on disk are reloaded in place, keeping each object's state, so a
 ## fix shows up without restarting. Off in exported release builds. Scene and data/*.json
-## changes still need a restart: those are read once when nodes are made.
+## changes still need a restart: those are read once when nodes are made, and so do changes
+## to this script (reloading itself from inside its own _process crashes the engine).
 class_name LiveReload
 extends Node
 
@@ -34,14 +35,21 @@ func _process(delta: float) -> void:
 
 
 func _reload(path: String) -> void:
+	if path == get_script().resource_path:
+		return
 	var script := load(path) as GDScript
 	if script == null:
 		return
+	var old := script.source_code
 	script.source_code = FileAccess.get_file_as_string(path)
 	var result := script.reload(true)  # keep_state: running objects keep their member values
 	if result == OK:
 		print("[live reload] %s" % path)
 	else:
+		# A failed reload leaves the script unusable; put the old source back so the running
+		# objects keep working until the file compiles.
+		script.source_code = old
+		script.reload(true)
 		push_error("[live reload] %s did not compile (error %d); the old code keeps running" % [path, result])
 
 
