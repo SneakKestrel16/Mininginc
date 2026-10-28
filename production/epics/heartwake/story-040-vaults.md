@@ -93,6 +93,16 @@ Built with two changes found while checking: a vault changes density only out to
 
 ---
 
+## Review fixes (2026-10-28)
+
+The Milestone 10 review found three defects:
+
+- **The banner came late from above or below.** The breach test measured the scoop's middle in squashed distance. Vertically that overstates how far the hollow is, so a scoop 0.7–1 m above the roof had already opened it with no banner. A vault now opens with the scoop that turns a sample beside its hollow to air, from any side, including ground a scoop cuts loose. `vault_check` digs down into vaults 1 and 3 and up into 2 and 4 in 0.1 m steps. It asserts the banner comes with the first scoop whose air reaches the hollow; all four failed before. Screenshot: `production/qa/evidence/review-m10/vault-from-above.png`.
+- **Drills paid for vault air with Wider scoop at level 4–5.** The scoop that breaks the roof also writes an edit into the hollow, and the drill counted any edited cell as ground. Air the seed made is now free whatever its edits. On seed 1234 at bite bonus 1.25, vaults 6 and 7 paid for air before the fix.
+- **A save from before vaults filled them with rock.** A scoop stores positive densities just outside its ball, and an edit replaced the generated value outright. An edit now only ever lowers density: `density_at` takes the smaller of the edit and the seed's value. Every edit this build writes was already the smaller, so new saves are unchanged. A pre-vault column through vault 0 left 71 solid samples in its hollow before; now none.
+
+---
+
 ## Dependencies
 
 - Depends on: `production/epics/heartwake/story-039-recall.md`

@@ -1,8 +1,10 @@
 ## Pacing simulator: plays Heartwake headless with the shipped data and prints when each
 ## Heart stage is reached, or where the run gets stuck.
 ## Run: <godot> --headless --path . -s res://tools/pacing_sim.gd [-- seed=N] [-- legacy]
-## Every seed in SEEDS is played unless seed=N picks one; legacy plays the slider rule from
-## before story 036, which reproduces the older tables.
+## Every seed in SEEDS is played unless seed=N picks one; legacy swaps in only the slider rule
+## from before story 036. Its numbers match the story 033 and 036 tables only at those commits:
+## later stories changed the shipped data, and since the Milestone 10 review the hand column
+## takes its share of drill power, which the older tables left out.
 ## TUNINGS lists candidate changes laid over the shipped data; "shipped" changes nothing.
 ## Each strategy is an attentive player in the 3D game: hand-drills one column down from
 ## the base, refuels and cools everything whenever there is room, builds the turbine and the
@@ -82,7 +84,9 @@ func _run(strategy: Dictionary, tuning: Dictionary, world_seed: int) -> void:
 	mine.shaft.shaft_seed = world_seed
 	world.world_seed = world_seed
 	_apply(tuning, economy, mine, world)
-	var hand_rate: float = JSON.parse_string(FileAccess.get_file_as_string("res://data/world.json"))["hand_drill_hits_per_second"]
+	var world_data: Dictionary = JSON.parse_string(FileAccess.get_file_as_string("res://data/world.json"))
+	var hand_rate: float = world_data["hand_drill_hits_per_second"]
+	var hand_power_bonus: float = world_data["hand_power_bonus"]
 	# The player's own column, dug like a drill so hits carry from scoop to scoop; ore seen
 	# in its walls is mined out first.
 	var hand := AutoDrill.new()
@@ -125,14 +129,20 @@ func _run(strategy: Dictionary, tuning: Dictionary, world_seed: int) -> void:
 				economy.crafting.make_for(economy.upgrades.cost(id), mine)
 				if _can_spare(economy, id) and economy.buy_upgrade(id):
 					events.append("%s %d %s" % [id, economy.upgrades.levels[id], _clock(_t)])
-		# Drill power does nothing until a drill stands, nor once every drill has stopped at
-		# bedrock: then everything goes to the Heart. The legacy rule waited instead for every
-		# upgrade to be bought, which tool_motor never is (its plates need iron above 80 m).
-		var idle := mine.working_drills().is_empty()
+		# The slider sits at the strategy's share while drill power has somewhere to go: a
+		# working drill, or the hand tool, which takes a share of it (Mine.hand_share). With
+		# neither, the player sends everything to the Heart. The legacy rule ignored the hand
+		# and waited for every upgrade to be bought, which tool_motor never is (its plates need
+		# iron above 80 m).
+		var digging := not mine.working_drills().is_empty() or not hand.stopped
 		if tuning.get("legacy_slider", false):
-			idle = economy.upgrades.defs.all(func(u: Dictionary) -> bool: return economy.upgrades.is_maxed(u["id"]))
-		economy.split.heart_share = strategy["share"] if mine.drills and not idle else 1.0
-		_hand_dig(world, hand, veins, hand_rate * (1.0 + economy.upgrades.effect("hand_speed")) * HAND_ATTENTION * STEP)
+			digging = not mine.drills.is_empty() and not economy.upgrades.defs.all(
+					func(u: Dictionary) -> bool: return economy.upgrades.is_maxed(u["id"]))
+		economy.split.heart_share = strategy["share"] if digging else 1.0
+		# As Player.hand_rate: the tool's own rate plus its share of drill power, used only
+		# while the player drills.
+		var hand_hits := hand_rate + mine.hand_share(economy.drill_hits_per_second) * hand_power_bonus
+		_hand_dig(world, hand, veins, hand_hits * (1.0 + economy.upgrades.effect("hand_speed")) * HAND_ATTENTION * STEP)
 		economy.advance(STEP, STEP)
 		if marks.size() < DEPTH_MARKS.size() and mine.drills:
 			var deepest: int = mine.drills.map(func(d: AutoDrill) -> int: return -d.depth_y).max()

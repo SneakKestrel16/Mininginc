@@ -63,9 +63,10 @@ func dig(hits: float) -> void:
 			stopped = true
 			break
 		var pos := Vector3i(column.x, depth_y, column.y)
-		# Open air the seed made (a vault's hollow) costs nothing to pass. Ground a scoop
-		# already carved still costs a scoop, as it always has.
-		if not world.edits.has(pos) and world.generated_density(pos) <= 0.0:
+		# Open air the seed made (a vault's hollow) costs nothing to pass, even where a wide
+		# scoop has written an edit into it. Ground a scoop already carved still costs a
+		# scoop, as it always has.
+		if world.generated_density(pos) <= 0.0:
 			depth_y -= 1
 			continue
 		var needed := world.hardness_at(pos)

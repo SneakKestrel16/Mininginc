@@ -82,6 +82,12 @@
 
 ---
 
+## Review fixes (2026-10-28)
+
+The Milestone 10 review found that the ore-glow check could not fail: a ShaderMaterial keeps a parameter under any name, so reading `ore_glow` back proved nothing about the shader. `strata_check` now also needs `terrain.gdshader` to declare the uniform; it failed with the uniform renamed.
+
+---
+
 ## Dependencies
 
 - Depends on: `production/epics/heartwake/story-036-honest-simulator.md`

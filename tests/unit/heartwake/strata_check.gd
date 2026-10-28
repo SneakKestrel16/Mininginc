@@ -94,7 +94,12 @@ func _initialize() -> void:
 	failures += _check(absf(sense.environment.ambient_light_energy - top_energy) < top_energy * 0.01,
 			"after 5 s back at the surface the light is the surface's (%.3f)" % sense.environment.ambient_light_energy)
 	world.set_ore_glow(1.0)
-	failures += _check(world._material.get_shader_parameter("ore_glow") == 1.0, "the ore glow reaches the terrain shader")
+	# A material keeps any name it is given, so the shader must also declare the uniform and
+	# use it past its declaration.
+	failures += _check(world._material.get_shader_parameter("ore_glow") == 1.0
+			and world._material.shader.get_shader_uniform_list().any(func(u: Dictionary) -> bool: return u["name"] == "ore_glow")
+			and world._material.shader.code.count("ore_glow") >= 2,
+			"the ore glow reaches the terrain shader")
 	sense.free()
 
 	print("strata_check: %s" % ("PASS" if failures == 0 else "%d FAILED" % failures))

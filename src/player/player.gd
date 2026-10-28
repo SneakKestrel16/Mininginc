@@ -36,7 +36,8 @@ var flying := false:
 		flying = on
 		$Shape.disabled = flying and noclip
 		velocity = Vector3.ZERO
-## Where Recall (hold R) and the dev menu's To base put the player: flat base ground.
+## Where Recall (hold R) and the dev menu's To base put the player: the machines' deck, which
+## no scoop or drill opens, so a shaft dug at the spawn cannot drop them back down.
 var recall_point: Vector3
 ## Dev menu: while flying, pass through the ground. Off by default.
 var noclip := false:

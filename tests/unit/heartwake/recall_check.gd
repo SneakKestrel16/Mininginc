@@ -64,6 +64,18 @@ func _initialize() -> void:
 		await physics_frame
 	failures += _check(player.is_on_floor() and player.global_position.y > 0.8, "and the player stands on the ground there (y %.2f)" % player.global_position.y)
 
+	# Nothing dug where the player lands can drop them back down: a shaft under the point,
+	# then a recall from the deep.
+	failures += _check(world.is_protected(Vector3i(home.floor()) + Vector3i.DOWN), "no scoop or drill can open the ground under the recall point")
+	for y in range(1, -16, -1):
+		world.carve(Vector3(home.x, y, home.z), world.bite_radius)
+	player.global_position = Vector3(20.5, -302.8, 20.5)
+	player.recall_home()
+	for i in 120:
+		await physics_frame
+	failures += _check(player.is_on_floor() and player.global_position.y > 0.8,
+			"after digging at the recall point a recall still lands on the ground (y %.2f)" % player.global_position.y)
+
 	print("recall_check: %s" % ("PASS" if failures == 0 else "%d FAILED" % failures))
 	quit(1 if failures else 0)
 

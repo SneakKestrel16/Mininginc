@@ -176,8 +176,11 @@ func _ready() -> void:
 
 
 ## Density of the sample at [param pos]: its edit if it has one, else what the seed generates.
+## An edit only ever carves: one from a save made before the seed hollowed that spot (a vault)
+## cannot fill it back in.
 func density_at(pos: Vector3i) -> float:
-	return edits.get(pos, generated_density(pos))
+	var generated := generated_density(pos)
+	return minf(edits.get(pos, generated), generated)
 
 
 ## Density the seed generates at [param pos], ignoring edits.
@@ -343,6 +346,8 @@ func carve(center: Vector3, radius: float) -> Dictionary:
 	var low := Vector3i((center - Vector3.ONE * radius).floor())
 	var high := Vector3i((center + Vector3.ONE * radius).ceil())
 	var touched := {}
+	# Samples this scoop turned from rock to air.
+	var aired: Array[Vector3i] = []
 	for x in range(low.x, high.x + 1):
 		for y in range(low.y, high.y + 1):
 			for z in range(low.z, high.z + 1):
@@ -353,22 +358,38 @@ func carve(center: Vector3, radius: float) -> Dictionary:
 					continue
 				edits[pos] = cut
 				if old > 0.0 and cut <= 0.0:
+					aired.append(pos)
 					var what: String = Blocks.NAMES[material_at(pos)]
 					collected[what] = collected.get(what, 0) + 1
 				# A sample moves the vertices of the cells around it, and those are used by
 				# quads of edges up to one sample further on each side.
 				_touch(pos, touched)
-	_drop_floating(center, radius, collected, touched)
+	_drop_floating(center, radius, collected, touched, aired)
 	for key in touched:
 		_open_chunks[key] = true
 		if _built.has(key):
 			_build(key)
 	carved.emit(center, collected)
-	for i in vaults.size():
-		if not _opened.has(i) and _cavity(vaults[i], center) <= radius:
-			_opened[i] = true
-			vault_opened.emit(i, Blocks.NAMES[vaults[i]["ore"]])
+	_open_vaults(aired)
 	return collected
+
+
+# A vault is broken into by the scoop that turns a sample beside its hollow to air, from any
+# side: a distance from the scoop's middle comes late from above or below, where the squash
+# puts the hollow nearer than it says.
+func _open_vaults(aired: Array[Vector3i]) -> void:
+	for pos in aired:
+		if pos.y > _vault_top + 1.0:
+			continue
+		for side in SIDES:
+			var next: Vector3i = pos + side
+			var near = _vault_cells.get(_vault_cell(next))
+			if not near:
+				continue
+			for i in near:
+				if not _opened.has(i) and _cavity(vaults[i], Vector3(next)) <= 0.0:
+					_opened[i] = true
+					vault_opened.emit(i, Blocks.NAMES[vaults[i]["ore"]])
 
 
 # Ground a scoop cut loose falls and breaks whole (playtest: "no floating ground anywhere"):
@@ -376,7 +397,7 @@ func carve(center: Vector3, radius: float) -> Dictionary:
 # SUPPORT_REACH metres from the scoop is held up by nothing and is removed, its ore collected.
 # ponytail: a bounded fill, so a huge piece hanging by a long thin bridge stays up; a global
 # connectivity pass would catch it if that ever shows in play.
-func _drop_floating(center: Vector3, radius: float, collected: Dictionary, touched: Dictionary) -> void:
+func _drop_floating(center: Vector3, radius: float, collected: Dictionary, touched: Dictionary, aired: Array[Vector3i]) -> void:
 	var reach := int(ceil(radius)) + SUPPORT_REACH
 	var middle := Vector3i(center.round())
 	# Sample to its fill's verdict: HELD once that fill found support. Samples of a loose
@@ -421,6 +442,7 @@ func _drop_floating(center: Vector3, radius: float, collected: Dictionary, touch
 					var what: String = Blocks.NAMES[material_at(pos)]
 					collected[what] = collected.get(what, 0) + 1
 					edits[pos] = -1.0
+					aired.append(pos)
 					_touch(pos, touched)
 
 

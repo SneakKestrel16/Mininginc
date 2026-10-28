@@ -91,6 +91,38 @@ The drill rows drop by about 11 minutes against the legacy rule (60:04 to 49:28 
 
 ---
 
+## Review fixes (2026-10-28)
+
+The Milestone 10 review found that the simulator's hand column never got its share of drill power. Live play gives the hand tool one share among the working drills (`Mine.hand_share`, used by `Player.hand_rate`), and all of it when none works (brief item 23, story 020). The simulator gave each drill its share and dropped the hand's. The omission dates from story 020; this story's "honest" baseline inherited it. Now:
+
+- **The hand column digs at `Player.hand_rate`'s rate**, times `HAND_ATTENTION`.
+- **The slider rule counts the hand as a digger.** The strategy's share holds while a drill works or the hand column digs. With neither, all power goes to the Heart. The old rule forced 100% Heart until a drill stood, so the "hand only, 50% Heart" row really played 100%.
+- **The header no longer claims `legacy` reproduces the older tables.** It swaps only the slider rule, and the data and the hand rate have changed under it.
+
+**New baseline** (`tools/pacing_sim.gd`, shipped data with vaults, 2026-10-28). Every run ends awake; none STUCK. Edits at Wake: at most 92,475, under the 150,000 budget.
+
+| Seed | Tuning | Hand only | 25% | 35% | 50% | 65% | 100% |
+|---|---|---|---|---|---|---|---|
+| 1234 | shipped | 33:10 | 34:50 | 34:13 | 35:36 | 38:39 | 98:36 |
+| 1234 | Resonance 1 | 22:53 | 23:40 | 23:18 | 24:20 | 26:31 | 78:00 |
+| 7 | shipped | 34:04 | 38:58 | 38:31 | 39:36 | 42:47 | 104:41 |
+| 7 | Resonance 1 | 23:33 | 26:47 | 26:40 | 28:14 | 31:27 | 76:13 |
+| 99 | shipped | 35:59 | 39:36 | 38:53 | 39:34 | 40:57 | 73:07 |
+| 99 | Resonance 1 | 25:11 | 27:21 | 26:59 | 28:08 | 29:50 | 58:54 |
+
+- 100% Heart is unchanged: with no drill power there is no share to give.
+- Set against story 038's table (the "no vaults" rows, which story 040 left equal to it), drill rows are 6–20 minutes faster and hand only 40–64 minutes faster. Every column but 100% Heart now reaches 400 m.
+- When the deepest drill passes 150 / 250 / 340 / 400 m (shipped, 50% Heart): seed 1234 18:26 / 22:01 / 25:14 / 27:46; seed 7 22:51 / 26:24 / 29:21 / 31:53; seed 99 22:43 / 26:02 / 28:53 / 31:37.
+
+**Balance finding: auto-drills do not pay for themselves.** Hand only at 50% Heart beats every drill split on every seed, both moons:
+- Seed 1234: by 1:03 (against 35%).
+- Seed 7: by 4:27.
+- Seed 99: by 2:54.
+
+With no drill standing, the hand tool takes all drill power, while six drills split it seven ways and cost plates and wire. The simulator's player drills by hand half the time and never plays offline, where drills dig and the hand does not, so live play may favour drills more than this. That needs a playtest or an offline model to settle. The data knob is `hand_power_bonus` in `data/world.json`.
+
+---
+
 ## Dependencies
 
 - Depends on: `production/epics/heartwake/story-035-solid-panels.md`

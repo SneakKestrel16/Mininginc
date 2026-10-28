@@ -11,6 +11,7 @@ func _initialize() -> void:
 	var other := _world(8)
 	var third := _world(1234)
 	var bare := _world(7)
+	var loaded := _world(7)
 	await process_frame  # _ready runs on the next frame
 	for stratum in bare.strata:
 		stratum.erase("vaults")
@@ -129,10 +130,31 @@ func _initialize() -> void:
 	world.carve(edge, world.bite_radius)
 	world.carve(edge + Vector3(0, 0.5, 0), world.bite_radius)
 	failures += _check(heard == [[0, Blocks.NAMES[vault0["ore"]]]], "breaking in tells which vault and its ore, once (%s)" % [heard])
+	# From above and below too, where the squash puts the hollow nearer than a centre's distance says.
+	for approach in [[1, -0.1], [2, 0.1], [3, -0.1], [4, 0.1]]:
+		var late := _banner_at_breach(world, approach[0], approach[1])
+		failures += _check(late == "", "digging %s into vault %d tells with the scoop that breaks in (%s)"
+				% ["down" if approach[1] < 0.0 else "up", approach[0], late])
 
 	# Auto-drills pay for rock, not for a vault's air; elsewhere exactly what they always did.
 	failures += _check(_drill_pays_for_rock(third, third.vaults[3]), "a drill through a vault pays only for its rock")
 	failures += _check(_drill_pays_for_rock(third, {}), "a drill through plain rock pays what it always did")
+	# The widest scoop's roof-breaking bite also reaches into the hollow; that air is still free.
+	third.bite_bonus = 1.25
+	var wide := [4, 5, 6, 7, 8, 9].filter(func(i: int) -> bool: return not _drill_pays_for_rock(third, third.vaults[i]))
+	third.bite_bonus = 0.0
+	failures += _check(wide.is_empty(), "with the widest scoop a drill through a vault pays only for its rock (paid air at %s)" % [wide])
+
+	# A save from before vaults: its carved edges, solid just outside each scoop, cannot fill a
+	# vault the seed now hollows out. An edit only ever carves.
+	var column: Vector3 = vault0["center"]
+	for y in range(int(column.y) + 10, int(column.y) - 10, -1):
+		bare.carve(Vector3(column.x, y, column.z), bare.bite_radius)
+	loaded.load_edits(bare.edits_flat())
+	var ghosts := 0
+	for pos in loaded.edits:
+		ghosts += int(loaded._cavity(vault0, Vector3(pos)) <= 0.0 and loaded.is_solid(pos))
+	failures += _check(ghosts == 0 and loaded.edits.size() > 100, "an old save's edits leave no rock in a vault's hollow (%d)" % ghosts)
 
 	# The HUD's hint: distance and height, rounded, never which way across.
 	var hud: GDScript = load("res://src/ui/hud.gd")
@@ -170,6 +192,47 @@ func _drill_pays_for_rock(world: VoxelWorld, vault: Dictionary) -> bool:
 	var through: bool = drill.depth_y == bottom and world.damage.get(Vector3i(column.x, bottom, column.y), 0.0) < 0.01
 	drill.free()
 	return through and (air > 3) == not vault.is_empty()
+
+
+# Scoops up or down the vertical through vault [param index]'s middle from outside its shell,
+# [param step] metres at a time (negative: down from above). Empty when vault_opened came with
+# the first scoop whose air joins the hollow's, else what happened instead.
+func _banner_at_breach(world: VoxelWorld, index: int, step: float) -> String:
+	var vault: Dictionary = world.vaults[index]
+	var heard := [0]  # an array: a lambda captures locals by value
+	var on_open := func(i: int, _ore: String) -> void:
+		if i == index:
+			heard[0] += 1
+	world.vault_opened.connect(on_open)
+	var outside: float = (vault["radius"] + VoxelWorld.VAULT_LUMPS + vault["shell"] + world.bite_radius) / VoxelWorld.VAULT_SQUASH + 2.0
+	var at: Vector3 = vault["center"] - Vector3(0, signf(step) * outside, 0)
+	var result := "never broke in"
+	for n in 300:
+		world.carve(at, world.bite_radius)
+		var breached := _reaches_hollow(world, vault, Vector3i(at.floor()))
+		if heard[0] > 0 or breached:
+			result = "" if heard[0] == 1 and breached else "%.1f m from the middle: banner %d, broken in %s" % [
+					at.y - vault["center"].y, heard[0], breached]
+			break
+		at.y += step
+	world.vault_opened.disconnect(on_open)
+	return result
+
+
+# True when open air leads from [param from] to a sample of [param vault]'s hollow.
+func _reaches_hollow(world: VoxelWorld, vault: Dictionary, from: Vector3i) -> bool:
+	var seen := { from: true }
+	var stack: Array[Vector3i] = [from]
+	while not stack.is_empty() and seen.size() < 20000:
+		var pos: Vector3i = stack.pop_back()
+		if world._cavity(vault, Vector3(pos)) <= 0.0:
+			return true
+		for side in VoxelWorld.SIDES:
+			var next: Vector3i = pos + side
+			if not seen.has(next) and not world.is_solid(next) and Vector3(next).distance_to(vault["center"]) < 20.0:
+				seen[next] = true
+				stack.append(next)
+	return false
 
 
 # A point straight out from [param vault]'s middle, [param out] squashed metres past its hollow.

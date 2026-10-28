@@ -40,7 +40,7 @@
 ## Implementation Notes
 
 - A free recall cannot soft-lock: a jump rises 1.6 m and one scoop at 300 m costs hundreds of hits, so nothing else brings a player up from depth.
-- Panel numbers: recall_seconds 3.0, recall_point (64.5, 1.5, 64.5).
+- Panel numbers: recall_seconds 3.0, recall_point (64.5, 1.5, 62.5) (the spawn column, z 64.5, until the review fix below).
 
 ---
 
@@ -70,6 +70,17 @@
 **Required evidence**: headless check passes; prompt screenshot in `production/qa/evidence/story-039-*`.
 
 **Status**: [x] `production/qa/evidence/story-039-recall/` (2026-10-27): R held at 263 m with the countdown, and the player standing at the base after it. `tests/unit/heartwake/recall_check.gd` passes: the hold timing, R ignored without control, the player brought home onto solid ground from 300 m down. It was seen failing with the control gate and the repeat guard removed.
+
+---
+
+## Review fixes (2026-10-28)
+
+The Milestone 10 review found two gaps:
+
+- **Recall dropped the player back down a shaft dug at the spawn.** The recall point was the spawn column, which digs like anywhere else, so a pit or drill there put the player above their own hole on every recall. `recall_point` is now (64.5, 1.5, 62.5): on the machines' deck in front of the console, where no scoop or drill opens the ground. `recall_check` digs a shaft under the point and recalls from 200 m. Before the move it landed at y -8.58; now the player stands on the deck.
+- **Nothing on screen named R.** The controls hint has a fourth line, "Hold R to recall to the base".
+
+Screenshots: `production/qa/evidence/review-m10/hint.png`, `recall-onto-deck.png` (a shaft at the spawn, the player standing on the deck after a recall).
 
 ---
 
