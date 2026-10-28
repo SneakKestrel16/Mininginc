@@ -38,6 +38,15 @@ func _initialize() -> void:
 	failures += _check(not crafting.make_for({ "circuit": 2 }, mine) and ores["circuit"] == 1,
 			"and reports when the ore runs short")
 
+	# A core cell from raw deep ore: heartstone, a lens (amethyst and glass from quartz) and an
+	# alloy (cobalt and coal), each taken exactly.
+	for id in ["heartstone", "amethyst", "quartz", "cobalt", "coal"]:
+		ores[id] = 100
+	failures += _check(crafting.make_for({ "core_cell": 1 }, mine) and ores["core_cell"] == 1
+			and ores["heartstone"] == 94 and ores["amethyst"] == 96 and ores["quartz"] == 98 and ores["cobalt"] == 98
+			and ores["coal"] == 90 and ores["lens"] == 0 and ores["alloy"] == 0 and ores["glass"] == 0,
+			"make_for crafts a core cell through a lens and an alloy, taking exactly their ore")
+
 	print("crafting_check: %s" % ("PASS" if failures == 0 else "%d FAILED" % failures))
 	quit(1 if failures else 0)
 

@@ -45,6 +45,17 @@ func _initialize() -> void:
 	var b := await _game()
 	SaveGame.apply(JSON.parse_string(JSON.stringify(data)), b.economy, b.mine, b.player)
 	failures += _check(SaveGame.capture(b.economy, b.mine, 1000.0, b.player) == data, "loading restores every saved field")
+	# A save from before the deep ores and the deep shop loads them at zero.
+	var before_deep: Dictionary = JSON.parse_string(JSON.stringify(data))
+	for id in ["cobalt", "amethyst", "heartstone", "alloy", "lens", "core_cell"]:
+		before_deep["mine"]["ores"].erase(id)
+	for id in ["deep_tuning", "carbide_bit", "thermal_lance", "core_tap"]:
+		before_deep["upgrades"].erase(id)
+	var old_deep := await _game()
+	SaveGame.apply(before_deep, old_deep.economy, old_deep.mine, old_deep.player)
+	failures += _check(old_deep.mine.ores["cobalt"] == 0 and old_deep.mine.ores["core_cell"] == 0
+			and old_deep.economy.upgrades.levels["core_tap"] == 0 and old_deep.economy.upgrades.levels["long_arm"] == 2,
+			"a save from before the deep ores loads them, and the deep shop, at zero")
 	failures += _check(not b.mine.world.is_solid(Vector3i(20, 0, 20)) and b.mine.drills.size() == 1
 			and b.mine.drills[0].depth_y == a.mine.drills[0].depth_y, "dug tunnels stay dug, and the drill is back where it was")
 

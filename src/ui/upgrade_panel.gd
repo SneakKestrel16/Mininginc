@@ -17,7 +17,7 @@ func _ready() -> void:
 		margin.add_theme_constant_override("margin_" + side, 16)
 	add_child(margin)
 	var list := VBoxContainer.new()
-	list.add_theme_constant_override("separation", 10)
+	list.add_theme_constant_override("separation", 6)  # nine rows fit a 648 px window
 	margin.add_child(list)
 	var title := Label.new()
 	title.text = "Upgrades"
@@ -39,6 +39,12 @@ func _ready() -> void:
 	_refresh()
 
 
+## What [param upgrade] gives at [param level], as its describe line shows it.
+static func effect_text(upgrade: Dictionary, level: int) -> String:
+	# Rounded first: 0.3 x 3 x 100 is 89.99999999999999 in floats, and %d would show 89.
+	return upgrade["describe"] % (roundf(upgrade["per_level"] * level * upgrade["shown_scale"] * 1000.0) / 1000.0)
+
+
 func _buy(id: String) -> void:
 	economy.buy_upgrade(id)
 	_refresh()
@@ -51,8 +57,7 @@ func _refresh() -> void:
 		var level: int = upgrades.levels[id]
 		var info: Label = _rows[id][0]
 		var buy: Button = _rows[id][1]
-		var now: String = upgrade["describe"] % (upgrade["per_level"] * level * upgrade["shown_scale"])
-		info.text = "%s  %d/%d\n%s" % [upgrade["name"], level, upgrade["max_level"], now]
+		info.text = "%s  %d/%d\n%s" % [upgrade["name"], level, upgrade["max_level"], effect_text(upgrade, level)]
 		if upgrades.is_maxed(id):
 			buy.text = "Maxed"
 		else:

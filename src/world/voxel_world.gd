@@ -496,7 +496,7 @@ func _seed_noise() -> void:
 	for i in _ores.size():
 		var noise := FastNoiseLite.new()
 		noise.seed = world_seed + 7919 * (i + 1)
-		noise.frequency = _ore_frequency
+		noise.frequency = _ores[i].get("frequency", _ore_frequency)  # deep lodes are fewer and bigger
 		_ore_noise.append(noise)
 		var values := PackedFloat32Array()
 		for s in 4096:

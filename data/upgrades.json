@@ -9,6 +9,14 @@
 		{ "id": "drill_gearing", "name": "Drill gearing", "effect": "drill_speed", "per_level": 0.25, "max_level": 8,
 			"cost": { "iron_plate": 2, "uranium": 1 }, "cost_growth": 1.6, "describe": "+%d%% drill power speed", "shown_scale": 100 },
 		{ "id": "generator_tuning", "name": "Generator tuning", "effect": "power_bonus", "per_level": 0.1, "max_level": 10,
-			"cost": { "copper": 8, "uranium": 2, "circuit": 1 }, "cost_growth": 1.5, "describe": "+%d%% power from every generator", "shown_scale": 100 }
+			"cost": { "copper": 8, "uranium": 2, "circuit": 1 }, "cost_growth": 1.5, "describe": "+%d%% power from every generator", "shown_scale": 100 },
+		{ "id": "deep_tuning", "name": "Deep tuning", "effect": "power_bonus", "per_level": 0.05, "max_level": 6,
+			"cost": { "alloy": 3, "uranium": 20, "circuit": 1 }, "cost_growth": 1.5, "describe": "+%d%% power from every generator", "shown_scale": 100 },
+		{ "id": "carbide_bit", "name": "Carbide bit", "effect": "drill_speed", "per_level": 0.3, "max_level": 4,
+			"cost": { "alloy": 4, "wire": 6 }, "cost_growth": 1.6, "describe": "+%d%% drill power speed", "shown_scale": 100 },
+		{ "id": "thermal_lance", "name": "Thermal lance", "effect": "thaw", "per_level": 100, "max_level": 3,
+			"cost": { "alloy": 6, "lens": 2 }, "cost_growth": 2.0, "describe": "Breath thaws %d m deeper", "shown_scale": 1 },
+		{ "id": "core_tap", "name": "Core tap", "effect": "flat_power", "per_level": 10, "max_level": 3,
+			"cost": { "core_cell": 1, "lens": 2 }, "cost_growth": 2.0, "describe": "+%d power/s, no fuel", "shown_scale": 1 }
 	]
 }

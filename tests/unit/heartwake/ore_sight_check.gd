@@ -39,6 +39,14 @@ func _initialize() -> void:
 	failures += _check(after.size() < expected and not after.any(func(item: Array) -> bool: return item[0] == first),
 			"a dug spot stops glowing, and so does ore it opens to view")
 
+	# Sight shows each deep stratum's own ore.
+	var deep_seen := []
+	for depth in [200, 300, 370]:
+		for item in OreSight.scan(world, Vector3i(64, -depth, 64), 24):
+			if Blocks.NAMES[item[1]] in ["cobalt", "amethyst", "heartstone"] and not Blocks.NAMES[item[1]] in deep_seen:
+				deep_seen.append(Blocks.NAMES[item[1]])
+	failures += _check(deep_seen.size() == 3, "Sight shows cobalt, amethyst and heartstone in their strata (%s)" % [deep_seen])
+
 	print("ore_sight_check: %s" % ("PASS" if failures == 0 else "%d FAILED" % failures))
 	quit(1 if failures else 0)
 

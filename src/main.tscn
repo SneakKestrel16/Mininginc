@@ -149,15 +149,15 @@ theme_override_constants/separation = 16
 layout_mode = 2
 economy = NodePath("../../../../../Economy")
 
-[node name="UpgradePanel" type="PanelContainer" parent="Overlay/Center/Columns/Panels" node_paths=PackedStringArray("economy")]
+[node name="CraftingPanel" type="PanelContainer" parent="Overlay/Center/Columns/Panels" node_paths=PackedStringArray("economy")]
 layout_mode = 2
-script = ExtResource("19_upgrades")
+script = ExtResource("22_crafting")
 economy = NodePath("../../../../../Economy")
 
-[node name="CraftingPanel" type="PanelContainer" parent="Overlay/Center/Columns" node_paths=PackedStringArray("economy")]
+[node name="UpgradePanel" type="PanelContainer" parent="Overlay/Center/Columns" node_paths=PackedStringArray("economy")]
 layout_mode = 2
 size_flags_vertical = 4
-script = ExtResource("22_crafting")
+script = ExtResource("19_upgrades")
 economy = NodePath("../../../../Economy")
 
 [node name="DevMenu" type="CanvasLayer" parent="." node_paths=PackedStringArray("economy", "player", "heart")]

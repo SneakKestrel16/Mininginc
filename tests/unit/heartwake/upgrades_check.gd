@@ -18,8 +18,8 @@ func _initialize() -> void:
 	economy.set_process(false)
 	var upgrades := economy.upgrades
 
-	failures += _check(upgrades.defs.size() == 5 and upgrades.levels.values().all(func(n: int) -> bool: return n == 0),
-			"five upgrades, none bought at start")
+	failures += _check(upgrades.defs.size() == 9 and upgrades.levels.values().all(func(n: int) -> bool: return n == 0),
+			"nine upgrades, none bought at start")
 	var first: Dictionary = upgrades.cost("tool_motor")
 	failures += _check(not economy.buy_upgrade("tool_motor") and upgrades.levels["tool_motor"] == 0, "refused without the ore")
 	mine.ores["coal"] = 5000
@@ -59,6 +59,48 @@ func _initialize() -> void:
 	economy.buy_upgrade("generator_tuning")
 	economy._tick(1.0)
 	failures += _check(is_equal_approx(economy.power_per_second, power * 1.1), "generator tuning adds 10%% power")
+
+	# The deep shop: Deep tuning adds to the same bonus, the Carbide bit to drill speed, the
+	# Core tap adds power that burns nothing, and the Thermal lance carries Breath's thaw deeper.
+	for part in ["alloy", "lens", "core_cell"]:
+		mine.ores[part] = 1000
+	mine.ores["uranium"] = 1000
+	var bonus_before := upgrades.effect("power_bonus")
+	var speed_before := upgrades.effect("drill_speed")
+	economy.buy_upgrade("deep_tuning")
+	economy.buy_upgrade("deep_tuning")
+	economy.buy_upgrade("carbide_bit")
+	failures += _check(is_equal_approx(upgrades.effect("power_bonus") - bonus_before, 0.1)
+			and is_equal_approx(upgrades.effect("drill_speed") - speed_before, 0.3), "Deep tuning and the Carbide bit add to their effects")
+	economy.furnace.fuel = 0
+	economy.furnace.burn_left = 0.0
+	economy._tick(1.0)
+	var bonus := 1.0 + upgrades.effect("power_bonus")
+	failures += _check(is_zero_approx(economy.power_per_second), "no fuel, no Core tap: no power")
+	economy.buy_upgrade("core_tap")
+	economy._tick(1.0)
+	failures += _check(is_equal_approx(economy.power_per_second, 10.0 * bonus) and is_equal_approx(economy.core_output, 10.0 * bonus),
+			"a Core tap level gives 10 power/s with no fuel, times the generator bonus (%.2f)" % economy.power_per_second)
+	economy.buy_upgrade("thermal_lance")
+	failures += _check(world.frozen_from == 50, "the Thermal lance thaws nothing before Breath")
+	economy.heart.stage = 3  # Breath
+	economy.apply_heart()
+	failures += _check(world.frozen_from == 200 and is_equal_approx(world.hardness_at(Vector3i(30, -150, 30)), 76.5),
+			"after Breath it thaws 100 m deeper: 150 m costs 76.5")
+	economy.buy_upgrade("thermal_lance")
+	economy.buy_upgrade("thermal_lance")
+	failures += _check(world.frozen_from == 400 and is_equal_approx(world.hardness_at(Vector3i(30, -399, 30)), 377.1),
+			"at level 3 nothing above bedrock is frozen: 399 m costs 377.1")
+
+	# Every panel line shows its whole number: 0.3 x 3 x 100 is 89.999... in floats.
+	var shown := true
+	for upgrade in upgrades.defs:
+		for level in int(upgrade["max_level"]) + 1:
+			var value: float = upgrade["per_level"] * level * upgrade["shown_scale"]
+			var want: String = upgrade["describe"] % (roundi(value) if "%d" in upgrade["describe"] else value)
+			shown = shown and UpgradePanel.effect_text(upgrade, level) == want
+	failures += _check(shown and UpgradePanel.effect_text(upgrades.find("carbide_bit"), 3) == "+90% drill power speed",
+			"every upgrade's panel line shows the right number at every level")
 
 	# Levels load clamped, unknown ids dropped, missing ones at zero.
 	upgrades.load_levels({ "tool_motor": 99, "gone": 3 })

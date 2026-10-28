@@ -3,6 +3,9 @@
 		{ "id": "iron_plate", "name": "Iron plate", "inputs": { "iron": 2 }, "output": 1 },
 		{ "id": "wire", "name": "Copper wire", "inputs": { "copper": 1 }, "output": 2 },
 		{ "id": "glass", "name": "Glass", "inputs": { "quartz": 2 }, "output": 1 },
-		{ "id": "circuit", "name": "Circuit", "inputs": { "wire": 2, "glass": 1, "gold": 1 }, "output": 1 }
+		{ "id": "circuit", "name": "Circuit", "inputs": { "wire": 2, "glass": 1, "gold": 1 }, "output": 1 },
+		{ "id": "alloy", "name": "Cobalt alloy", "inputs": { "cobalt": 2, "coal": 10 }, "output": 1 },
+		{ "id": "lens", "name": "Amethyst lens", "inputs": { "amethyst": 4, "glass": 1 }, "output": 1 },
+		{ "id": "core_cell", "name": "Core cell", "inputs": { "heartstone": 6, "lens": 1, "alloy": 1 }, "output": 1 }
 	]
 }

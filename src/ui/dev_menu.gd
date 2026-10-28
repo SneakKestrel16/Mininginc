@@ -38,7 +38,10 @@ func _ready() -> void:
 	panel.add_child(_margin(rows))
 	_label(rows, "DEV MENU  (F1 closes)")
 
-	var ore_row := _row(rows, "Ore")
+	# Every ore and part has a button: they wrap rather than run off the screen.
+	var ore_row := HFlowContainer.new()
+	ore_row.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	_row(rows, "Ore").add_child(ore_row)
 	_amount = _spin(ore_row, 1, 1000, 10)
 	for id in economy.mine.ores:
 		_button(ore_row, "+ %s" % id.capitalize(), _add_ore.bind(id))

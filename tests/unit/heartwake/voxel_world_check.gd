@@ -53,6 +53,64 @@ func _initialize() -> void:
 	failures += _check(coal_share > 0.04 and coal_share < 0.13, "coal is about 8%% of shallow rock (%.3f)" % coal_share)
 	failures += _check(lumpy > total / 2, "ore comes in deposits: most ore has the same ore beside it (%d of %d)" % [lumpy, total])
 
+	# Each deep stratum's own ore lies in it and nowhere else, in deposits, a few % of its rock.
+	var deep_ores := { Blocks.id_of("cobalt"): [150, 249], Blocks.id_of("amethyst"): [250, 339], Blocks.id_of("heartstone"): [340, 399] }
+	var found := {}
+	var band_samples := {}
+	var stray := 0
+	var deep_lumpy := 0
+	var deep_total := 0
+	for x in range(2, 126, 3):
+		for z in [20, 60, 100]:
+			for depth in range(100, 400, 2):
+				var pos := Vector3i(x, -depth, z)
+				var id := world.material_at(pos)
+				for ore in deep_ores:
+					var band: Array = deep_ores[ore]
+					var inside: bool = depth >= band[0] and depth <= band[1]
+					if inside:
+						band_samples[ore] = band_samples.get(ore, 0) + 1
+					if id == ore:
+						found[ore] = found.get(ore, 0) + 1
+						stray += int(not inside)
+				if id in deep_ores:
+					deep_total += 1
+					deep_lumpy += int(world.material_at(pos + Vector3i.RIGHT) == id)
+	var shares := deep_ores.keys().map(func(ore: int) -> float: return found.get(ore, 0) / float(band_samples[ore]))
+	failures += _check(stray == 0 and shares.all(func(s: float) -> bool: return s > 0.01 and s < 0.08),
+			"cobalt, amethyst and heartstone lie only in their strata, 1-8%% of each (%s)" % [shares])
+	failures += _check(deep_lumpy > deep_total / 2, "deep ore comes in deposits (%d of %d)" % [deep_lumpy, deep_total])
+
+	# Appending them moved no older deposit: without the new rows, ground differs only where a
+	# new ore now stands in what was rock.
+	twin._ores = world._ores.slice(0, -3)
+	twin._ore_ids = world._ore_ids.slice(0, -3)
+	twin._seed_noise()
+	var moved := 0
+	var claimed := 0
+	for i in 60000:
+		var pos := Vector3i(2 + (i * 37) % 124, -(i % 400), 2 + (i * 91) % 124)
+		var old := twin.material_at(pos)
+		var now := world.material_at(pos)
+		if old != now:
+			if old == Blocks.ROCK and now in deep_ores:
+				claimed += 1
+			else:
+				moved += 1
+	failures += _check(moved == 0 and claimed > 0, "the new ores take only rock (%d claimed, %d moved)" % [claimed, moved])
+
+	# Each new ore reads apart from every other block, and from its own stratum's rock.
+	var apart := true
+	for ore in deep_ores:
+		var own := Blocks.COLORS[ore]
+		for block in Blocks.COLORS.size():
+			var c := Blocks.COLORS[block]
+			apart = apart and (block == ore or Vector3(own.r, own.g, own.b).distance_to(Vector3(c.r, c.g, c.b)) >= 0.4)
+		var tint: Array = world.strata[world.stratum_at(deep_ores[ore][0])]["tint"]
+		var rock: Color = Blocks.COLORS[Blocks.ROCK] * Color(tint[0], tint[1], tint[2])
+		apart = apart and Vector3(own.r, own.g, own.b).distance_to(Vector3(rock.r, rock.g, rock.b)) >= 0.45
+	failures += _check(apart, "each new ore colour stands 0.4 from every block and 0.45 from its stratum's rock")
+
 	var shallow := Vector3i(5, -10, 5)
 	var frozen := Vector3i(5, -60, 5)
 	failures += _check(is_equal_approx(world.hardness_at(shallow), (3.0 + 0.15 * 10) * 2.0), "a scoop costs hardness by depth times bite cost")

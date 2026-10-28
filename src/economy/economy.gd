@@ -61,6 +61,8 @@ var furnace_output: float = 0.0
 var turbine_output: float = 0.0
 ## The reactor's part of [member power_per_second], bonus included.
 var reactor_output: float = 0.0
+## The Core tap's part of [member power_per_second], bonus included: it burns nothing.
+var core_output: float = 0.0
 
 ## Hits per second each unit of drill power lands on the shaft.
 var drill_hits_per_power: float
@@ -145,7 +147,11 @@ func advance(seconds: float, step: float) -> void:
 ## Applies every stage bonus and upgrade that does not wait for a tick, after a save is
 ## loaded or an upgrade bought.
 func apply_heart() -> void:
-	mine.thaw_to(int(heart.effect_total("thaw_to_depth")))
+	var thaw := int(heart.effect_total("thaw_to_depth"))
+	# The Thermal lance carries Breath's thaw deeper; before Breath it has nothing to carry.
+	if heart.has_effect("thaw_to_depth"):
+		thaw += int(upgrades.effect("thaw"))
+	mine.thaw_to(thaw)
 	if mine.world:
 		mine.world.bite_bonus = upgrades.effect("scoop_radius")
 
@@ -169,7 +175,8 @@ func _tick(seconds: float) -> void:
 	furnace_output = furnace.tick(seconds) * bonus
 	turbine_output = turbine.tick(seconds) * bonus if turbine_built else 0.0
 	reactor_output = reactor.tick(seconds) * bonus if reactor_built else 0.0
-	power_per_second = furnace_output + turbine_output + reactor_output
+	core_output = upgrades.effect("flat_power") * bonus
+	power_per_second = furnace_output + turbine_output + reactor_output + core_output
 	split.tick(power_per_second)
 	drill_hits_per_second = split.drill_power * drill_hits_per_power * (1.0 + heart.effect_total("drill_bonus")) 			* (1.0 + upgrades.effect("drill_speed"))
 	mine.dig(drill_hits_per_second * seconds)

@@ -53,15 +53,20 @@ func _initialize() -> void:
 		ore_ok = ore_ok and color.a == 1.0 and color.r == own.r and color.g == own.g and color.b == own.b
 	failures += _check(ore_ok, "ore keeps its own colour and fleck flag at every depth")
 
-	# Hardness at 1.0 everywhere: digging costs exactly what it did before strata.
+	# Above the Deep digging costs what it did before strata; below, each stratum multiplies it.
 	var same := true
-	for depth in 400:
+	for depth in 150:
 		var hits := world._hardness_base + world._hardness_per_block * depth
 		if depth >= world.frozen_from:
 			hits *= world._frozen_multiplier
-		var pos := Vector3i(30, -depth, 30)
-		same = same and (world.material_at(pos) == Blocks.BEDROCK or world.hardness_at(pos) == hits * world._bite_cost)
-	failures += _check(same, "every depth costs what it did before strata")
+		same = same and world.hardness_at(Vector3i(30, -depth, 30)) == hits * world._bite_cost
+	failures += _check(same, "above 150 m every depth costs what it did before strata")
+	# (3 + 0.15 d) x 2 frozen x stratum x 2 per scoop, with Breath's thaw to 100 m.
+	world.thaw_to(100)
+	var table := { 149: 101.4, 150: 153.0, 249: 242.1, 250: 324.0, 339: 430.8, 340: 648.0, 399: 754.2 }
+	var off := table.keys().filter(func(d: int) -> bool: return not is_equal_approx(world.hardness_at(Vector3i(30, -d, 30)), table[d]))
+	failures += _check(off.is_empty(), "deep rock is harder by stratum (off at %s)" % [off])
+	world.thaw_to(0)
 
 	# The banner fires on entering, with 3 m of hysteresis, and never for the first reading.
 	var sense := DepthSense.new()

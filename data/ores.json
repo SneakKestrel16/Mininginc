@@ -14,6 +14,9 @@
 		{ "id": "copper", "min_depth": 100, "max_depth": 1000000, "chance": 0.05 },
 		{ "id": "iron", "min_depth": 0, "max_depth": 80, "chance": 0.07 },
 		{ "id": "quartz", "min_depth": 40, "max_depth": 140, "chance": 0.06 },
-		{ "id": "gold", "min_depth": 100, "max_depth": 1000000, "chance": 0.025 }
+		{ "id": "gold", "min_depth": 100, "max_depth": 1000000, "chance": 0.025 },
+		{ "id": "cobalt", "min_depth": 150, "max_depth": 249, "chance": 0.06, "frequency": 0.06 },
+		{ "id": "amethyst", "min_depth": 250, "max_depth": 339, "chance": 0.05, "frequency": 0.06 },
+		{ "id": "heartstone", "min_depth": 340, "max_depth": 399, "chance": 0.04, "frequency": 0.05 }
 	]
 }
